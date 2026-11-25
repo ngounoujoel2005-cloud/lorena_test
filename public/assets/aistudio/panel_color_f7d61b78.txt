@@ -1,0 +1,5 @@
+teinte violet a associer a une couleur : 5A5AA1
+couleur jaune : #F4BE38
+couleur violet : #A084E8
+couleur blanc : #fff
+couleur nour : #000

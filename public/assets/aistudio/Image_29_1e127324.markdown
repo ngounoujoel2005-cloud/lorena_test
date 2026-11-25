@@ -1,0 +1,163 @@
+---
+name: E-Commerce Retail UI
+colors:
+  surface: '#fff9ef'
+  surface-dim: '#e1d9c7'
+  surface-bright: '#fff9ef'
+  surface-container-lowest: '#ffffff'
+  surface-container-low: '#fbf3e0'
+  surface-container: '#f6edda'
+  surface-container-high: '#f0e7d5'
+  surface-container-highest: '#eae2cf'
+  on-surface: '#1f1b10'
+  on-surface-variant: '#4d4732'
+  inverse-surface: '#343024'
+  inverse-on-surface: '#f9f0dd'
+  outline: '#7e775f'
+  outline-variant: '#d0c6ab'
+  surface-tint: '#705d00'
+  primary: '#705d00'
+  on-primary: '#ffffff'
+  primary-container: '#ffd700'
+  on-primary-container: '#705e00'
+  inverse-primary: '#e9c400'
+  secondary: '#5f5e5e'
+  on-secondary: '#ffffff'
+  secondary-container: '#e2dfde'
+  on-secondary-container: '#636262'
+  tertiary: '#00696f'
+  on-tertiary: '#ffffff'
+  tertiary-container: '#00f1ff'
+  on-tertiary-container: '#006a70'
+  error: '#ba1a1a'
+  on-error: '#ffffff'
+  error-container: '#ffdad6'
+  on-error-container: '#93000a'
+  primary-fixed: '#ffe16d'
+  primary-fixed-dim: '#e9c400'
+  on-primary-fixed: '#221b00'
+  on-primary-fixed-variant: '#544600'
+  secondary-fixed: '#e5e2e1'
+  secondary-fixed-dim: '#c8c6c5'
+  on-secondary-fixed: '#1c1b1b'
+  on-secondary-fixed-variant: '#474746'
+  tertiary-fixed: '#79f5ff'
+  tertiary-fixed-dim: '#00dbe8'
+  on-tertiary-fixed: '#002022'
+  on-tertiary-fixed-variant: '#004f54'
+  background: '#fff9ef'
+  on-background: '#1f1b10'
+  surface-variant: '#eae2cf'
+  surface-light: '#F8F9FA'
+  success-green: '#2E7D32'
+  text-muted: '#6C757D'
+typography:
+  headline-lg:
+    fontFamily: Work Sans
+    fontSize: 32px
+    fontWeight: '600'
+    lineHeight: 40px
+  headline-md:
+    fontFamily: Work Sans
+    fontSize: 24px
+    fontWeight: '600'
+    lineHeight: 32px
+  headline-sm:
+    fontFamily: Work Sans
+    fontSize: 18px
+    fontWeight: '500'
+    lineHeight: 24px
+  body-lg:
+    fontFamily: Inter
+    fontSize: 16px
+    fontWeight: '400'
+    lineHeight: 24px
+  body-md:
+    fontFamily: Inter
+    fontSize: 14px
+    fontWeight: '400'
+    lineHeight: 20px
+  body-sm:
+    fontFamily: Inter
+    fontSize: 12px
+    fontWeight: '400'
+    lineHeight: 16px
+  label-md:
+    fontFamily: Inter
+    fontSize: 14px
+    fontWeight: '500'
+    lineHeight: 20px
+  label-sm:
+    fontFamily: Inter
+    fontSize: 12px
+    fontWeight: '500'
+    lineHeight: 16px
+rounded:
+  sm: 0.125rem
+  DEFAULT: 0.25rem
+  md: 0.375rem
+  lg: 0.5rem
+  xl: 0.75rem
+  full: 9999px
+spacing:
+  gutter: 1rem
+  margin: 1rem
+  space-xs: 0.25rem
+  space-sm: 0.5rem
+  space-md: 1rem
+  space-lg: 1.5rem
+  space-xl: 2rem
+---
+
+## Brand & Style
+
+This design system establishes a reliable, high-converting e-commerce layout tailored for mobile-first performance and absolute user trust. The visual language blends energetic vibrancy with professional restraint, utilizing clear hierarchy, trusted typography, and familiar UI patterns to reduce cognitive load and drive conversions. 
+
+The aesthetic style is anchored in modern commercial minimalism, emphasizing fast scanning, secure transaction flows (such as Mobile Money integrations), and transparent trust signals like warranty badges and verified localized address inputs.
+
+## Colors
+
+The color palette is built for high contrast, immediate legibility, and trustworthy commercial interactions. 
+
+- **Primary (`#FFD700`):** An energetic yellow used strategically for primary call-to-action elements, active states, and promotional highlights.
+- **Secondary (`#1A1A1A`):** A sleek, deep black utilized for high-impact headlines, primary body text, and structural framing to ground the energetic yellow.
+- **Neutrals:** Crisp white (`#FFFFFF`) and light gray (`#F8F9FA`) form clean surfaces, while muted grays (`#6C757D`) handle secondary text and disabled states.
+- **Functional Colors:** A dedicated success green (`#2E7D32`) is reserved for verified badges, warranty indicators, and successful Mobile Money payment confirmations.
+
+## Typography
+
+Typography in this design system prioritizes absolute clarity and quick scannability across mobile and desktop viewports. 
+
+- **Headlines:** Set in `Work Sans`, providing a grounded, professional, and reliable structure for product categories, pricing, and key marketing messages.
+- **Body & Labels:** Set in `Inter`, delivering a highly functional, systematic, and neutral reading experience for product descriptions, reviews, and transactional forms.
+
+Ensure line heights remain tight yet comfortable, and never use font weights below 400 for body text to maintain optimal accessibility.
+
+## Layout & Spacing
+
+This design system uses a mobile-first fluid grid layout combined with a predictable 4px/8px spacing rhythm. 
+
+- **Grid & Margins:** On mobile viewports, layouts utilize a 4-column fluid grid with 1rem (`16px`) outer margins and 1rem gutters. On desktop, this scales smoothly to a 12-column max-width container with generous breathing room.
+- **Component Spacing:** Use `space-sm` (`8px`) for tight groupings (e.g., badges and titles), `space-md` (`16px`) for standard card padding, and `space-lg` (`24px`) to `space-xl` (`32px`) for separating distinct structural sections.
+
+## Elevation & Depth
+
+Visual hierarchy is established through a clean combination of tonal surface layering and low-contrast outlines. 
+
+- **Surfaces:** Use flat, clean white cards resting on light gray backgrounds (`#F8F9FA`) to separate product listings and content chunks without visual clutter.
+- **Borders & Dividers:** Rely on soft, low-opacity gray outlines (`#E5E7EB`) to define input fields, card boundaries, and separators.
+- **Interactive Depth:** Elevated states (such as sticky checkout bars or modal dialogs) employ diffused, low-opacity ambient shadows tinted with the secondary black color to simulate natural light falloff.
+
+## Shapes
+
+The design system implements a soft roundedness level (`1`), featuring 0.25rem border-radius on standard UI elements like inputs and buttons, scaling up to 0.5rem (`rounded-lg`) and 0.75rem (`rounded-xl`) for cards and containers. This maintains a friendly, approachable, yet professional commercial appearance that feels modern without sacrificing screen real estate.
+
+## Components
+
+Components are engineered for high conversion rates, fast touch interactions, and reassuring trust signals.
+
+- **Buttons:** Primary buttons feature the energetic yellow (`#FFD700`) with sleek black text for maximum conversion pull. Secondary buttons use clean outlines with dark text. All touch targets must have a minimum height of 44px for mobile ergonomics.
+- **Input Fields & Localized Addresses:** Form inputs include clear floating labels and high-contrast borders. Localized address components feature streamlined dropdowns for regions, cities, and quarters tailored for domestic logistics.
+- **Payment Selectors:** Specialized UI components for Mobile Money providers, featuring recognizable provider branding, instant selection states, and secure confirmation flows.
+- **Warranty Badges:** High-visibility trust badges utilizing success green and neutral borders to highlight certified products and guarantee terms directly on product cards.
+- **Cards & Lists:** Product cards incorporate clear pricing, prominent "Add to Cart" actions, and compact thumbnail containers optimized for fast mobile rendering.

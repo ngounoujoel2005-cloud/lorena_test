@@ -1,0 +1,49 @@
+@import "tailwindcss";
+
+@theme {
+  --font-display: "Work Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-sans: "DM Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+
+  --color-lorena-black: #000000;
+  --color-lorena-white: #FFFFFF;
+  --color-lorena-indigo: #5A5AA1;
+  --color-lorena-indigo-hover: #474789;
+  --color-lorena-violet: #A084E8;
+  --color-lorena-gold: #F4BE38;
+  --color-lorena-gold-hover: #e0aa22;
+  --color-lorena-canvas: #F8F9FA;
+  --color-lorena-border: #E5E7EB;
+  --color-lorena-muted: #6C757D;
+}
+
+@layer base {
+  html {
+    font-family: var(--font-sans);
+    background-color: var(--color-lorena-canvas);
+    color: var(--color-lorena-black);
+    scroll-behavior: smooth;
+  }
+
+  h1, h2, h3, h4, .font-display {
+    font-family: var(--font-display);
+  }
+}
+
+.no-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+.no-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

@@ -1,0 +1,6 @@
+{
+  "name": "KoraMarket",
+  "description": "Certified electronics, audio, and portable power retail with Mobile Money checkout and localized domestic delivery.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
