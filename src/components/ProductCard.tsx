@@ -1,4 +1,4 @@
-import { Check, Heart, ShoppingCart } from 'lucide-react';
+import { Check, Heart, Scale, ShoppingCart } from 'lucide-react';
 import { TRANSLATIONS } from '../i18n/translations';
 import { Locale, Product } from '../types/store';
 import { formatXAF } from '../utils/format';
@@ -8,10 +8,12 @@ interface ProductCardProps {
   product: Product;
   locale: Locale;
   isWishlisted: boolean;
+  isCompared?: boolean;
   justAdded: boolean;
   onSelectProduct: (product: Product) => void;
   onQuickAdd: (product: Product) => void;
   onToggleWishlist: (productId: string) => void;
+  onToggleCompare?: (productId: string) => void;
   compact?: boolean;
 }
 
@@ -19,10 +21,12 @@ export function ProductCard({
   product,
   locale,
   isWishlisted,
+  isCompared = false,
   justAdded,
   onSelectProduct,
   onQuickAdd,
   onToggleWishlist,
+  onToggleCompare,
   compact = false,
 }: ProductCardProps) {
   const t = TRANSLATIONS[locale];
@@ -31,92 +35,129 @@ export function ProductCard({
 
   return (
     <article
-      className={`bg-white border border-[#E5E7EB] rounded-xl overflow-hidden flex flex-col transition-all duration-150 hover:-translate-y-0.5 hover:shadow-md ${
+      className={`ice-surface rounded-3xl overflow-hidden flex flex-col transition-all duration-200 hover:-translate-y-1 ${
         compact ? 'min-w-[205px] w-[205px] sm:min-w-[216px] sm:w-[216px] shrink-0' : 'w-full'
       }`}
     >
-      {/* Image Box with Discount & Category Badges */}
-      <div className="relative aspect-[4/3] w-full bg-white p-3 flex items-center justify-center overflow-hidden">
-        {/* Top-Left Badges */}
-        <div className="absolute top-2.5 left-2.5 z-10 flex flex-col items-start gap-1">
-          {product.badgeType === 'new' && (
-            <span className="px-2 py-0.5 rounded bg-[#000000] text-white text-[11px] font-semibold">
-              {t.newBadge}
+      {/* Ice-Encapsulated Product Chamber */}
+      <div className="p-2.5 pb-0">
+        <div className="ice-product-trap relative aspect-[4/3] w-full rounded-2xl p-3 flex items-center justify-center">
+          {/* Top-Left Crystal Badges */}
+          <div className="absolute top-2 left-2 z-10 flex flex-col items-start gap-1">
+            {product.badgeType === 'new' && (
+              <span className="glass-pill-black px-2 py-0.5 rounded-full text-white text-[10px] font-bold">
+                {t.newBadge}
+              </span>
+            )}
+            {product.badgeType === 'clearance' && (
+              <span className="glass-pill-blue px-2 py-0.5 rounded-full text-white text-[10px] font-bold">
+                {t.clearanceBadge}
+              </span>
+            )}
+            {product.discountPct && (
+              <span className="glass-pill-gold px-2 py-0.5 rounded-full text-[#000000] text-[10px] font-extrabold tabular-nums">
+                -{product.discountPct} %
+              </span>
+            )}
+          </div>
+
+          {/* Top-Right Wishlist & Compare Frost Pills */}
+          <button
+            type="button"
+            aria-label={isWishlisted ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleWishlist(product.id);
+            }}
+            className={`absolute top-2 right-2 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              isWishlisted
+                ? 'glass-pill-cta text-white'
+                : 'glass-pill-frost text-[#3F3F56] hover:text-[#5A5AA1]'
+            }`}
+          >
+            <Heart
+              className="w-3.5 h-3.5"
+              fill={isWishlisted ? 'currentColor' : 'none'}
+              aria-hidden="true"
+            />
+          </button>
+
+          {onToggleCompare && (
+            <button
+              type="button"
+              title={
+                isCompared
+                  ? locale === 'fr'
+                    ? 'Retirer du comparatif'
+                    : 'Remove from compare'
+                  : locale === 'fr'
+                  ? 'Comparer ce produit'
+                  : 'Compare this product'
+              }
+              aria-label={
+                isCompared
+                  ? locale === 'fr'
+                    ? 'Retirer du comparatif'
+                    : 'Remove from comparison'
+                  : locale === 'fr'
+                  ? 'Ajouter au comparatif'
+                  : 'Add to comparison'
+              }
+              onClick={(e) => {
+                e.stopPropagation();
+                onToggleCompare(product.id);
+              }}
+              className={`absolute top-11 right-2 z-10 w-8 h-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+                isCompared
+                  ? 'glass-pill-gold text-[#000000]'
+                  : 'glass-pill-frost text-[#3F3F56] hover:text-[#5A5AA1]'
+              }`}
+            >
+              <Scale className="w-3.5 h-3.5" aria-hidden="true" />
+            </button>
+          )}
+
+          {/* Second Hand Verified Badge (Bottom Left of Image) */}
+          {product.badgeType === 'second_hand' && (
+            <span className="glass-pill-gold absolute bottom-2 left-2 z-10 px-2 py-0.5 rounded-full text-[#000000] text-[10px] font-extrabold tracking-wide inline-flex items-center gap-1">
+              <Check className="w-3 h-3" aria-hidden="true" />
+              <span>{t.secondHandBadge}</span>
             </span>
           )}
-          {product.badgeType === 'clearance' && (
-            <span className="px-2 py-0.5 rounded bg-[#5A5AA1] text-white text-[11px] font-semibold">
-              {t.clearanceBadge}
-            </span>
-          )}
-          {product.discountPct && (
-            <span className="px-2 py-0.5 rounded bg-[#F4BE38] text-[#000000] text-[11px] font-bold tabular-nums">
-              -{product.discountPct} %
-            </span>
-          )}
+
+          <button
+            type="button"
+            onClick={() => onSelectProduct(product)}
+            className="w-full h-full relative z-[5] cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5A5AA1] rounded-xl"
+          >
+            <ProductImage
+              src={product.image}
+              alt={title}
+              className="w-full h-full object-contain"
+            />
+          </button>
         </div>
-
-        {/* Top-Right Wishlist Button */}
-        <button
-          type="button"
-          aria-label={isWishlisted ? 'Retirer des favoris' : 'Ajouter aux favoris'}
-          onClick={(e) => {
-            e.stopPropagation();
-            onToggleWishlist(product.id);
-          }}
-          className={`absolute top-2.5 right-2.5 z-10 w-8 h-8 rounded-full border flex items-center justify-center transition-colors cursor-pointer ${
-            isWishlisted
-              ? 'bg-[#5A5AA1] border-[#5A5AA1] text-white'
-              : 'bg-white/90 border-[#E5E7EB] text-[#6C757D] hover:text-[#5A5AA1]'
-          }`}
-        >
-          <Heart
-            className="w-4 h-4"
-            fill={isWishlisted ? 'currentColor' : 'none'}
-            aria-hidden="true"
-          />
-        </button>
-
-        {/* Second Hand Verified Badge (Bottom Left of Image) */}
-        {product.badgeType === 'second_hand' && (
-          <span className="absolute bottom-2 left-2.5 z-10 px-2 py-0.5 rounded bg-[#F4BE38] text-[#000000] text-[10px] font-extrabold tracking-wide inline-flex items-center gap-1">
-            <Check className="w-3 h-3" aria-hidden="true" />
-            <span>{t.secondHandBadge}</span>
-          </span>
-        )}
-
-        <button
-          type="button"
-          onClick={() => onSelectProduct(product)}
-          className="w-full h-full cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5A5AA1] rounded"
-        >
-          <ProductImage
-            src={product.image}
-            alt={title}
-            className="w-full h-full object-contain"
-          />
-        </button>
       </div>
 
       {/* Card Content */}
-      <div className="px-3.5 pb-3.5 pt-1 flex flex-col flex-1 border-t border-[#F3F4F6]">
+      <div className="px-3.5 pb-3.5 pt-2.5 flex flex-col flex-1">
         <button
           type="button"
           onClick={() => onSelectProduct(product)}
           className="text-left cursor-pointer"
         >
-          <h3 className="text-[13px] font-medium text-[#000000] leading-snug line-clamp-2 min-h-[36px] hover:text-[#5A5AA1] transition-colors">
+          <h3 className="text-[13px] font-semibold text-[#000000] leading-snug line-clamp-2 min-h-[36px] hover:text-[#5A5AA1] transition-colors">
             {title}
           </h3>
         </button>
 
         {/* Prices */}
         <div className="mt-2">
-          <span className="block font-display text-[15px] font-bold text-[#000000] tabular-nums">
+          <span className="block font-display text-[15px] font-extrabold text-[#000000] tabular-nums">
             {formatXAF(product.price)}
           </span>
           {product.oldPrice && (
-            <span className="block text-[11px] text-[#6C757D] line-through tabular-nums">
+            <span className="block text-[11px] text-[#3F3F56] line-through tabular-nums">
               {formatXAF(product.oldPrice)}
             </span>
           )}
@@ -129,20 +170,20 @@ export function ProductCard({
               <span
                 key={swatch.name}
                 title={swatch.name}
-                className="w-4 h-4 rounded-full border border-[#D1D5DB]"
+                className="w-4 h-4 rounded-full border border-white shadow-sm"
                 style={{ backgroundColor: swatch.hex }}
               />
             ))}
           </div>
         )}
 
-        {/* Primary CTA Button (#5A5AA1 with white text, or disabled out of stock) */}
+        {/* Primary CTA Button */}
         <div className="mt-auto pt-3">
           {isOutOfStock ? (
             <button
               type="button"
               onClick={() => onSelectProduct(product)}
-              className="w-full min-h-[38px] px-3 py-2 rounded-lg bg-[#F3F4F6] text-[#9CA3AF] text-[11px] font-bold tracking-wide uppercase cursor-pointer"
+              className="glass-pill-frost w-full min-h-[38px] px-3 py-2 rounded-full text-[#3F3F56] text-[11px] font-bold tracking-wide uppercase cursor-pointer opacity-75"
             >
               {t.outOfStock}
             </button>
@@ -150,10 +191,10 @@ export function ProductCard({
             <button
               type="button"
               onClick={() => onQuickAdd(product)}
-              className={`w-full min-h-[38px] px-3 py-2 rounded-lg text-xs font-bold tracking-wide inline-flex items-center justify-center gap-1.5 transition-colors cursor-pointer ${
+              className={`w-full min-h-[38px] px-3 py-2 rounded-full text-xs font-bold tracking-wide inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                 justAdded
-                  ? 'bg-[#000000] text-[#F4BE38]'
-                  : 'bg-[#5A5AA1] hover:bg-[#474789] text-white'
+                  ? 'glass-pill-black text-[#F4BE38]'
+                  : 'glass-pill-cta text-white'
               }`}
             >
               {justAdded ? (

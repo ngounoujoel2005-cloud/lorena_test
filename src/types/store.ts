@@ -4,11 +4,14 @@ export type AppScreen =
   | 'home'
   | 'category'
   | 'product'
+  | 'cart'
   | 'checkout'
+  | 'invoice'
   | 'tracking'
   | 'wishlist'
   | 'account'
-  | 'help';
+  | 'help'
+  | 'compare';
 
 export type CategorySlug =
   | 'all'
@@ -56,11 +59,24 @@ export interface ProductSwatch {
   hex: string;
 }
 
+export interface ProductReview {
+  id: string;
+  productId: string;
+  author: string;
+  rating: number;
+  date: string;
+  comment: string;
+  verified: boolean;
+  helpfulCount: number;
+}
+
 export interface Product {
   id: string;
   sku: string;
   brand: string;
   category: CategorySlug;
+  subCategoryFr?: string;
+  subCategoryEn?: string;
   sections: HomeSectionKey[];
   nameFr: string;
   nameEn: string;
@@ -130,9 +146,26 @@ export interface OrderRecord {
   paymentVerified: boolean;
   items: CartItem[];
   subtotal: number;
+  discountAmount?: number;
   deliveryFee: number;
   total: number;
   deliveryEta: string;
   warrantySerial: string;
   stageIndex: 0 | 1 | 2 | 3;
+}
+
+export interface UserSession {
+  fullName: string;
+  phone: string;
+  email: string;
+  provider: 'phone' | 'email' | 'google';
+}
+
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'model';
+  text: string;
+  model?: string;
+  createdAt: string;
+  error?: boolean;
 }

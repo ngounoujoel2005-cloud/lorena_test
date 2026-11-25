@@ -1,35 +1,117 @@
-import { ArrowLeft, Check, Heart, MapPin, Minus, Plus, ShieldCheck, ShoppingCart, Truck } from 'lucide-react';
-import { useState } from 'react';
-import { LOGISTICS_REGIONS } from '../data/catalog';
+import {
+  AlertTriangle,
+  ArrowLeft,
+  Check,
+  ChevronDown,
+  ChevronUp,
+  Copy,
+  Flag,
+  Heart,
+  MapPin,
+  MessageCircle,
+  Minus,
+  Plus,
+  RefreshCw,
+  Scale,
+  Share2,
+  ShieldCheck,
+  ShoppingBag,
+  ShoppingCart,
+  Star,
+  ThumbsUp,
+  Truck,
+  Zap,
+  ZoomIn,
+} from 'lucide-react';
+import { FormEvent, MouseEvent, useMemo, useState } from 'react';
+import { CATEGORIES_META, LOGISTICS_REGIONS, PRODUCTS } from '../data/catalog';
 import { TRANSLATIONS } from '../i18n/translations';
-import { Locale, Product } from '../types/store';
+import { Locale, Product, ProductReview } from '../types/store';
 import { formatXAF } from '../utils/format';
+import { ProductCarouselRow } from './ProductCarouselRow';
+import { ProductFaqAccordion } from './ProductFaqAccordion';
 import { ProductImage } from './ProductImage';
 
 interface ProductDetailScreenProps {
   product: Product;
   locale: Locale;
   isWishlisted: boolean;
+  wishlistIds: string[];
+  compareIds?: string[];
+  recentlyAddedId: string | null;
+  reviews: ProductReview[];
   onBackToCatalog: () => void;
+  onSelectCategory: (slug: Product['category']) => void;
+  onSelectProduct: (product: Product) => void;
+  onQuickAdd: (product: Product) => void;
   onAddToCart: (product: Product, variantId: string, quantity: number) => void;
   onBuyNow: (product: Product, variantId: string, quantity: number) => void;
+  onOpenCartPage: () => void;
+  onGoToReturnPolicy: () => void;
   onToggleWishlist: (productId: string) => void;
+  onToggleCompare?: (productId: string) => void;
+  onAddReview: (review: Omit<ProductReview, 'id' | 'date' | 'helpfulCount'>) => void;
+  onMarkReviewHelpful: (reviewId: string) => void;
 }
 
 export function ProductDetailScreen({
   product,
   locale,
   isWishlisted,
+  wishlistIds,
+  compareIds = [],
+  recentlyAddedId,
+  reviews,
   onBackToCatalog,
+  onSelectCategory,
+  onSelectProduct,
+  onQuickAdd,
   onAddToCart,
   onBuyNow,
+  onOpenCartPage,
+  onGoToReturnPolicy,
   onToggleWishlist,
+  onToggleCompare,
+  onAddReview,
+  onMarkReviewHelpful,
 }: ProductDetailScreenProps) {
   const t = TRANSLATIONS[locale];
   const [selectedVariantId, setSelectedVariantId] = useState(product.variants[0].id);
   const [quantity, setQuantity] = useState(1);
+  const [activeThumbIndex, setActiveThumbIndex] = useState(0);
   const [addedFeedback, setAddedFeedback] = useState(false);
-  const [estimatorCity, setEstimatorCity] = useState('Douala');
+  const [copiedSku, setCopiedSku] = useState(false);
+  const [copiedShare, setCopiedShare] = useState(false);
+
+  const allCities = useMemo(() => LOGISTICS_REGIONS.flatMap((r) => r.cities), []);
+  const [estimatorCity, setEstimatorCity] = useState(allCities[0].name);
+  const activeCity =
+    allCities.find((c) => c.name === estimatorCity) ?? allCities[0];
+  const [estimatorQuarter, setEstimatorQuarter] = useState(
+    activeCity.quarters[0].name
+  );
+  const activeQuarter =
+    activeCity.quarters.find((q) => q.name === estimatorQuarter) ??
+    activeCity.quarters[0];
+
+  const [detailsExpanded, setDetailsExpanded] = useState(true);
+  const [reportOpen, setReportOpen] = useState(false);
+  const [reportText, setReportText] = useState('');
+  const [reportSent, setReportSent] = useState(false);
+
+  const [reviewFilter, setReviewFilter] = useState<'all' | 'verified' | number>('all');
+  const [reviewFormOpen, setReviewFormOpen] = useState(false);
+  const [reviewAuthor, setReviewAuthor] = useState('');
+  const [reviewRating, setReviewRating] = useState(5);
+  const [reviewComment, setReviewComment] = useState('');
+
+  const [whatsappTipOpen, setWhatsappTipOpen] = useState(false);
+  const [isZoomActive, setIsZoomActive] = useState(false);
+  const [zoomPinned, setZoomPinned] = useState(false);
+  const [zoomZone, setZoomZone] = useState<{ row: number; col: number }>({
+    row: 2,
+    col: 2,
+  });
 
   const selectedVariant =
     product.variants.find((v) => v.id === selectedVariantId) ?? product.variants[0];
@@ -37,11 +119,41 @@ export function ProductDetailScreen({
   const isOutOfStock = product.stockQty <= 0;
 
   const title = locale === 'fr' ? product.nameFr : product.nameEn;
+  const shortNote = locale === 'fr' ? product.shortNoteFr : product.shortNoteEn;
   const description = locale === 'fr' ? product.descriptionFr : product.descriptionEn;
+  const categoryMeta = CATEGORIES_META.find((c) => c.slug === product.category);
+  const categoryLabel = categoryMeta
+    ? locale === 'fr'
+      ? categoryMeta.labelFr
+      : categoryMeta.labelEn
+    : product.category;
 
-  const cityEstimate =
-    LOGISTICS_REGIONS.flatMap((r) => r.cities).find((c) => c.name === estimatorCity) ??
-    LOGISTICS_REGIONS[0].cities[0];
+  const productReviews = useMemo(
+    () => reviews.filter((r) => r.productId === product.id),
+    [product.id, reviews]
+  );
+
+  const avgRating = useMemo(() => {
+    if (productReviews.length === 0) return 0;
+    const total = productReviews.reduce((sum, r) => sum + r.rating, 0);
+    return Number((total / productReviews.length).toFixed(1));
+  }, [productReviews]);
+
+  const filteredReviews = useMemo(() => {
+    if (reviewFilter === 'all') return productReviews;
+    if (reviewFilter === 'verified') return productReviews.filter((r) => r.verified);
+    return productReviews.filter((r) => r.rating === reviewFilter);
+  }, [productReviews, reviewFilter]);
+
+  const relatedProducts = useMemo(() => {
+    const sameCat = PRODUCTS.filter(
+      (p) => p.id !== product.id && p.category === product.category
+    );
+    const others = PRODUCTS.filter(
+      (p) => p.id !== product.id && p.category !== product.category
+    );
+    return [...sameCat, ...others].slice(0, 8);
+  }, [product.category, product.id]);
 
   const handleAdd = () => {
     if (isOutOfStock) return;
@@ -50,90 +162,281 @@ export function ProductDetailScreen({
     setTimeout(() => setAddedFeedback(false), 1600);
   };
 
+  const handleCopySku = () => {
+    navigator.clipboard?.writeText(product.sku).catch(() => {});
+    setCopiedSku(true);
+    setTimeout(() => setCopiedSku(false), 1800);
+  };
+
+  const handleShare = () => {
+    navigator.clipboard?.writeText(window.location.href).catch(() => {});
+    setCopiedShare(true);
+    setTimeout(() => setCopiedShare(false), 1800);
+  };
+
+  const handleSubmitReport = (e: FormEvent) => {
+    e.preventDefault();
+    if (!reportText.trim()) return;
+    setReportSent(true);
+    setReportText('');
+    setTimeout(() => {
+      setReportSent(false);
+      setReportOpen(false);
+    }, 2200);
+  };
+
+  const handleSubmitReview = (e: FormEvent) => {
+    e.preventDefault();
+    if (reviewAuthor.trim().length < 2 || reviewComment.trim().length < 5) return;
+    onAddReview({
+      productId: product.id,
+      author: reviewAuthor.trim(),
+      rating: reviewRating,
+      comment: reviewComment.trim(),
+      verified: true,
+    });
+    setReviewAuthor('');
+    setReviewComment('');
+    setReviewRating(5);
+    setReviewFormOpen(false);
+  };
+
+  const ZOOM_ORIGINS = [
+    ['origin-[10%_10%]', 'origin-[30%_10%]', 'origin-[50%_10%]', 'origin-[70%_10%]', 'origin-[90%_10%]'],
+    ['origin-[10%_30%]', 'origin-[30%_30%]', 'origin-[50%_30%]', 'origin-[70%_30%]', 'origin-[90%_30%]'],
+    ['origin-[10%_50%]', 'origin-[30%_50%]', 'origin-[50%_50%]', 'origin-[70%_50%]', 'origin-[90%_50%]'],
+    ['origin-[10%_70%]', 'origin-[30%_70%]', 'origin-[50%_70%]', 'origin-[70%_70%]', 'origin-[90%_70%]'],
+    ['origin-[10%_90%]', 'origin-[30%_90%]', 'origin-[50%_90%]', 'origin-[70%_90%]', 'origin-[90%_90%]'],
+  ];
+
+  const handleGalleryMouseMove = (e: MouseEvent<HTMLDivElement>) => {
+    const rect = e.currentTarget.getBoundingClientRect();
+    const rx = (e.clientX - rect.left) / rect.width;
+    const ry = (e.clientY - rect.top) / rect.height;
+    const col = Math.min(4, Math.max(0, Math.floor(rx * 5)));
+    const row = Math.min(4, Math.max(0, Math.floor(ry * 5)));
+    setZoomZone((prev) =>
+      prev.row === row && prev.col === col ? prev : { row, col }
+    );
+  };
+
+  const zoomed = isZoomActive || zoomPinned;
+
+  const galleryFrames = [
+    { labelFr: 'Vue principale', transform: '' },
+    { labelFr: 'Vue zoom', transform: 'scale-110' },
+    { labelFr: 'Détail angle', transform: 'scale-105 -rotate-2' },
+  ];
+
   return (
-    <div className="max-w-[1360px] mx-auto px-4 py-8 pb-24 md:pb-16">
-      <div className="mb-6 flex items-center gap-3 text-sm">
+    <div className="max-w-[1360px] mx-auto px-4 py-6 pb-28 space-y-10">
+      {/* Breadcrumb Encased in Frosted Ice */}
+      <nav className="ice-surface rounded-full px-4 py-2 w-fit flex flex-wrap items-center gap-2 text-xs text-[#3F3F56]">
         <button
           type="button"
           onClick={onBackToCatalog}
-          className="min-h-[40px] inline-flex items-center gap-1.5 text-[#5A5AA1] hover:underline font-semibold cursor-pointer"
+          className="inline-flex items-center gap-1 font-bold text-[#5A5AA1] hover:underline cursor-pointer"
         >
-          <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-          <span>{t.backToHome}</span>
+          <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
+          <span>{locale === 'fr' ? 'Accueil' : 'Home'}</span>
         </button>
-        <span className="text-[#D1D5DB]" aria-hidden="true">
-          /
-        </span>
-        <span className="text-[#000000] font-medium truncate">{title}</span>
-      </div>
+        <span aria-hidden="true">&gt;</span>
+        <button
+          type="button"
+          onClick={() => onSelectCategory(product.category)}
+          className="font-medium hover:text-[#5A5AA1] cursor-pointer"
+        >
+          {categoryLabel}
+        </button>
+        <span aria-hidden="true">&gt;</span>
+        <span className="text-[#000000] font-bold truncate max-w-md">{title}</span>
+      </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Gallery & Specs */}
-        <div className="lg:col-span-7 lg:sticky lg:top-28 space-y-4">
-          <div className="relative aspect-[4/3] w-full rounded-2xl overflow-hidden bg-white border border-[#E5E7EB] p-6 flex items-center justify-center">
+      {/* Top 3-Column Section (Gallery | Purchase Core | Delivery Card) */}
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        {/* Column 1: Gallery + Thumbnails + Report Link */}
+        <div className="lg:col-span-4 space-y-3">
+          <div
+            onMouseEnter={() => setIsZoomActive(true)}
+            onMouseLeave={() => {
+              setIsZoomActive(false);
+              setZoomPinned(false);
+            }}
+            onMouseMove={handleGalleryMouseMove}
+            onClick={() => setZoomPinned((p) => !p)}
+            role="button"
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                setZoomPinned((p) => !p);
+              }
+            }}
+            aria-label={
+              locale === 'fr'
+                ? 'Inspecter le produit en zoom'
+                : 'Inspect product zoom'
+            }
+            className={`ice-product-trap group relative aspect-square w-full rounded-3xl p-6 flex items-center justify-center transition-all select-none ${
+              zoomed
+                ? 'border-[#5A5AA1] cursor-zoom-out ring-2 ring-[#5A5AA1]/35'
+                : 'hover:border-[#A084E8] cursor-zoom-in'
+            }`}
+          >
             {product.discountPct && (
-              <span className="absolute top-4 left-4 px-3 py-1 rounded bg-[#F4BE38] text-[#000000] font-display text-xs font-extrabold">
+              <span className="glass-pill-gold absolute top-3.5 left-3.5 z-10 px-3 py-1 rounded-full text-[#000000] font-display text-xs font-extrabold pointer-events-none">
                 -{product.discountPct} %
               </span>
             )}
-            <ProductImage
-              src={product.image}
-              alt={title}
-              className="w-full h-full object-contain"
-            />
-          </div>
-
-          <div className="bg-white border border-[#E5E7EB] rounded-2xl p-6">
-            <h2 className="font-display text-lg font-bold text-[#000000] mb-4">
-              {locale === 'fr' ? 'Caractéristiques techniques' : 'Technical Specifications'}
-            </h2>
-            <dl className="grid grid-cols-1 sm:grid-cols-2 gap-x-6 gap-y-3">
-              {product.specs.map((spec) => (
-                <div key={spec.labelFr} className="py-2 border-b border-[#F3F4F6]">
-                  <dt className="text-xs text-[#6C757D] uppercase tracking-wide">
-                    {locale === 'fr' ? spec.labelFr : spec.labelEn}
-                  </dt>
-                  <dd className="mt-0.5 text-sm font-semibold text-[#000000]">
-                    {spec.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          </div>
-        </div>
-
-        {/* Right Purchase Module */}
-        <div className="lg:col-span-5 bg-white border border-[#E5E7EB] rounded-2xl p-6 space-y-6">
-          <div>
-            <div className="flex items-center justify-between gap-2 text-xs text-[#6C757D]">
-              <span className="uppercase tracking-wider font-semibold">
-                {product.brand} · {product.sku}
+            <span
+              className={`absolute bottom-3 right-3 z-10 px-3 py-1 rounded-full text-[11px] font-bold inline-flex items-center gap-1.5 pointer-events-none transition-colors ${
+                zoomed
+                  ? 'glass-pill-cta text-white'
+                  : 'glass-pill-black text-white'
+              }`}
+            >
+              <ZoomIn className="w-3.5 h-3.5 text-[#F4BE38]" aria-hidden="true" />
+              <span>
+                {zoomed
+                  ? 'Zoom 2.2×'
+                  : locale === 'fr'
+                  ? 'Survolez pour zoomer'
+                  : 'Hover to zoom'}
               </span>
-              <span
-                className={`font-bold ${
-                  isOutOfStock ? 'text-[#9CA3AF]' : 'text-[#5A5AA1]'
+            </span>
+            <div
+              className={`w-full h-full flex items-center justify-center transition-transform duration-150 ease-out will-change-transform ${
+                ZOOM_ORIGINS[zoomZone.row][zoomZone.col]
+              } ${zoomed ? 'scale-[2.2]' : 'scale-100'}`}
+            >
+              <ProductImage
+                src={product.image}
+                alt={title}
+                className={`w-full h-full object-contain transition-transform duration-200 ${galleryFrames[activeThumbIndex].transform}`}
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-2.5">
+            {galleryFrames.map((frame, idx) => (
+              <button
+                key={frame.labelFr}
+                type="button"
+                onClick={() => setActiveThumbIndex(idx)}
+                aria-label={frame.labelFr}
+                className={`ice-product-trap aspect-square rounded-2xl p-2 cursor-pointer transition-all ${
+                  activeThumbIndex === idx
+                    ? 'border-[#5A5AA1] ring-2 ring-[#5A5AA1]/35'
+                    : 'hover:border-[#A084E8]'
                 }`}
               >
-                {isOutOfStock
-                  ? t.outOfStock
-                  : `${product.stockQty} ${
-                      locale === 'fr' ? 'en stock' : 'in stock'
-                    }`}
-              </span>
-            </div>
+                <ProductImage
+                  src={product.image}
+                  alt={`${title} - ${frame.labelFr}`}
+                  className={`w-full h-full object-contain ${frame.transform}`}
+                />
+              </button>
+            ))}
+          </div>
 
-            <div className="mt-2 flex items-start justify-between gap-3">
-              <h1 className="font-display text-2xl font-bold text-[#000000] leading-tight">
-                {title}
-              </h1>
+          <button
+            type="button"
+            onClick={() => setReportOpen((o) => !o)}
+            className="glass-pill-frost px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 text-xs font-bold text-[#ba1a1a] cursor-pointer"
+          >
+            <Flag className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>
+              {locale === 'fr'
+                ? 'Signaler des informations incorrectes'
+                : 'Report incorrect product details'}
+            </span>
+          </button>
+
+          {reportOpen && (
+            <form
+              onSubmit={handleSubmitReport}
+              className="ice-surface p-4 rounded-2xl space-y-2.5"
+            >
+              <textarea
+                rows={2}
+                value={reportText}
+                onChange={(e) => setReportText(e.target.value)}
+                placeholder={
+                  locale === 'fr'
+                    ? 'Précisez l’erreur constatée (prix, photo, fiche technique)...'
+                    : 'Describe the issue (price, photo, specs)...'
+                }
+                className="glass-input-recessed w-full p-2.5 rounded-xl text-xs text-[#000000] focus:outline-none"
+              />
+              <div className="flex items-center justify-between gap-2">
+                {reportSent ? (
+                  <span className="text-[11px] font-bold text-[#5A5AA1]">
+                    {locale === 'fr'
+                      ? 'Merci, signalement envoyé !'
+                      : 'Thank you, report submitted!'}
+                  </span>
+                ) : (
+                  <span className="text-[11px] text-[#3F3F56]">
+                    {locale === 'fr' ? 'Réponse rapide' : 'Reviewed promptly'}
+                  </span>
+                )}
+                <button
+                  type="submit"
+                  className="glass-pill-black px-3.5 py-1.5 rounded-full text-white text-xs font-bold cursor-pointer"
+                >
+                  {locale === 'fr' ? 'Envoyer' : 'Submit'}
+                </button>
+              </div>
+            </form>
+          )}
+        </div>
+
+        {/* Column 2: Main Product Info & CTAs */}
+        <div className="ice-surface lg:col-span-5 rounded-3xl p-6 space-y-5">
+          <div className="flex items-start justify-between gap-3">
+            <h1 className="font-display text-xl sm:text-2xl font-bold text-[#000000] leading-snug">
+              {title}
+            </h1>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {onToggleCompare && (
+                <button
+                  type="button"
+                  title={
+                    compareIds.includes(product.id)
+                      ? locale === 'fr'
+                        ? 'Retirer du comparatif'
+                        : 'Remove from compare'
+                      : locale === 'fr'
+                      ? 'Comparer'
+                      : 'Compare'
+                  }
+                  aria-label={
+                    compareIds.includes(product.id)
+                      ? locale === 'fr'
+                        ? 'Retirer du comparatif'
+                        : 'Remove from comparison'
+                      : locale === 'fr'
+                      ? 'Comparer ce produit'
+                      : 'Compare this product'
+                  }
+                  onClick={() => onToggleCompare(product.id)}
+                  className={`w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all ${
+                    compareIds.includes(product.id)
+                      ? 'glass-pill-gold text-[#000000]'
+                      : 'glass-pill-frost text-[#3F3F56] hover:text-[#5A5AA1]'
+                  }`}
+                >
+                  <Scale className="w-4 h-4" aria-hidden="true" />
+                </button>
+              )}
               <button
                 type="button"
                 aria-label="Favoris"
                 onClick={() => onToggleWishlist(product.id)}
-                className={`w-10 h-10 rounded-full border flex items-center justify-center shrink-0 cursor-pointer ${
+                className={`w-9 h-9 rounded-full flex items-center justify-center cursor-pointer ${
                   isWishlisted
-                    ? 'bg-[#5A5AA1] border-[#5A5AA1] text-white'
-                    : 'bg-white border-[#E5E7EB] text-[#6C757D] hover:text-[#5A5AA1]'
+                    ? 'glass-pill-cta text-white'
+                    : 'glass-pill-frost text-[#3F3F56] hover:text-[#5A5AA1]'
                 }`}
               >
                 <Heart
@@ -142,79 +445,114 @@ export function ProductDetailScreen({
                   aria-hidden="true"
                 />
               </button>
-            </div>
-
-            <div className="mt-3 flex items-baseline gap-3">
-              <span className="font-display text-2xl font-extrabold text-[#000000] tabular-nums">
-                {formatXAF(unitPrice)}
-              </span>
-              {product.oldPrice && (
-                <span className="text-sm text-[#6C757D] line-through tabular-nums">
-                  {formatXAF(product.oldPrice)}
-                </span>
-              )}
-            </div>
-
-            <div className="mt-3 inline-flex items-center gap-1.5 text-xs font-bold px-2.5 py-1 rounded bg-[#F4BE38] text-[#000000]">
-              <ShieldCheck className="w-4 h-4 shrink-0" aria-hidden="true" />
-              <span>
-                {product.warrantyMonths} {t.warrantyMonthsLabel}
-              </span>
+              <button
+                type="button"
+                aria-label="Partager"
+                onClick={handleShare}
+                className="glass-pill-frost w-9 h-9 rounded-full text-[#3F3F56] hover:text-[#5A5AA1] flex items-center justify-center cursor-pointer"
+                title={copiedShare ? 'Lien copié' : 'Copier le lien'}
+              >
+                {copiedShare ? (
+                  <Check className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
+                ) : (
+                  <Share2 className="w-4 h-4" aria-hidden="true" />
+                )}
+              </button>
             </div>
           </div>
 
-          <p className="text-sm text-[#4B5563] leading-relaxed">{description}</p>
+          {/* Category + Stars Summary */}
+          <div className="flex flex-wrap items-center gap-2 text-xs text-[#3F3F56]">
+            <button
+              type="button"
+              onClick={() => onSelectCategory(product.category)}
+              className="font-bold text-[#5A5AA1] hover:underline cursor-pointer"
+            >
+              {categoryLabel}
+            </button>
+            <span>·</span>
+            <div className="flex items-center gap-0.5 text-[#F4BE38]">
+              {[1, 2, 3, 4, 5].map((star) => (
+                <Star
+                  key={star}
+                  className="w-3.5 h-3.5"
+                  fill={star <= Math.round(avgRating) ? '#F4BE38' : 'none'}
+                  stroke="#F4BE38"
+                  aria-hidden="true"
+                />
+              ))}
+            </div>
+            <span className="font-bold text-[#000000] tabular-nums">
+              {avgRating.toFixed(1)}
+            </span>
+            <span>
+              ({productReviews.length} {locale === 'fr' ? 'avis' : 'reviews'})
+            </span>
+          </div>
 
-          {/* Variants */}
-          <div className="space-y-2.5">
-            <label className="block text-xs font-bold uppercase tracking-wider text-[#000000]">
-              {locale === 'fr' ? 'Option / Version' : 'Select Option'}
-            </label>
-            <div className="grid grid-cols-1 gap-2">
-              {product.variants.map((variant) => {
-                const isSelected = variant.id === selectedVariant.id;
-                return (
-                  <button
-                    key={variant.id}
-                    type="button"
-                    onClick={() => setSelectedVariantId(variant.id)}
-                    className={`min-h-[44px] px-4 py-2.5 rounded-lg border text-left flex items-center justify-between gap-2 transition-colors cursor-pointer ${
-                      isSelected
-                        ? 'border-[#5A5AA1] bg-[#5A5AA1]/5 text-[#000000] font-semibold'
-                        : 'border-[#E5E7EB] bg-white text-[#4B5563] hover:border-[#A084E8]'
-                    }`}
-                  >
-                    <span className="text-sm">
+          {/* Price Block */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="font-display text-2xl sm:text-3xl font-extrabold text-[#000000] tabular-nums">
+              {formatXAF(unitPrice)}
+            </span>
+            {product.discountPct && (
+              <span className="glass-pill-gold px-2.5 py-0.5 rounded-full text-[#000000] font-display text-xs font-extrabold">
+                -{product.discountPct}%
+              </span>
+            )}
+            {product.oldPrice && (
+              <span className="text-sm text-[#3F3F56] line-through tabular-nums">
+                {formatXAF(product.oldPrice)}
+              </span>
+            )}
+          </div>
+
+          {/* Variant Option Selector */}
+          {product.variants.length > 0 && (
+            <div className="space-y-2">
+              <span className="block text-xs font-bold uppercase tracking-wider text-[#3F3F56]">
+                {locale === 'fr' ? 'Option / Version' : 'Select Option'}
+              </span>
+              <div className="flex flex-wrap gap-2">
+                {product.variants.map((variant) => {
+                  const isSelected = variant.id === selectedVariant.id;
+                  return (
+                    <button
+                      key={variant.id}
+                      type="button"
+                      onClick={() => setSelectedVariantId(variant.id)}
+                      className={`min-h-[38px] px-4 py-1.5 rounded-full text-xs font-bold cursor-pointer ${
+                        isSelected
+                          ? 'glass-pill-cta text-white'
+                          : 'glass-pill-frost text-[#000000]'
+                      }`}
+                    >
                       {locale === 'fr' ? variant.labelFr : variant.labelEn}
-                    </span>
-                    <span className="text-xs tabular-nums font-semibold">
-                      {variant.priceDelta === 0
-                        ? locale === 'fr'
-                          ? 'Inclus'
-                          : 'Included'
-                        : `+${formatXAF(variant.priceDelta)}`}
-                    </span>
-                  </button>
-                );
-              })}
+                      {variant.priceDelta > 0
+                        ? ` (+${formatXAF(variant.priceDelta)})`
+                        : ''}
+                    </button>
+                  );
+                })}
+              </div>
             </div>
-          </div>
+          )}
 
-          {/* Quantity & Actions */}
-          <div className="space-y-3 pt-2 border-t border-[#E5E7EB]">
-            <div className="flex items-center justify-between">
-              <span className="text-sm font-medium text-[#000000]">
+          {/* Quantity + Dual CTAs */}
+          <div className="space-y-3 pt-2">
+            <div className="flex items-center gap-4">
+              <span className="text-xs font-bold uppercase tracking-wider text-[#3F3F56]">
                 {locale === 'fr' ? 'Quantité' : 'Quantity'}
               </span>
-              <div className="inline-flex items-center border border-[#E5E7EB] rounded-lg bg-[#F8F9FA]">
+              <div className="glass-input-recessed inline-flex items-center rounded-full overflow-hidden">
                 <button
                   type="button"
                   aria-label="Diminuer"
                   disabled={isOutOfStock}
                   onClick={() => setQuantity((q) => Math.max(1, q - 1))}
-                  className="w-10 h-10 inline-flex items-center justify-center text-[#000000] hover:bg-[#E5E7EB] cursor-pointer disabled:opacity-40"
+                  className="w-9 h-9 inline-flex items-center justify-center text-[#000000] hover:bg-white/60 cursor-pointer disabled:opacity-40"
                 >
-                  <Minus className="w-4 h-4" aria-hidden="true" />
+                  <Minus className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
                 <span className="px-4 text-sm font-bold tabular-nums text-[#000000]">
                   {quantity}
@@ -223,10 +561,12 @@ export function ProductDetailScreen({
                   type="button"
                   aria-label="Augmenter"
                   disabled={isOutOfStock}
-                  onClick={() => setQuantity((q) => Math.min(product.stockQty || 1, q + 1))}
-                  className="w-10 h-10 inline-flex items-center justify-center text-[#000000] hover:bg-[#E5E7EB] cursor-pointer disabled:opacity-40"
+                  onClick={() =>
+                    setQuantity((q) => Math.min(product.stockQty || 1, q + 1))
+                  }
+                  className="glass-pill-cta w-9 h-9 inline-flex items-center justify-center text-white rounded-full cursor-pointer disabled:opacity-40"
                 >
-                  <Plus className="w-4 h-4" aria-hidden="true" />
+                  <Plus className="w-3.5 h-3.5" aria-hidden="true" />
                 </button>
               </div>
             </div>
@@ -235,19 +575,19 @@ export function ProductDetailScreen({
               <button
                 type="button"
                 disabled
-                className="min-h-[48px] w-full px-5 py-3 rounded-lg bg-[#F3F4F6] text-[#9CA3AF] font-bold text-sm"
+                className="ice-surface-subtle w-full min-h-[46px] px-5 py-3 rounded-full text-[#3F3F56] font-bold text-sm"
               >
                 {t.outOfStock}
               </button>
             ) : (
-              <div className="grid grid-cols-1 gap-2.5">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <button
                   type="button"
                   onClick={handleAdd}
-                  className={`min-h-[48px] w-full px-5 py-3 rounded-lg font-bold text-sm inline-flex items-center justify-center gap-2 transition-colors cursor-pointer ${
+                  className={`min-h-[46px] px-4 py-2.5 rounded-full font-bold text-sm inline-flex items-center justify-center gap-2 cursor-pointer ${
                     addedFeedback
-                      ? 'bg-[#000000] text-[#F4BE38]'
-                      : 'bg-[#5A5AA1] hover:bg-[#474789] text-white'
+                      ? 'glass-pill-black text-[#F4BE38]'
+                      : 'glass-pill-frost text-[#000000]'
                   }`}
                 >
                   {addedFeedback ? (
@@ -258,9 +598,7 @@ export function ProductDetailScreen({
                   ) : (
                     <>
                       <ShoppingCart className="w-4 h-4" aria-hidden="true" />
-                      <span>
-                        {t.addToBag} · {formatXAF(unitPrice * quantity)}
-                      </span>
+                      <span>{t.addToBag}</span>
                     </>
                   )}
                 </button>
@@ -268,51 +606,637 @@ export function ProductDetailScreen({
                 <button
                   type="button"
                   onClick={() => onBuyNow(product, selectedVariant.id, quantity)}
-                  className="min-h-[48px] w-full px-5 py-3 rounded-lg bg-[#000000] hover:bg-[#1f1f2e] text-white font-bold text-sm transition-colors cursor-pointer"
+                  className="glass-pill-cta min-h-[46px] px-4 py-2.5 rounded-full text-white font-display font-bold text-sm cursor-pointer"
                 >
-                  {t.buyNowMomo}
+                  {locale === 'fr' ? 'Acheter' : 'Buy Now'}
                 </button>
               </div>
             )}
+
+            {/* WhatsApp Order Helper Card */}
+            <div className="ice-surface-subtle rounded-2xl p-3.5 space-y-2">
+              <div className="flex items-center justify-between gap-3">
+                <div className="flex items-center gap-3 min-w-0">
+                  <span className="glass-pill-black w-9 h-9 rounded-full text-[#F4BE38] flex items-center justify-center shrink-0">
+                    <MessageCircle className="w-4 h-4" aria-hidden="true" />
+                  </span>
+                  <div className="min-w-0">
+                    <p className="text-xs font-bold text-[#000000]">
+                      {locale === 'fr'
+                        ? 'Commander sur WhatsApp'
+                        : 'Order via WhatsApp'}
+                    </p>
+                    <p className="text-[11px] text-[#3F3F56] truncate">
+                      {locale === 'fr'
+                        ? 'Un conseiller vous aide à finaliser · COD'
+                        : 'Live advisor assists checkout · COD'}
+                    </p>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setWhatsappTipOpen((o) => !o)}
+                  className="glass-pill-cta px-3.5 py-1.5 rounded-full text-white text-xs font-bold shrink-0 cursor-pointer"
+                >
+                  {locale === 'fr' ? 'Contacter' : 'Contact'}
+                </button>
+              </div>
+
+              {whatsappTipOpen && (
+                <p className="text-[11px] text-[#000000] pt-2 border-t border-white/75">
+                  {locale === 'fr'
+                    ? `Référence à indiquer au +237 693 71 25 25 : « ${product.sku} (${quantity}x) »`
+                    : `Share SKU "${product.sku} (${quantity}x)" on WhatsApp +237 693 71 25 25.`}
+                </p>
+              )}
+            </div>
+
+            {/* Availability Status */}
+            <div className="flex items-center gap-2 text-xs font-medium">
+              {isOutOfStock ? (
+                <>
+                  <AlertTriangle className="w-4 h-4 text-[#ba1a1a]" aria-hidden="true" />
+                  <span className="text-[#ba1a1a] font-semibold">
+                    {t.outOfStock}
+                  </span>
+                </>
+              ) : (
+                <>
+                  <Check className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
+                  <span className="text-[#000000] font-semibold">
+                    {locale === 'fr'
+                      ? 'En stock · expédition rapide'
+                      : 'In stock · fast dispatch'}
+                  </span>
+                </>
+              )}
+            </div>
           </div>
 
-          {/* Delivery Estimator */}
-          <div className="p-4 rounded-xl bg-[#F8F9FA] border border-[#E5E7EB] space-y-2">
-            <div className="flex items-center justify-between gap-2">
-              <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-[#000000]">
-                <MapPin className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
-                <span>
-                  {locale === 'fr' ? 'Livraison Cameroun' : 'Cameroon Delivery'}
+          {/* Petite description */}
+          <div className="pt-3 border-t border-white/75 space-y-1.5 text-xs">
+            <h2 className="font-bold text-[#000000]">
+              {locale === 'fr' ? 'Petite description' : 'Quick Overview'}
+            </h2>
+            <p className="text-[#3F3F56] leading-relaxed">{shortNote}</p>
+            <p className="text-[#3F3F56]">
+              • {locale === 'fr' ? 'Marque' : 'Brand'} :{' '}
+              <strong className="text-[#000000]">{product.brand}</strong>
+            </p>
+          </div>
+
+          {/* 5 Trust Badges Row */}
+          <div className="pt-3 border-t border-white/75 grid grid-cols-5 gap-2 text-center">
+            {[
+              { icon: Zap, labelFr: 'Lorena Prime', labelEn: 'Lorena Prime' },
+              { icon: ShieldCheck, labelFr: 'Lorena Pay', labelEn: 'Lorena Pay' },
+              { icon: Truck, labelFr: 'Livraison Rapide', labelEn: 'Fast Delivery' },
+              { icon: ShieldCheck, labelFr: 'Paiement Sécurisé', labelEn: 'Secure Pay' },
+              { icon: RefreshCw, labelFr: 'SAV Certifié', labelEn: 'After-Sales' },
+            ].map((badge) => (
+              <div
+                key={badge.labelFr}
+                className="ice-surface-subtle flex flex-col items-center gap-1 p-1.5 rounded-2xl"
+              >
+                <badge.icon className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
+                <span className="text-[10px] font-semibold text-[#000000] leading-tight">
+                  {locale === 'fr' ? badge.labelFr : badge.labelEn}
                 </span>
               </div>
+            ))}
+          </div>
+        </div>
+
+        {/* Column 3: Delivery Calculator & Return Policy */}
+        <aside className="lg:col-span-3 space-y-4">
+          <div className="ice-surface rounded-3xl p-5 space-y-4">
+            <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wide text-[#000000]">
+              <MapPin className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
+              <span>
+                {locale === 'fr'
+                  ? 'OÙ SOUHAITEZ-VOUS ÊTRE LIVRÉ ?'
+                  : 'WHERE SHOULD WE DELIVER?'}
+              </span>
+            </div>
+
+            <div className="space-y-2.5">
               <select
-                value={estimatorCity}
-                onChange={(e) => setEstimatorCity(e.target.value)}
-                aria-label="Ville"
-                className="text-xs font-semibold bg-white border border-[#E5E7EB] rounded px-2.5 py-1.5 text-[#000000] cursor-pointer"
+                value={activeCity.name}
+                onChange={(e) => {
+                  const newCity =
+                    allCities.find((c) => c.name === e.target.value) ??
+                    allCities[0];
+                  setEstimatorCity(newCity.name);
+                  setEstimatorQuarter(newCity.quarters[0].name);
+                }}
+                aria-label="Ville de livraison"
+                className="glass-input-recessed min-h-[40px] w-full px-3.5 rounded-full text-xs font-bold text-[#000000] cursor-pointer focus:outline-none"
               >
-                {LOGISTICS_REGIONS.flatMap((r) => r.cities).map((c) => (
+                {allCities.map((c) => (
                   <option key={c.name} value={c.name}>
                     {c.name}
                   </option>
                 ))}
               </select>
+
+              <select
+                value={activeQuarter.name}
+                onChange={(e) => setEstimatorQuarter(e.target.value)}
+                aria-label="Quartier de livraison"
+                className="glass-input-recessed min-h-[40px] w-full px-3.5 rounded-full text-xs font-bold text-[#000000] cursor-pointer focus:outline-none"
+              >
+                {activeCity.quarters.map((q) => (
+                  <option key={q.name} value={q.name}>
+                    {q.name}
+                  </option>
+                ))}
+              </select>
             </div>
-            <div className="flex items-center gap-2 text-xs text-[#4B5563]">
-              <Truck className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
-              <span>
-                {cityEstimate.name}:{' '}
+
+            <div className="ice-surface-subtle p-3 rounded-2xl space-y-1 text-xs">
+              <div className="flex items-center justify-between">
+                <span className="inline-flex items-center gap-1.5 text-[#3F3F56]">
+                  <Truck className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
+                  <span>{locale === 'fr' ? 'Coût :' : 'Fee:'}</span>
+                </span>
+                <span className="font-display font-extrabold text-[#5A5AA1] tabular-nums">
+                  {formatXAF(activeQuarter.fee)}
+                </span>
+              </div>
+              <p className="text-[11px] text-[#3F3F56]">
+                {locale === 'fr' ? 'Délai estimé :' : 'ETA:'}{' '}
                 <strong className="text-[#000000]">
-                  {locale === 'fr'
-                    ? cityEstimate.quarters[0]?.etaFr
-                    : cityEstimate.quarters[0]?.etaEn}
-                </strong>{' '}
-                ({formatXAF(cityEstimate.quarters[0]?.fee ?? 1500)})
+                  {locale === 'fr' ? activeQuarter.etaFr : activeQuarter.etaEn}
+                </strong>
+              </p>
+            </div>
+
+            <div className="pt-3 border-t border-white/75 flex items-center justify-between gap-2">
+              <div className="flex items-center gap-2 text-xs font-bold text-[#000000]">
+                <RefreshCw className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
+                <span>
+                  {locale === 'fr' ? 'POLITIQUE DE RETOUR' : 'RETURN POLICY'}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={onGoToReturnPolicy}
+                className="glass-pill-frost px-3 py-1 rounded-full text-xs font-bold text-[#000000] cursor-pointer"
+              >
+                {locale === 'fr' ? 'Tout lire' : 'Read policy'}
+              </button>
+            </div>
+
+            <div className="pt-3 border-t border-white/75 flex items-center justify-between gap-2 text-xs">
+              <span className="text-[#3F3F56]">SKU :</span>
+              <button
+                type="button"
+                onClick={handleCopySku}
+                className="inline-flex items-center gap-1.5 font-mono font-bold text-[#000000] hover:text-[#5A5AA1] cursor-pointer"
+              >
+                <span>{product.sku}</span>
+                {copiedSku ? (
+                  <Check className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
+                ) : (
+                  <Copy className="w-3.5 h-3.5 text-[#3F3F56]" aria-hidden="true" />
+                )}
+              </button>
+            </div>
+          </div>
+
+          <div className="ice-obsidian p-4 rounded-3xl text-white space-y-1.5 text-xs">
+            <div className="flex items-center gap-1.5 text-[#F4BE38] font-bold">
+              <ShieldCheck className="w-4 h-4" aria-hidden="true" />
+              <span>
+                {product.warrantyMonths} {t.warrantyMonthsLabel}
               </span>
+            </div>
+            <p className="text-white/80 leading-relaxed">
+              {locale === 'fr'
+                ? 'Garantie vérifiable en ligne via votre numéro de série Lorena Market.'
+                : 'Warranty verifiable online using your Lorena Market certificate number.'}
+            </p>
+          </div>
+        </aside>
+      </section>
+
+      {/* Caractéristiques Table */}
+      <section className="ice-surface rounded-3xl overflow-hidden">
+        <div className="px-6 py-4 border-b border-white/75">
+          <h2 className="font-display text-lg font-bold text-[#000000]">
+            {locale === 'fr' ? 'Caractéristiques' : 'Key Specifications'}
+          </h2>
+        </div>
+        <div className="overflow-x-auto">
+          <table className="w-full text-left border-collapse text-xs sm:text-sm">
+            <thead>
+              <tr className="ice-obsidian text-white">
+                <th className="px-5 py-3 font-semibold">
+                  {locale === 'fr' ? 'Marque' : 'Brand'}
+                </th>
+                <th className="px-5 py-3 font-semibold">
+                  {locale === 'fr' ? 'Référence' : 'SKU'}
+                </th>
+                <th className="px-5 py-3 font-semibold">
+                  {locale === 'fr' ? 'Catégorie' : 'Category'}
+                </th>
+                <th className="px-5 py-3 font-semibold">
+                  {locale === 'fr' ? 'Garantie' : 'Warranty'}
+                </th>
+                <th className="px-5 py-3 font-semibold">
+                  {locale === 'fr' ? 'Stockage' : 'Stock'}
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b border-white/75 text-[#000000] font-semibold">
+                <td className="px-5 py-3.5">{product.brand}</td>
+                <td className="px-5 py-3.5 font-mono">{product.sku}</td>
+                <td className="px-5 py-3.5">{categoryLabel}</td>
+                <td className="px-5 py-3.5">
+                  {product.warrantyMonths} {locale === 'fr' ? 'mois' : 'months'}
+                </td>
+                <td className="px-5 py-3.5">
+                  {product.stockQty > 0
+                    ? `(${product.stockQty}) ${locale === 'fr' ? 'articles en stock' : 'items in stock'}`
+                    : t.outOfStock}
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <div className="ice-surface-subtle px-6 py-3 text-xs text-[#3F3F56] font-medium">
+          {title} — {shortNote}
+        </div>
+      </section>
+
+      {/* Collapsible Détail du produit + Plus d'information */}
+      <section className="ice-surface rounded-3xl overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setDetailsExpanded((e) => !e)}
+          className="w-full px-6 py-4 flex items-center justify-between text-left border-b border-white/75 hover:bg-white/40 cursor-pointer"
+        >
+          <span className="font-display text-lg font-bold text-[#000000]">
+            {locale === 'fr' ? 'Détail du produit' : 'Product Details'}
+          </span>
+          {detailsExpanded ? (
+            <ChevronUp className="w-5 h-5 text-[#5A5AA1]" aria-hidden="true" />
+          ) : (
+            <ChevronDown className="w-5 h-5 text-[#5A5AA1]" aria-hidden="true" />
+          )}
+        </button>
+
+        {detailsExpanded && (
+          <div className="p-6 space-y-6">
+            <div className="space-y-3">
+              <h3 className="font-display text-base font-bold text-[#000000]">
+                {title}
+              </h3>
+              <p className="text-sm text-[#3F3F56] leading-relaxed">
+                {description}
+              </p>
+            </div>
+
+            {product.specs.length > 0 && (
+              <div className="space-y-3">
+                <h4 className="font-display text-sm font-bold uppercase tracking-wider text-[#000000]">
+                  {locale === 'fr' ? "Plus d'information" : 'Technical Sheet'}
+                </h4>
+                <div className="rounded-2xl border border-white/80 overflow-hidden">
+                  {product.specs.map((spec, idx) => (
+                    <div
+                      key={spec.labelFr}
+                      className={`px-4 py-3 grid grid-cols-1 sm:grid-cols-3 gap-2 text-xs sm:text-sm ${
+                        idx % 2 === 0 ? 'ice-surface-subtle' : 'bg-white/50'
+                      }`}
+                    >
+                      <span className="font-semibold text-[#3F3F56]">
+                        {locale === 'fr' ? spec.labelFr : spec.labelEn}
+                      </span>
+                      <span className="sm:col-span-2 font-semibold text-[#000000]">
+                        {spec.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+      </section>
+
+      {/* Product-Specific Frequently Asked Questions Accordion */}
+      <ProductFaqAccordion product={product} locale={locale} />
+
+      {/* Customer Reviews Section */}
+      <section className="ice-surface rounded-3xl p-6 space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-6 items-center pb-6 border-b border-white/75">
+          {/* Overall Score */}
+          <div className="md:col-span-3 text-center md:text-left">
+            <h2 className="font-display text-base font-bold text-[#000000]">
+              {locale === 'fr' ? 'Avis des internautes' : 'Customer Reviews'}
+            </h2>
+            <div className="mt-2 flex items-baseline justify-center md:justify-start gap-1">
+              <span className="font-display text-4xl font-extrabold text-[#000000] tabular-nums">
+                {avgRating.toFixed(1)}
+              </span>
+              <span className="text-sm text-[#3F3F56]">/5</span>
+            </div>
+            <p className="text-xs text-[#3F3F56] mt-1">
+              {productReviews.length === 0
+                ? locale === 'fr'
+                  ? '(Aucun avis)'
+                  : '(No reviews yet)'
+                : `${productReviews.length} ${locale === 'fr' ? 'avis clients' : 'reviews'}`}
+            </p>
+          </div>
+
+          {/* 5-Star Breakdown Bars */}
+          <div className="md:col-span-6 space-y-2">
+            {[5, 4, 3, 2, 1].map((star) => {
+              const count = productReviews.filter((r) => r.rating === star).length;
+              const pct =
+                productReviews.length > 0
+                  ? Math.round((count / productReviews.length) * 100)
+                  : 0;
+              return (
+                <div key={star} className="flex items-center gap-3 text-xs">
+                  <span className="inline-flex items-center gap-1 w-8 font-bold text-[#000000] shrink-0">
+                    <Star className="w-3.5 h-3.5 fill-[#F4BE38] stroke-[#F4BE38]" />
+                    <span>{star}</span>
+                  </span>
+                  <div className="flex-1 h-2.5 rounded-full bg-white/70 border border-white/90 overflow-hidden">
+                    <div
+                      className="h-full bg-[#F4BE38] rounded-full transition-all"
+                      style={{ width: `${pct}%` }}
+                    />
+                  </div>
+                  <span className="w-8 text-right text-[#3F3F56] tabular-nums">
+                    {count}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Write Review Button */}
+          <div className="md:col-span-3 text-center space-y-2">
+            <h3 className="font-display text-sm font-bold text-[#000000]">
+              {locale === 'fr' ? 'Évaluer ce produit' : 'Rate this product'}
+            </h3>
+            <p className="text-xs text-[#3F3F56]">
+              {locale === 'fr'
+                ? 'Partagez votre expérience avec les autres clients'
+                : 'Share your experience with other shoppers'}
+            </p>
+            <button
+              type="button"
+              onClick={() => setReviewFormOpen((o) => !o)}
+              className="glass-pill-frost w-full min-h-[42px] px-4 py-2 rounded-full text-xs font-bold text-[#000000] cursor-pointer"
+            >
+              {locale === 'fr' ? 'Écrire un avis client' : 'Write a customer review'}
+            </button>
+          </div>
+        </div>
+
+        {/* Inline Review Form */}
+        {reviewFormOpen && (
+          <form
+            onSubmit={handleSubmitReview}
+            className="ice-surface-subtle p-5 rounded-2xl space-y-4"
+          >
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <h3 className="font-display text-sm font-bold text-[#000000]">
+                {locale === 'fr' ? 'Publier votre avis' : 'Post your review'}
+              </h3>
+              <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    onClick={() => setReviewRating(star)}
+                    aria-label={`${star} étoiles`}
+                    className="p-1 cursor-pointer"
+                  >
+                    <Star
+                      className="w-5 h-5"
+                      fill={star <= reviewRating ? '#F4BE38' : 'none'}
+                      stroke="#F4BE38"
+                    />
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <input
+                type="text"
+                required
+                value={reviewAuthor}
+                onChange={(e) => setReviewAuthor(e.target.value)}
+                placeholder={locale === 'fr' ? 'Votre nom complet' : 'Your full name'}
+                className="glass-input-recessed min-h-[42px] px-4 rounded-full text-sm text-[#000000] focus:outline-none"
+              />
+              <input
+                type="text"
+                required
+                value={reviewComment}
+                onChange={(e) => setReviewComment(e.target.value)}
+                placeholder={
+                  locale === 'fr'
+                    ? 'Votre retour d’expérience...'
+                    : 'Your review comment...'
+                }
+                className="glass-input-recessed min-h-[42px] px-4 rounded-full text-sm text-[#000000] focus:outline-none"
+              />
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <button
+                type="button"
+                onClick={() => setReviewFormOpen(false)}
+                className="glass-pill-frost min-h-[38px] px-4 rounded-full text-xs font-bold text-[#000000] cursor-pointer"
+              >
+                {locale === 'fr' ? 'Annuler' : 'Cancel'}
+              </button>
+              <button
+                type="submit"
+                className="glass-pill-cta min-h-[38px] px-5 rounded-full text-white text-xs font-bold cursor-pointer"
+              >
+                {locale === 'fr' ? 'Publier l’avis' : 'Publish review'}
+              </button>
+            </div>
+          </form>
+        )}
+
+        {/* Filter Pills */}
+        {productReviews.length > 0 && (
+          <div className="flex flex-wrap items-center gap-2">
+            {[
+              { id: 'all' as const, label: locale === 'fr' ? 'Tout' : 'All' },
+              {
+                id: 'verified' as const,
+                label: locale === 'fr' ? 'Achat vérifié' : 'Verified purchase',
+              },
+              { id: 5, label: '5 ★' },
+              { id: 4, label: '4 ★' },
+              { id: 3, label: '3 ★' },
+            ].map((pill) => (
+              <button
+                key={String(pill.id)}
+                type="button"
+                onClick={() => setReviewFilter(pill.id)}
+                className={`px-3.5 py-1 rounded-full text-xs font-bold cursor-pointer ${
+                  reviewFilter === pill.id
+                    ? 'glass-pill-black text-[#F4BE38]'
+                    : 'glass-pill-frost text-[#3F3F56]'
+                }`}
+              >
+                {pill.label}
+              </button>
+            ))}
+          </div>
+        )}
+
+        {/* Reviews List */}
+        {filteredReviews.length === 0 ? (
+          <p className="text-xs text-[#3F3F56]">
+            {locale === 'fr'
+              ? 'Soyez le premier à partager votre avis sur cet article.'
+              : 'Be the first customer to review this product.'}
+          </p>
+        ) : (
+          <div className="divide-y divide-white/75">
+            {filteredReviews.map((rev) => (
+              <div key={rev.id} className="py-4 space-y-2">
+                <div className="flex flex-wrap items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <span className="font-display text-sm font-bold text-[#000000]">
+                      {rev.author}
+                    </span>
+                    {rev.verified && (
+                      <span className="glass-pill-gold px-2.5 py-0.5 rounded-full text-[#000000] text-[10px] font-extrabold">
+                        {locale === 'fr' ? 'Achat vérifié' : 'Verified'}
+                      </span>
+                    )}
+                  </div>
+                  <span className="text-xs text-[#3F3F56]">{rev.date}</span>
+                </div>
+                <div className="flex items-center gap-0.5">
+                  {[1, 2, 3, 4, 5].map((s) => (
+                    <Star
+                      key={s}
+                      className="w-3.5 h-3.5"
+                      fill={s <= rev.rating ? '#F4BE38' : 'none'}
+                      stroke="#F4BE38"
+                    />
+                  ))}
+                </div>
+                <p className="text-sm text-[#3F3F56] leading-relaxed">
+                  {rev.comment}
+                </p>
+                <button
+                  type="button"
+                  onClick={() => onMarkReviewHelpful(rev.id)}
+                  className="inline-flex items-center gap-1.5 text-xs font-semibold text-[#3F3F56] hover:text-[#5A5AA1] cursor-pointer"
+                >
+                  <ThumbsUp className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span>
+                    {locale === 'fr' ? 'Utile' : 'Helpful'} ({rev.helpfulCount})
+                  </span>
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </section>
+
+      {/* Vous aimerez aussi Carousel */}
+      <ProductCarouselRow
+        title={locale === 'fr' ? 'Vous aimerez aussi' : 'You may also like'}
+        products={relatedProducts}
+        locale={locale}
+        wishlistIds={wishlistIds}
+        compareIds={compareIds}
+        recentlyAddedId={recentlyAddedId}
+        viewAllCategory={product.category}
+        onSelectProduct={onSelectProduct}
+        onQuickAdd={onQuickAdd}
+        onToggleWishlist={onToggleWishlist}
+        onToggleCompare={onToggleCompare}
+        onViewAll={onSelectCategory}
+      />
+
+      {/* Sticky Bottom Purchase Bar Encased in Frosted Ice */}
+      {!isOutOfStock && (
+        <div className="fixed bottom-0 inset-x-0 z-30 ice-surface border-t border-white/90">
+          <div className="max-w-[1360px] mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-4">
+              <div className="glass-input-recessed hidden sm:inline-flex items-center rounded-full overflow-hidden">
+                <button
+                  type="button"
+                  aria-label="Diminuer"
+                  onClick={() => setQuantity((q) => Math.max(1, q - 1))}
+                  className="w-8 h-8 inline-flex items-center justify-center text-[#000000] hover:bg-white/60 cursor-pointer"
+                >
+                  <Minus className="w-3.5 h-3.5" aria-hidden="true" />
+                </button>
+                <span className="px-3 text-xs font-bold tabular-nums text-[#000000]">
+                  {quantity}
+                </span>
+                <button
+                  type="button"
+                  aria-label="Augmenter"
+                  onClick={() =>
+                    setQuantity((q) => Math.min(product.stockQty || 1, q + 1))
+                  }
+                  className="glass-pill-cta w-8 h-8 inline-flex items-center justify-center text-white rounded-full cursor-pointer"
+                >
+                  <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+                </button>
+              </div>
+
+              <div>
+                <span className="block text-[10px] font-semibold text-[#3F3F56]">
+                  {t.subtotal}
+                </span>
+                <span className="font-display text-sm sm:text-base font-extrabold text-[#000000] tabular-nums">
+                  {formatXAF(unitPrice * quantity)}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <button
+                type="button"
+                onClick={onOpenCartPage}
+                className="glass-pill-frost min-h-[38px] px-3.5 sm:px-4 rounded-full text-[#000000] text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
+              >
+                <ShoppingBag className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>{t.cart}</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={() => onBuyNow(product, selectedVariant.id, quantity)}
+                className="glass-pill-cta min-h-[38px] px-5 sm:px-6 rounded-full text-white text-xs font-bold cursor-pointer"
+              >
+                {locale === 'fr' ? 'Acheter' : 'Buy Now'}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => setWhatsappTipOpen(true)}
+                className="glass-pill-frost hidden md:inline-flex min-h-[38px] px-3.5 rounded-full text-[#000000] text-xs font-bold items-center gap-1.5 cursor-pointer"
+              >
+                <MessageCircle className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
+                <span>WhatsApp</span>
+              </button>
             </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

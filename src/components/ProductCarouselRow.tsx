@@ -9,12 +9,14 @@ interface ProductCarouselRowProps {
   products: Product[];
   locale: Locale;
   wishlistIds: string[];
+  compareIds?: string[];
   recentlyAddedId: string | null;
   darkHeaderBar?: boolean;
   viewAllCategory?: CategorySlug;
   onSelectProduct: (product: Product) => void;
   onQuickAdd: (product: Product) => void;
   onToggleWishlist: (productId: string) => void;
+  onToggleCompare?: (productId: string) => void;
   onViewAll: (category: CategorySlug) => void;
 }
 
@@ -23,12 +25,14 @@ export function ProductCarouselRow({
   products,
   locale,
   wishlistIds,
+  compareIds = [],
   recentlyAddedId,
   darkHeaderBar = false,
   viewAllCategory = 'all',
   onSelectProduct,
   onQuickAdd,
   onToggleWishlist,
+  onToggleCompare,
   onViewAll,
 }: ProductCarouselRowProps) {
   const t = TRANSLATIONS[locale];
@@ -43,30 +47,30 @@ export function ProductCarouselRow({
   return (
     <section className="max-w-[1360px] mx-auto px-4 space-y-4">
       {darkHeaderBar ? (
-        <div className="bg-[#000000] text-white rounded-xl px-5 py-3.5 flex items-center justify-between gap-4">
+        <div className="ice-obsidian text-white rounded-3xl px-5 py-3.5 flex items-center justify-between gap-4">
           <h2 className="font-display text-lg sm:text-xl font-bold">{title}</h2>
           <div className="flex items-center gap-3">
             <button
               type="button"
               onClick={() => onViewAll(viewAllCategory)}
-              className="text-xs sm:text-sm font-medium text-[#F4BE38] hover:underline cursor-pointer whitespace-nowrap"
+              className="glass-pill-gold px-3.5 py-1 rounded-full text-xs font-extrabold text-[#000000] cursor-pointer whitespace-nowrap"
             >
               {t.viewAll}
             </button>
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-between gap-4">
+        <div className="ice-surface rounded-3xl px-5 py-3 flex items-center justify-between gap-4">
           <h2 className="font-display text-lg sm:text-xl font-bold text-[#000000]">
             {title}
           </h2>
           <div className="flex items-center gap-2">
-            <div className="hidden sm:flex items-center gap-1.5 mr-2">
+            <div className="hidden sm:flex items-center gap-1.5 mr-1">
               <button
                 type="button"
                 aria-label="Précédent"
                 onClick={() => scrollBy(-450)}
-                className="w-8 h-8 rounded-full bg-white border border-[#E5E7EB] hover:border-[#5A5AA1] text-[#000000] flex items-center justify-center cursor-pointer"
+                className="glass-pill-frost w-8 h-8 rounded-full text-[#000000] flex items-center justify-center cursor-pointer"
               >
                 <ChevronLeft className="w-4 h-4" aria-hidden="true" />
               </button>
@@ -74,7 +78,7 @@ export function ProductCarouselRow({
                 type="button"
                 aria-label="Suivant"
                 onClick={() => scrollBy(450)}
-                className="w-8 h-8 rounded-full bg-[#5A5AA1] hover:bg-[#474789] text-white flex items-center justify-center cursor-pointer"
+                className="glass-pill-cta w-8 h-8 rounded-full text-white flex items-center justify-center cursor-pointer"
               >
                 <ChevronRight className="w-4 h-4" aria-hidden="true" />
               </button>
@@ -82,7 +86,7 @@ export function ProductCarouselRow({
             <button
               type="button"
               onClick={() => onViewAll(viewAllCategory)}
-              className="text-xs sm:text-sm font-semibold text-[#5A5AA1] hover:underline cursor-pointer whitespace-nowrap"
+              className="glass-pill-frost px-3.5 py-1.5 rounded-full text-xs font-bold text-[#5A5AA1] cursor-pointer whitespace-nowrap"
             >
               {t.viewAll}
             </button>
@@ -101,10 +105,12 @@ export function ProductCarouselRow({
             locale={locale}
             compact
             isWishlisted={wishlistIds.includes(product.id)}
+            isCompared={compareIds.includes(product.id)}
             justAdded={recentlyAddedId === product.id}
             onSelectProduct={onSelectProduct}
             onQuickAdd={onQuickAdd}
             onToggleWishlist={onToggleWishlist}
+            onToggleCompare={onToggleCompare}
           />
         ))}
       </div>
