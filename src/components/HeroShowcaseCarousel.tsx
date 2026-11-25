@@ -9,6 +9,7 @@ import {
 import { useEffect, useRef, useState } from 'react';
 import { IMAGES, PRODUCTS } from '../data/catalog';
 import { CategorySlug, Locale, Product } from '../types/store';
+import { ActionIconTooltip } from './ActionIconTooltip';
 import { ProductImage } from './ProductImage';
 
 interface HeroShowcaseCarouselProps {
@@ -69,10 +70,20 @@ export function HeroShowcaseCarousel({
 
         {/* Top Bar */}
         <div className="relative z-10 flex items-center justify-between gap-2">
-          <span className="glass-pill-gold px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider text-[#000000] inline-flex items-center gap-1">
-            <Sparkles className="w-3 h-3" aria-hidden="true" />
-            <span>{locale === 'fr' ? 'Animation Lorena' : 'Lorena Showcase'}</span>
-          </span>
+          <ActionIconTooltip
+            focusable
+            placement="right"
+            text={
+              locale === 'fr'
+                ? 'Animation vitrine des offres phares Lorena Market'
+                : 'Animated spotlight of featured Lorena Market deals'
+            }
+          >
+            <span className="glass-pill-gold px-2.5 py-0.5 rounded-full text-[10px] font-extrabold uppercase tracking-wider text-[#000000] inline-flex items-center gap-1">
+              <Sparkles className="w-3 h-3" aria-hidden="true" />
+              <span>{locale === 'fr' ? 'Animation Lorena' : 'Lorena Showcase'}</span>
+            </span>
+          </ActionIconTooltip>
           <div className="flex items-center gap-1">
             {[0, 1, 2].map((b) => (
               <span
@@ -239,9 +250,19 @@ export function HeroShowcaseCarousel({
           <span className="glass-pill-frost px-4 py-1.5 rounded-full text-[#000000] text-xs font-bold">
             {locale === 'fr' ? "Voir l'offre" : 'View offer'}
           </span>
-          <span className="glass-pill-blue w-8 h-8 rounded-full flex items-center justify-center">
-            <Play className="w-3.5 h-3.5 text-white fill-white" aria-hidden="true" />
-          </span>
+          <ActionIconTooltip
+            focusable
+            placement="left"
+            text={
+              locale === 'fr'
+                ? 'Cliquez sur la carte pour voir la fiche produit'
+                : 'Click the card to open the product details'
+            }
+          >
+            <span className="glass-pill-blue w-8 h-8 rounded-full flex items-center justify-center">
+              <Play className="w-3.5 h-3.5 text-white fill-white" aria-hidden="true" />
+            </span>
+          </ActionIconTooltip>
         </div>
       </div>
 
@@ -367,41 +388,72 @@ export function HeroShowcaseCarousel({
           </div>
 
           <div className="flex items-center gap-2">
-            <button
-              type="button"
-              onClick={() => setIsPlaying((p) => !p)}
-              aria-label={isPlaying ? 'Pause' : 'Play'}
-              className="glass-pill-frost min-h-[34px] px-3 py-1 rounded-full text-xs font-bold text-[#000000] inline-flex items-center gap-1.5 cursor-pointer"
+            <ActionIconTooltip
+              placement="bottom"
+              text={
+                isPlaying
+                  ? locale === 'fr'
+                    ? 'Mettre en pause le défilement automatique du carrousel'
+                    : 'Pause automatic carousel sliding & rotation'
+                  : locale === 'fr'
+                  ? 'Relancer le défilement automatique de droite à gauche'
+                  : 'Resume automatic right-to-left scrolling'
+              }
             >
-              {isPlaying ? (
-                <>
-                  <Pause className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
-                  <span>{locale === 'fr' ? 'Pause' : 'Pause'}</span>
-                </>
-              ) : (
-                <>
-                  <Play className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
-                  <span>{locale === 'fr' ? 'Défiler' : 'Play'}</span>
-                </>
-              )}
-            </button>
+              <button
+                type="button"
+                onClick={() => setIsPlaying((p) => !p)}
+                aria-label={isPlaying ? 'Pause' : 'Play'}
+                className="glass-pill-frost min-h-[34px] px-3 py-1 rounded-full text-xs font-bold text-[#000000] inline-flex items-center gap-1.5 cursor-pointer"
+              >
+                {isPlaying ? (
+                  <>
+                    <Pause className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
+                    <span>{locale === 'fr' ? 'Pause' : 'Pause'}</span>
+                  </>
+                ) : (
+                  <>
+                    <Play className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
+                    <span>{locale === 'fr' ? 'Défiler' : 'Play'}</span>
+                  </>
+                )}
+              </button>
+            </ActionIconTooltip>
 
-            <button
-              type="button"
-              onClick={() => nudgeCarousel(-340)}
-              aria-label={locale === 'fr' ? 'Carte précédente' : 'Previous slide'}
-              className="glass-pill-frost w-9 h-9 rounded-full flex items-center justify-center text-[#000000] cursor-pointer"
+            <ActionIconTooltip
+              placement="bottom"
+              text={
+                locale === 'fr'
+                  ? 'Revenir à la carte précédente du carrousel'
+                  : 'Jump to previous carousel slide'
+              }
             >
-              <ChevronLeft className="w-4 h-4" aria-hidden="true" />
-            </button>
-            <button
-              type="button"
-              onClick={() => nudgeCarousel(340)}
-              aria-label={locale === 'fr' ? 'Carte suivante' : 'Next slide'}
-              className="glass-pill-cta w-9 h-9 rounded-full flex items-center justify-center text-white cursor-pointer"
+              <button
+                type="button"
+                onClick={() => nudgeCarousel(-340)}
+                aria-label={locale === 'fr' ? 'Carte précédente' : 'Previous slide'}
+                className="glass-pill-frost w-9 h-9 rounded-full flex items-center justify-center text-[#000000] cursor-pointer"
+              >
+                <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+              </button>
+            </ActionIconTooltip>
+            <ActionIconTooltip
+              placement="left"
+              text={
+                locale === 'fr'
+                  ? 'Avancer vers la carte suivante du carrousel'
+                  : 'Advance to next carousel slide'
+              }
             >
-              <ChevronRight className="w-4 h-4" aria-hidden="true" />
-            </button>
+              <button
+                type="button"
+                onClick={() => nudgeCarousel(340)}
+                aria-label={locale === 'fr' ? 'Carte suivante' : 'Next slide'}
+                className="glass-pill-cta w-9 h-9 rounded-full flex items-center justify-center text-white cursor-pointer"
+              >
+                <ChevronRight className="w-4 h-4" aria-hidden="true" />
+              </button>
+            </ActionIconTooltip>
           </div>
         </div>
 

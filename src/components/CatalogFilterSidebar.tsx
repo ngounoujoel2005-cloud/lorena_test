@@ -3,6 +3,7 @@ import { FormEvent, useState } from 'react';
 import { CATEGORIES_META } from '../data/catalog';
 import { CategorySlug, Locale } from '../types/store';
 import { formatXAF } from '../utils/format';
+import { ActionIconTooltip } from './ActionIconTooltip';
 
 export interface BrandFacet {
   brand: string;
@@ -102,9 +103,19 @@ export function CatalogFilterSidebar({
       {/* Header Row */}
       <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/75">
         <div className="flex items-center gap-2.5">
-          <span className="glass-pill-black w-8 h-8 rounded-full text-[#F4BE38] flex items-center justify-center shrink-0">
-            <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
-          </span>
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Filtrez par marque, budget et garantie'
+                : 'Filter by brand, price range, and warranty'
+            }
+            placement="right"
+            focusable
+          >
+            <span className="glass-pill-black w-8 h-8 rounded-full text-[#F4BE38] flex items-center justify-center shrink-0">
+              <SlidersHorizontal className="w-4 h-4" aria-hidden="true" />
+            </span>
+          </ActionIconTooltip>
           <div>
             <div className="flex items-center gap-2">
               <h2 className="font-display text-sm font-bold text-[#000000]">
@@ -130,19 +141,33 @@ export function CatalogFilterSidebar({
           >
             {locale === 'fr' ? 'Réinitialiser' : 'Reset'}
           </button>
-          <button
-            type="button"
-            onClick={() => setMobileOpen((o) => !o)}
-            aria-expanded={mobileOpen}
-            aria-label={locale === 'fr' ? 'Afficher les filtres' : 'Toggle filters'}
-            className="glass-pill-frost lg:hidden w-8 h-8 rounded-full flex items-center justify-center text-[#000000] cursor-pointer"
+          <ActionIconTooltip
+            text={
+              mobileOpen
+                ? locale === 'fr'
+                  ? 'Masquer le panneau des filtres'
+                  : 'Hide filter panel'
+                : locale === 'fr'
+                ? 'Afficher le panneau des filtres'
+                : 'Show filter panel'
+            }
+            placement="left"
+            className="inline-flex lg:hidden"
           >
-            {mobileOpen ? (
-              <ChevronUp className="w-4 h-4" aria-hidden="true" />
-            ) : (
-              <ChevronDown className="w-4 h-4" aria-hidden="true" />
-            )}
-          </button>
+            <button
+              type="button"
+              onClick={() => setMobileOpen((o) => !o)}
+              aria-expanded={mobileOpen}
+              aria-label={locale === 'fr' ? 'Afficher les filtres' : 'Toggle filters'}
+              className="glass-pill-frost w-8 h-8 rounded-full flex items-center justify-center text-[#000000] cursor-pointer"
+            >
+              {mobileOpen ? (
+                <ChevronUp className="w-4 h-4" aria-hidden="true" />
+              ) : (
+                <ChevronDown className="w-4 h-4" aria-hidden="true" />
+              )}
+            </button>
+          </ActionIconTooltip>
         </div>
       </div>
 
@@ -156,10 +181,19 @@ export function CatalogFilterSidebar({
             {locale === 'fr' ? 'RECHERCHE' : 'SEARCH'}
           </label>
           <div className="relative">
-            <Search
-              className="w-4 h-4 text-[#5A5AA1] absolute left-3.5 top-1/2 -translate-y-1/2 z-10"
-              aria-hidden="true"
-            />
+            <span className="absolute left-3.5 top-1/2 -translate-y-1/2 z-10">
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Filtrer instantanément par nom, marque ou SKU'
+                    : 'Filter instantly by name, brand, or SKU'
+                }
+                placement="right"
+                focusable
+              >
+                <Search className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
+              </ActionIconTooltip>
+            </span>
             <input
               id="sidebar-catalog-search"
               type="search"
@@ -178,14 +212,23 @@ export function CatalogFilterSidebar({
               {locale === 'fr' ? 'PRIX · XAF' : 'PRICE RANGE · XAF'}
             </span>
             {(appliedMinPrice !== null || appliedMaxPrice !== null) && (
-              <button
-                type="button"
-                onClick={() => onSelectPricePreset(null, null)}
-                className="text-[10px] font-bold text-[#5A5AA1] hover:underline inline-flex items-center gap-0.5 cursor-pointer"
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Effacer la plage de prix sélectionnée'
+                    : 'Clear selected price range'
+                }
+                placement="left"
               >
-                <X className="w-3 h-3" aria-hidden="true" />
-                <span>{locale === 'fr' ? 'Effacer' : 'Clear'}</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => onSelectPricePreset(null, null)}
+                  className="text-[10px] font-bold text-[#5A5AA1] hover:underline inline-flex items-center gap-0.5 cursor-pointer"
+                >
+                  <X className="w-3 h-3" aria-hidden="true" />
+                  <span>{locale === 'fr' ? 'Effacer' : 'Clear'}</span>
+                </button>
+              </ActionIconTooltip>
             )}
           </div>
 
@@ -313,7 +356,17 @@ export function CatalogFilterSidebar({
         <div className="space-y-2.5 pt-4 border-t border-white/75">
           <div className="flex items-center justify-between">
             <span className="inline-flex items-center gap-1.5 text-[11px] font-bold uppercase tracking-wider text-[#3F3F56]">
-              <ShieldCheck className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Filtrer les articles selon la durée de garantie'
+                    : 'Filter products by warranty duration'
+                }
+                placement="right"
+                focusable
+              >
+                <ShieldCheck className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
+              </ActionIconTooltip>
               <span>
                 {locale === 'fr' ? 'DURÉE DE GARANTIE' : 'WARRANTY LENGTH'}
               </span>

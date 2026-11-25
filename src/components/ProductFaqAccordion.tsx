@@ -9,6 +9,7 @@ import {
 import { useState } from 'react';
 import { Locale, Product } from '../types/store';
 import { FaqTopic, getProductFaqs } from '../utils/productFaqs';
+import { ActionIconTooltip } from './ActionIconTooltip';
 
 interface ProductFaqAccordionProps {
   product: Product;
@@ -50,13 +51,23 @@ export function ProductFaqAccordion({
   return (
     <section
       aria-labelledby="product-faq-heading"
-      className="ice-surface rounded-3xl overflow-hidden"
+      className="ice-surface rounded-3xl"
     >
-      <div className="ice-surface-subtle px-6 py-4 border-b border-white/80 flex flex-wrap items-center justify-between gap-3">
+      <div className="ice-surface-subtle rounded-t-3xl px-6 py-4 border-b border-white/80 flex flex-wrap items-center justify-between gap-3">
         <div className="flex items-center gap-3">
-          <span className="glass-pill-black w-9 h-9 rounded-full text-[#F4BE38] flex items-center justify-center shrink-0">
-            <HelpCircle className="w-4 h-4" aria-hidden="true" />
-          </span>
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Questions fréquentes spécifiques à cet article'
+                : 'Frequently asked questions for this product'
+            }
+            placement="right"
+            focusable
+          >
+            <span className="glass-pill-black w-9 h-9 rounded-full text-[#F4BE38] flex items-center justify-center shrink-0">
+              <HelpCircle className="w-4 h-4" aria-hidden="true" />
+            </span>
+          </ActionIconTooltip>
           <div>
             <h2
               id="product-faq-heading"
@@ -102,20 +113,43 @@ export function ProductFaqAccordion({
                 className="w-full px-6 py-4 flex items-center justify-between gap-4 text-left hover:bg-white/35 transition-colors cursor-pointer"
               >
                 <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3 min-w-0">
-                  <span className="glass-pill-gold inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[#000000] text-[11px] font-extrabold w-fit shrink-0">
-                    <TopicIcon className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
-                    <span>{faq.topicLabel}</span>
-                  </span>
+                  <ActionIconTooltip
+                    text={
+                      locale === 'fr'
+                        ? `Thème : ${faq.topicLabel} — cliquez sur la ligne pour lire`
+                        : `Topic: ${faq.topicLabel} — click row to read answer`
+                    }
+                    placement="right"
+                    focusable
+                  >
+                    <span className="glass-pill-gold inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[#000000] text-[11px] font-extrabold w-fit shrink-0">
+                      <TopicIcon className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
+                      <span>{faq.topicLabel}</span>
+                    </span>
+                  </ActionIconTooltip>
                   <span className="font-display text-sm sm:text-base font-bold text-[#000000]">
                     {faq.question}
                   </span>
                 </div>
-                <ChevronDown
-                  className={`w-5 h-5 text-[#5A5AA1] shrink-0 transition-transform duration-200 ${
-                    isOpen ? 'rotate-180' : ''
-                  }`}
-                  aria-hidden="true"
-                />
+                <ActionIconTooltip
+                  text={
+                    isOpen
+                      ? locale === 'fr'
+                        ? 'Masquer la réponse'
+                        : 'Hide answer'
+                      : locale === 'fr'
+                      ? 'Afficher la réponse'
+                      : 'Show answer'
+                  }
+                  placement="left"
+                >
+                  <ChevronDown
+                    className={`w-5 h-5 text-[#5A5AA1] shrink-0 transition-transform duration-200 ${
+                      isOpen ? 'rotate-180' : ''
+                    }`}
+                    aria-hidden="true"
+                  />
+                </ActionIconTooltip>
               </button>
 
               {isOpen && (

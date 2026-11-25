@@ -16,6 +16,7 @@ import { FREE_DELIVERY_THRESHOLD, LOGISTICS_REGIONS } from '../data/catalog';
 import { TRANSLATIONS } from '../i18n/translations';
 import { CartItem, Locale, OrderRecord, PaymentMethod, UserSession } from '../types/store';
 import { formatXAF } from '../utils/format';
+import { ActionIconTooltip } from './ActionIconTooltip';
 import { getPromoDiscount } from './CartPageScreen';
 import { ProductImage } from './ProductImage';
 
@@ -222,32 +223,57 @@ export function CheckoutScreen({
     <div className="max-w-[1360px] mx-auto px-4 py-8 pb-20 space-y-6">
       {/* 3-Step Checkout Progress Bar (Step 2 Active) */}
       <div className="ice-surface max-w-lg mx-auto rounded-full px-6 py-3 flex items-center justify-between gap-2">
-        <button
-          type="button"
-          onClick={onBackToCart}
-          className="flex flex-col items-center gap-1 cursor-pointer"
+        <ActionIconTooltip
+          text={locale === 'fr' ? 'Revenir à l’étape Panier' : 'Go back to Cart step'}
+          placement="bottom"
         >
-          <span className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center">
-            <Check className="w-4 h-4" aria-hidden="true" />
-          </span>
-          <span className="text-xs font-bold text-[#5A5AA1]">
-            {locale === 'fr' ? 'Panier' : 'Cart'}
-          </span>
-        </button>
+          <button
+            type="button"
+            onClick={onBackToCart}
+            className="flex flex-col items-center gap-1 cursor-pointer"
+          >
+            <span className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center">
+              <Check className="w-4 h-4" aria-hidden="true" />
+            </span>
+            <span className="text-xs font-bold text-[#5A5AA1]">
+              {locale === 'fr' ? 'Panier' : 'Cart'}
+            </span>
+          </button>
+        </ActionIconTooltip>
         <div className="flex-1 h-0.5 bg-[#5A5AA1] mb-4 rounded-full" />
         <div className="flex flex-col items-center gap-1">
-          <span className="glass-pill-black w-10 h-10 rounded-full text-[#F4BE38] flex items-center justify-center">
-            <ClipboardList className="w-4 h-4" aria-hidden="true" />
-          </span>
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Étape en cours : adresse et paiement'
+                : 'Current step: address and payment'
+            }
+            placement="bottom"
+            focusable
+          >
+            <span className="glass-pill-black w-10 h-10 rounded-full text-[#F4BE38] flex items-center justify-center">
+              <ClipboardList className="w-4 h-4" aria-hidden="true" />
+            </span>
+          </ActionIconTooltip>
           <span className="text-xs font-bold text-[#000000]">
             {locale === 'fr' ? 'Commande' : 'Checkout'}
           </span>
         </div>
         <div className="flex-1 h-0.5 bg-white/80 mb-4 rounded-full" />
         <div className="flex flex-col items-center gap-1">
-          <span className="glass-pill-frost w-10 h-10 rounded-full text-[#3F3F56] flex items-center justify-center">
-            <Package className="w-4 h-4" aria-hidden="true" />
-          </span>
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Étape suivante : facture PDF et suivi'
+                : 'Next step: PDF invoice and tracking'
+            }
+            placement="bottom"
+            focusable
+          >
+            <span className="glass-pill-frost w-10 h-10 rounded-full text-[#3F3F56] flex items-center justify-center">
+              <Package className="w-4 h-4" aria-hidden="true" />
+            </span>
+          </ActionIconTooltip>
           <span className="text-xs font-medium text-[#3F3F56]">
             {locale === 'fr' ? 'Confirmation' : 'Confirmation'}
           </span>
@@ -255,14 +281,20 @@ export function CheckoutScreen({
       </div>
 
       <div className="ice-surface rounded-3xl p-5 sm:p-6">
-        <button
-          type="button"
-          onClick={onBackToCart}
-          className="glass-pill-frost px-3 py-1 rounded-full inline-flex items-center gap-1.5 text-xs font-bold text-[#5A5AA1] mb-2 cursor-pointer"
+        <ActionIconTooltip
+          text={locale === 'fr' ? 'Modifier les articles du panier' : 'Edit items in your cart'}
+          placement="right"
+          className="inline-flex mb-2"
         >
-          <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
-          <span>{locale === 'fr' ? 'Retour au panier' : 'Back to cart'}</span>
-        </button>
+          <button
+            type="button"
+            onClick={onBackToCart}
+            className="glass-pill-frost px-3 py-1 rounded-full inline-flex items-center gap-1.5 text-xs font-bold text-[#5A5AA1] cursor-pointer"
+          >
+            <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
+            <span>{locale === 'fr' ? 'Retour au panier' : 'Back to cart'}</span>
+          </button>
+        </ActionIconTooltip>
         <h1 className="font-display text-2xl sm:text-3xl font-bold text-[#000000]">
           {locale === 'fr'
             ? 'Finaliser la commande — Lorena Market'
@@ -279,7 +311,17 @@ export function CheckoutScreen({
           <section className="ice-surface rounded-3xl p-6 space-y-5">
             <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/75">
               <div className="flex items-center gap-2">
-                <MapPin className="w-5 h-5 text-[#5A5AA1]" aria-hidden="true" />
+                <ActionIconTooltip
+                  text={
+                    locale === 'fr'
+                      ? 'Indiquez votre ville et quartier pour la livraison'
+                      : 'Choose your city and quarter for delivery'
+                  }
+                  placement="right"
+                  focusable
+                >
+                  <MapPin className="w-5 h-5 text-[#5A5AA1]" aria-hidden="true" />
+                </ActionIconTooltip>
                 <h2 className="font-display text-lg font-bold text-[#000000]">
                   {locale === 'fr'
                     ? '1. Adresse de livraison (Cameroun)'
@@ -419,7 +461,17 @@ export function CheckoutScreen({
 
             <div className="ice-surface-subtle p-3.5 rounded-2xl flex items-center justify-between gap-3">
               <div className="flex items-center gap-2 text-sm text-[#000000]">
-                <Truck className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+                <ActionIconTooltip
+                  text={
+                    locale === 'fr'
+                      ? 'Délai et frais calculés selon votre quartier'
+                      : 'Delivery ETA and fee based on your quarter'
+                  }
+                  placement="right"
+                  focusable
+                >
+                  <Truck className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+                </ActionIconTooltip>
                 <span>
                   {selectedCity.name} — {selectedQuarter.name} :{' '}
                   <strong>
@@ -443,13 +495,33 @@ export function CheckoutScreen({
           <section className="ice-surface rounded-3xl p-6 space-y-5">
             <div className="flex items-center justify-between gap-2 pb-3 border-b border-white/75">
               <div className="flex items-center gap-2">
-                <Smartphone className="w-5 h-5 text-[#5A5AA1]" aria-hidden="true" />
+                <ActionIconTooltip
+                  text={
+                    locale === 'fr'
+                      ? 'Réglez par MTN MoMo, Orange Money ou à la livraison'
+                      : 'Pay via MTN MoMo, Orange Money, or Cash on Delivery'
+                  }
+                  placement="right"
+                  focusable
+                >
+                  <Smartphone className="w-5 h-5 text-[#5A5AA1]" aria-hidden="true" />
+                </ActionIconTooltip>
                 <h2 className="font-display text-lg font-bold text-[#000000]">
                   {locale === 'fr' ? '2. Mode de paiement' : '2. Payment Method'}
                 </h2>
               </div>
               <span className="inline-flex items-center gap-1 text-xs font-bold text-[#5A5AA1]">
-                <Lock className="w-3.5 h-3.5" aria-hidden="true" />
+                <ActionIconTooltip
+                  text={
+                    locale === 'fr'
+                      ? 'Paiement sécurisé avec validation sur votre mobile'
+                      : 'Secure payment verified on your phone'
+                  }
+                  placement="left"
+                  focusable
+                >
+                  <Lock className="w-3.5 h-3.5" aria-hidden="true" />
+                </ActionIconTooltip>
                 <span>{locale === 'fr' ? 'Sécurisé' : 'Secure'}</span>
               </span>
             </div>
@@ -686,7 +758,17 @@ export function CheckoutScreen({
           </div>
 
           <div className="ice-obsidian p-3.5 rounded-2xl text-white flex items-start gap-2.5 text-xs">
-            <ShieldCheck className="w-4 h-4 text-[#F4BE38] shrink-0 mt-0.5" aria-hidden="true" />
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Facture officielle et garantie délivrées dès confirmation'
+                  : 'Official invoice and warranty issued on confirmation'
+              }
+              placement="left"
+              focusable
+            >
+              <ShieldCheck className="w-4 h-4 text-[#F4BE38] shrink-0 mt-0.5" aria-hidden="true" />
+            </ActionIconTooltip>
             <span>
               {locale === 'fr'
                 ? 'Facture officielle avec en-tête Lorena Market générée automatiquement après validation MTN MoMo / Orange Money, avec garantie certifiée.'

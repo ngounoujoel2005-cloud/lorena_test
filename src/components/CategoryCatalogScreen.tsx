@@ -3,6 +3,7 @@ import { FormEvent, useMemo, useState } from 'react';
 import { CATEGORIES_META, PRODUCTS } from '../data/catalog';
 import { CategorySlug, Locale, Product } from '../types/store';
 import { formatXAF } from '../utils/format';
+import { ActionIconTooltip } from './ActionIconTooltip';
 import {
   BrandFacet,
   CatalogFilterSidebar,
@@ -188,14 +189,23 @@ export function CategoryCatalogScreen({
       <div className="ice-surface rounded-3xl p-5 sm:p-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <div className="flex items-center gap-2 text-xs text-[#3F3F56] mb-2">
-            <button
-              type="button"
-              onClick={onBackHome}
-              className="glass-pill-frost px-3 py-1 rounded-full inline-flex items-center gap-1 font-bold text-[#5A5AA1] cursor-pointer"
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Revenir à la page d’accueil Lorena'
+                  : 'Return to Lorena homepage'
+              }
+              placement="bottom"
             >
-              <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>{locale === 'fr' ? 'Accueil' : 'Home'}</span>
-            </button>
+              <button
+                type="button"
+                onClick={onBackHome}
+                className="glass-pill-frost px-3 py-1 rounded-full inline-flex items-center gap-1 font-bold text-[#5A5AA1] cursor-pointer"
+              >
+                <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>{locale === 'fr' ? 'Accueil' : 'Home'}</span>
+              </button>
+            </ActionIconTooltip>
             <span aria-hidden="true">/</span>
             <span className="font-medium">{locale === 'fr' ? 'Boutique' : 'Shop'}</span>
             {activeCategoryMeta && (
@@ -279,55 +289,91 @@ export function CategoryCatalogScreen({
               </span>
 
               {selectedBrands.map((brand) => (
-                <button
+                <ActionIconTooltip
                   key={`chip-brand-${brand}`}
-                  type="button"
-                  onClick={() => handleToggleBrand(brand)}
-                  className="glass-pill-cta px-3 py-1 rounded-full text-white text-xs font-semibold inline-flex items-center gap-1 cursor-pointer"
+                  text={
+                    locale === 'fr'
+                      ? `Retirer le filtre marque « ${brand} »`
+                      : `Remove brand filter "${brand}"`
+                  }
+                  placement="top"
                 >
-                  <span>{brand}</span>
-                  <X className="w-3 h-3" aria-hidden="true" />
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleBrand(brand)}
+                    className="glass-pill-cta px-3 py-1 rounded-full text-white text-xs font-semibold inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>{brand}</span>
+                    <X className="w-3 h-3" aria-hidden="true" />
+                  </button>
+                </ActionIconTooltip>
               ))}
 
               {selectedWarranties.map((months) => (
-                <button
+                <ActionIconTooltip
                   key={`chip-war-${months}`}
-                  type="button"
-                  onClick={() => handleToggleWarranty(months)}
-                  className="glass-pill-black px-3 py-1 rounded-full text-[#F4BE38] text-xs font-semibold inline-flex items-center gap-1 cursor-pointer"
+                  text={
+                    locale === 'fr'
+                      ? `Retirer le filtre garantie ${months} mois`
+                      : `Remove ${months}-month warranty filter`
+                  }
+                  placement="top"
                 >
-                  <span>
-                    {locale === 'fr' ? 'Garantie' : 'Warranty'} {months}{' '}
-                    {locale === 'fr' ? 'mois' : 'm'}
-                  </span>
-                  <X className="w-3 h-3" aria-hidden="true" />
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => handleToggleWarranty(months)}
+                    className="glass-pill-black px-3 py-1 rounded-full text-[#F4BE38] text-xs font-semibold inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>
+                      {locale === 'fr' ? 'Garantie' : 'Warranty'} {months}{' '}
+                      {locale === 'fr' ? 'mois' : 'm'}
+                    </span>
+                    <X className="w-3 h-3" aria-hidden="true" />
+                  </button>
+                </ActionIconTooltip>
               ))}
 
               {(appliedMinPrice !== null || appliedMaxPrice !== null) && (
-                <button
-                  type="button"
-                  onClick={() => handleSelectPricePreset(null, null)}
-                  className="glass-pill-gold px-3 py-1 rounded-full text-[#000000] text-xs font-extrabold inline-flex items-center gap-1 cursor-pointer tabular-nums"
+                <ActionIconTooltip
+                  text={
+                    locale === 'fr'
+                      ? 'Supprimer la limite de prix'
+                      : 'Clear price range filter'
+                  }
+                  placement="top"
                 >
-                  <span>
-                    {appliedMinPrice !== null ? formatXAF(appliedMinPrice) : '0 XAF'} –{' '}
-                    {appliedMaxPrice !== null ? formatXAF(appliedMaxPrice) : '∞'}
-                  </span>
-                  <X className="w-3 h-3" aria-hidden="true" />
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => handleSelectPricePreset(null, null)}
+                    className="glass-pill-gold px-3 py-1 rounded-full text-[#000000] text-xs font-extrabold inline-flex items-center gap-1 cursor-pointer tabular-nums"
+                  >
+                    <span>
+                      {appliedMinPrice !== null ? formatXAF(appliedMinPrice) : '0 XAF'} –{' '}
+                      {appliedMaxPrice !== null ? formatXAF(appliedMaxPrice) : '∞'}
+                    </span>
+                    <X className="w-3 h-3" aria-hidden="true" />
+                  </button>
+                </ActionIconTooltip>
               )}
 
               {onlyInStock && (
-                <button
-                  type="button"
-                  onClick={() => setOnlyInStock(false)}
-                  className="glass-pill-blue px-3 py-1 rounded-full text-white text-xs font-semibold inline-flex items-center gap-1 cursor-pointer"
+                <ActionIconTooltip
+                  text={
+                    locale === 'fr'
+                      ? 'Afficher aussi les produits épuisés'
+                      : 'Include out-of-stock products again'
+                  }
+                  placement="top"
                 >
-                  <span>{locale === 'fr' ? 'En stock' : 'In stock'}</span>
-                  <X className="w-3 h-3" aria-hidden="true" />
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => setOnlyInStock(false)}
+                    className="glass-pill-blue px-3 py-1 rounded-full text-white text-xs font-semibold inline-flex items-center gap-1 cursor-pointer"
+                  >
+                    <span>{locale === 'fr' ? 'En stock' : 'In stock'}</span>
+                    <X className="w-3 h-3" aria-hidden="true" />
+                  </button>
+                </ActionIconTooltip>
               )}
 
               <button

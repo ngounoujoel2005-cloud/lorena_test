@@ -2,6 +2,7 @@ import { ArrowRight, Scale, Trash2, X } from 'lucide-react';
 import { PRODUCTS } from '../data/catalog';
 import { Locale } from '../types/store';
 import { formatXAF } from '../utils/format';
+import { ActionIconTooltip } from './ActionIconTooltip';
 import { ProductImage } from './ProductImage';
 
 interface CompareBarProps {
@@ -31,19 +32,29 @@ export function CompareBar({
 
   return (
     <div
-      className={`no-print fixed left-4 right-20 sm:right-24 z-30 pointer-events-none ${
+      className={`no-print fixed left-4 right-32 sm:right-40 z-30 pointer-events-none ${
         elevated ? 'bottom-20' : 'bottom-4'
       }`}
     >
       <div className="max-w-[940px] mx-auto ice-obsidian text-white rounded-3xl px-4 py-3 pointer-events-auto">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5 overflow-x-auto no-scrollbar">
-            <span className="glass-pill-cta inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white text-[11px] font-bold shrink-0">
-              <Scale className="w-3.5 h-3.5 text-[#F4BE38]" aria-hidden="true" />
-              <span>
-                {selectedProducts.length}/3
+          <div className="flex flex-wrap items-center gap-2.5">
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Articles sélectionnés pour la comparaison côte à côte'
+                  : 'Products selected for side-by-side comparison'
+              }
+              placement="top"
+              focusable
+            >
+              <span className="glass-pill-cta inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-white text-[11px] font-bold shrink-0">
+                <Scale className="w-3.5 h-3.5 text-[#F4BE38]" aria-hidden="true" />
+                <span>
+                  {selectedProducts.length}/3
+                </span>
               </span>
-            </span>
+            </ActionIconTooltip>
 
             {selectedProducts.map((product) => (
               <div
@@ -65,14 +76,23 @@ export function CompareBar({
                     {formatXAF(product.price)}
                   </p>
                 </div>
-                <button
-                  type="button"
-                  aria-label="Retirer du comparatif"
-                  onClick={() => onRemoveCompare(product.id)}
-                  className="p-0.5 text-white/65 hover:text-white cursor-pointer shrink-0"
+                <ActionIconTooltip
+                  text={
+                    locale === 'fr'
+                      ? 'Retirer cet article du comparateur'
+                      : 'Remove this item from comparison'
+                  }
+                  placement="top"
                 >
-                  <X className="w-3.5 h-3.5" aria-hidden="true" />
-                </button>
+                  <button
+                    type="button"
+                    aria-label="Retirer du comparatif"
+                    onClick={() => onRemoveCompare(product.id)}
+                    className="p-0.5 text-white/65 hover:text-white cursor-pointer shrink-0"
+                  >
+                    <X className="w-3.5 h-3.5" aria-hidden="true" />
+                  </button>
+                </ActionIconTooltip>
               </div>
             ))}
 
@@ -87,30 +107,48 @@ export function CompareBar({
           </div>
 
           <div className="flex items-center gap-2 shrink-0 self-end md:self-auto">
-            <button
-              type="button"
-              onClick={onClearCompare}
-              aria-label={locale === 'fr' ? 'Vider le comparatif' : 'Clear comparison'}
-              className="min-h-[38px] px-3 rounded-full border border-white/30 bg-white/10 hover:bg-white/20 text-white text-xs font-medium inline-flex items-center gap-1 cursor-pointer transition-colors"
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Tout retirer du comparateur'
+                  : 'Clear all compared items'
+              }
+              placement="top"
             >
-              <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
-              <span className="hidden sm:inline">
-                {locale === 'fr' ? 'Vider' : 'Clear'}
-              </span>
-            </button>
+              <button
+                type="button"
+                onClick={onClearCompare}
+                aria-label={locale === 'fr' ? 'Vider le comparatif' : 'Clear comparison'}
+                className="min-h-[38px] px-3 rounded-full border border-white/30 bg-white/10 hover:bg-white/20 text-white text-xs font-medium inline-flex items-center gap-1 cursor-pointer transition-colors"
+              >
+                <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                <span className="hidden sm:inline">
+                  {locale === 'fr' ? 'Vider' : 'Clear'}
+                </span>
+              </button>
+            </ActionIconTooltip>
 
-            <button
-              type="button"
-              onClick={onOpenCompareScreen}
-              className="glass-pill-gold min-h-[38px] px-4 py-1.5 rounded-full text-[#000000] font-display font-extrabold text-xs inline-flex items-center gap-1.5 cursor-pointer"
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Ouvrir le tableau comparatif détaillé'
+                  : 'Open detailed comparison table'
+              }
+              placement="top"
             >
-              <span>
-                {locale === 'fr'
-                  ? `Comparer (${selectedProducts.length})`
-                  : `Compare (${selectedProducts.length})`}
-              </span>
-              <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
-            </button>
+              <button
+                type="button"
+                onClick={onOpenCompareScreen}
+                className="glass-pill-gold min-h-[38px] px-4 py-1.5 rounded-full text-[#000000] font-display font-extrabold text-xs inline-flex items-center gap-1.5 cursor-pointer"
+              >
+                <span>
+                  {locale === 'fr'
+                    ? `Comparer (${selectedProducts.length})`
+                    : `Compare (${selectedProducts.length})`}
+                </span>
+                <ArrowRight className="w-3.5 h-3.5" aria-hidden="true" />
+              </button>
+            </ActionIconTooltip>
           </div>
         </div>
       </div>

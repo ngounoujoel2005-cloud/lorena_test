@@ -14,6 +14,7 @@ import { FormEvent, useRef, useState } from 'react';
 import { TRANSLATIONS } from '../i18n/translations';
 import { Locale, OrderRecord } from '../types/store';
 import { formatOrderDate, formatXAF } from '../utils/format';
+import { ActionIconTooltip } from './ActionIconTooltip';
 import { InvoiceDocument } from './InvoiceDocument';
 import { ProductImage } from './ProductImage';
 
@@ -133,27 +134,49 @@ export function TrackingScreen({
       {/* 3-Step Checkout Progress Bar (Step 3 Active) */}
       <div className="no-print max-w-xl mx-auto ice-surface rounded-3xl px-6 py-4 flex items-center justify-between gap-2">
         <div className="flex flex-col items-center gap-1.5">
-          <span className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center">
-            <Check className="w-4 h-4" aria-hidden="true" />
-          </span>
+          <ActionIconTooltip
+            text={locale === 'fr' ? 'Étape 1 : Panier validé' : 'Step 1: Cart confirmed'}
+            placement="bottom"
+            focusable
+          >
+            <span className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center">
+              <Check className="w-4 h-4" aria-hidden="true" />
+            </span>
+          </ActionIconTooltip>
           <span className="text-xs font-bold text-[#5A5AA1]">
             {locale === 'fr' ? 'Panier' : 'Cart'}
           </span>
         </div>
         <div className="flex-1 h-1 rounded-full bg-[#5A5AA1]/60 mb-5" />
         <div className="flex flex-col items-center gap-1.5">
-          <span className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center">
-            <Check className="w-4 h-4" aria-hidden="true" />
-          </span>
+          <ActionIconTooltip
+            text={locale === 'fr' ? 'Étape 2 : Commande confirmée' : 'Step 2: Order confirmed'}
+            placement="bottom"
+            focusable
+          >
+            <span className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center">
+              <Check className="w-4 h-4" aria-hidden="true" />
+            </span>
+          </ActionIconTooltip>
           <span className="text-xs font-bold text-[#5A5AA1]">
             {locale === 'fr' ? 'Commande' : 'Checkout'}
           </span>
         </div>
         <div className="flex-1 h-1 rounded-full bg-[#5A5AA1]/60 mb-5" />
         <div className="flex flex-col items-center gap-1.5">
-          <span className="glass-pill-black w-10 h-10 rounded-full text-[#F4BE38] flex items-center justify-center">
-            <Package className="w-4 h-4" aria-hidden="true" />
-          </span>
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Étape 3 : Suivi en direct et facture'
+                : 'Step 3: Live tracking and invoice'
+            }
+            placement="bottom"
+            focusable
+          >
+            <span className="glass-pill-black w-10 h-10 rounded-full text-[#F4BE38] flex items-center justify-center">
+              <Package className="w-4 h-4" aria-hidden="true" />
+            </span>
+          </ActionIconTooltip>
           <span className="text-xs font-extrabold text-[#000000]">
             {locale === 'fr' ? 'Confirmation' : 'Confirmation'}
           </span>
@@ -178,7 +201,17 @@ export function TrackingScreen({
         <div className="flex flex-wrap items-center gap-2.5">
           <form onSubmit={handleLookup} className="flex items-center gap-2">
             <div className="glass-input-recessed rounded-full flex items-center pl-3.5 pr-3">
-              <Search className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Rechercher par numéro de commande, facture ou garantie'
+                    : 'Search by order ID, invoice, or warranty serial'
+                }
+                placement="bottom"
+                focusable
+              >
+                <Search className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+              </ActionIconTooltip>
               <input
                 type="text"
                 value={lookupInput}
@@ -197,14 +230,23 @@ export function TrackingScreen({
           </form>
 
           {selectedOrder && (
-            <button
-              type="button"
-              onClick={handleOpenInvoice}
-              className="glass-pill-black min-h-[42px] px-4 text-[#F4BE38] text-sm font-bold rounded-full inline-flex items-center gap-2 cursor-pointer"
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Afficher et télécharger la facture PDF de cette commande'
+                  : 'Open and download the PDF invoice for this order'
+              }
+              placement="left"
             >
-              <FileText className="w-4 h-4" aria-hidden="true" />
-              <span>{locale === 'fr' ? 'Facture PDF' : 'PDF Invoice'}</span>
-            </button>
+              <button
+                type="button"
+                onClick={handleOpenInvoice}
+                className="glass-pill-black min-h-[42px] px-4 text-[#F4BE38] text-sm font-bold rounded-full inline-flex items-center gap-2 cursor-pointer"
+              >
+                <FileText className="w-4 h-4" aria-hidden="true" />
+                <span>{locale === 'fr' ? 'Facture PDF' : 'PDF Invoice'}</span>
+              </button>
+            </ActionIconTooltip>
           )}
         </div>
       </div>
@@ -345,31 +387,44 @@ export function TrackingScreen({
                             key={step.title}
                             className="flex flex-col items-center text-center"
                           >
-                            <button
-                              type="button"
-                              onClick={() =>
-                                onUpdateOrderStage?.(
-                                  selectedOrder.id,
-                                  index as 0 | 1 | 2 | 3
-                                )
+                            <ActionIconTooltip
+                              text={
+                                onUpdateOrderStage
+                                  ? `${step.title} : ${step.desc} (${
+                                      locale === 'fr'
+                                        ? 'cliquez pour activer cette étape'
+                                        : 'click to select stage'
+                                    })`
+                                  : `${step.title} : ${step.desc}`
                               }
-                              aria-label={`${step.title}`}
-                              className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
-                                onUpdateOrderStage ? 'cursor-pointer' : 'cursor-default'
-                              } ${
-                                isCompleted
-                                  ? 'glass-pill-cta text-white'
-                                  : isCurrent
-                                  ? 'glass-pill-black text-[#F4BE38] ring-4 ring-[#F4BE38]/50'
-                                  : 'glass-pill-frost text-[#3F3F56]'
-                              }`}
+                              placement="top"
                             >
-                              {isCompleted ? (
-                                <Check className="w-5 h-5" aria-hidden="true" />
-                              ) : (
-                                <StepIcon className="w-5 h-5" aria-hidden="true" />
-                              )}
-                            </button>
+                              <button
+                                type="button"
+                                onClick={() =>
+                                  onUpdateOrderStage?.(
+                                    selectedOrder.id,
+                                    index as 0 | 1 | 2 | 3
+                                  )
+                                }
+                                aria-label={`${step.title}`}
+                                className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
+                                  onUpdateOrderStage ? 'cursor-pointer' : 'cursor-default'
+                                } ${
+                                  isCompleted
+                                    ? 'glass-pill-cta text-white'
+                                    : isCurrent
+                                    ? 'glass-pill-black text-[#F4BE38] ring-4 ring-[#F4BE38]/50'
+                                    : 'glass-pill-frost text-[#3F3F56]'
+                                }`}
+                              >
+                                {isCompleted ? (
+                                  <Check className="w-5 h-5" aria-hidden="true" />
+                                ) : (
+                                  <StepIcon className="w-5 h-5" aria-hidden="true" />
+                                )}
+                              </button>
+                            </ActionIconTooltip>
                             <span
                               className={`mt-2.5 text-xs font-bold ${
                                 isCurrent
@@ -472,7 +527,17 @@ export function TrackingScreen({
                 <div className="lg:col-span-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-1 gap-4">
                   <div className="ice-surface rounded-3xl p-5 space-y-1.5">
                     <div className="flex items-center gap-2 text-xs font-bold uppercase text-[#5A5AA1]">
-                      <MapPin className="w-4 h-4" aria-hidden="true" />
+                      <ActionIconTooltip
+                        text={
+                          locale === 'fr'
+                            ? 'Adresse de livraison enregistrée'
+                            : 'Saved delivery destination'
+                        }
+                        placement="right"
+                        focusable
+                      >
+                        <MapPin className="w-4 h-4" aria-hidden="true" />
+                      </ActionIconTooltip>
                       <span>{locale === 'fr' ? 'Destination' : 'Destination'}</span>
                     </div>
                     <p className="font-display text-base font-bold text-[#000000]">
@@ -489,7 +554,17 @@ export function TrackingScreen({
 
                   <div className="ice-obsidian text-white rounded-3xl p-5 space-y-1.5">
                     <div className="flex items-center gap-2 text-xs font-bold uppercase text-[#F4BE38]">
-                      <ShieldCheck className="w-4 h-4" aria-hidden="true" />
+                      <ActionIconTooltip
+                        text={
+                          locale === 'fr'
+                            ? 'Numéro de série à présenter en SAV'
+                            : 'Serial number for warranty support'
+                        }
+                        placement="right"
+                        focusable
+                      >
+                        <ShieldCheck className="w-4 h-4" aria-hidden="true" />
+                      </ActionIconTooltip>
                       <span>
                         {locale === 'fr' ? 'Certificat Garantie' : 'Warranty Serial'}
                       </span>
@@ -508,12 +583,32 @@ export function TrackingScreen({
                 <aside className="lg:col-span-6 ice-surface rounded-3xl p-6 space-y-5">
                   <div className="flex items-center justify-between pb-3 border-b border-white/75">
                     <div className="flex items-center gap-2">
-                      <PackageCheck className="w-5 h-5 text-[#5A5AA1]" aria-hidden="true" />
+                      <ActionIconTooltip
+                        text={
+                          locale === 'fr'
+                            ? 'Articles inclus dans cette expédition'
+                            : 'Items included in this shipment'
+                        }
+                        placement="right"
+                        focusable
+                      >
+                        <PackageCheck className="w-5 h-5 text-[#5A5AA1]" aria-hidden="true" />
+                      </ActionIconTooltip>
                       <h3 className="font-display text-lg font-bold text-[#000000]">
                         {locale === 'fr' ? 'Détail des articles' : 'Receipt Items'}
                       </h3>
                     </div>
-                    <Truck className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
+                    <ActionIconTooltip
+                      text={
+                        locale === 'fr'
+                          ? `Livraison estimée : ${selectedOrder.deliveryEta}`
+                          : `Estimated delivery: ${selectedOrder.deliveryEta}`
+                      }
+                      placement="left"
+                      focusable
+                    >
+                      <Truck className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
+                    </ActionIconTooltip>
                   </div>
 
                   <div className="space-y-3">
@@ -576,16 +671,26 @@ export function TrackingScreen({
                   </div>
 
                   <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <button
-                      type="button"
-                      onClick={handleOpenInvoice}
-                      className="glass-pill-black min-h-[44px] px-4 py-2.5 text-[#F4BE38] text-sm font-bold rounded-full inline-flex items-center justify-center gap-2 cursor-pointer"
+                    <ActionIconTooltip
+                      text={
+                        locale === 'fr'
+                          ? 'Ouvrir ou télécharger votre facture PDF'
+                          : 'Open or download your PDF invoice'
+                      }
+                      placement="top"
+                      className="w-full"
                     >
-                      <FileText className="w-4 h-4" aria-hidden="true" />
-                      <span>
-                        {locale === 'fr' ? 'Facture PDF' : 'PDF Invoice'}
-                      </span>
-                    </button>
+                      <button
+                        type="button"
+                        onClick={handleOpenInvoice}
+                        className="glass-pill-black w-full min-h-[44px] px-4 py-2.5 text-[#F4BE38] text-sm font-bold rounded-full inline-flex items-center justify-center gap-2 cursor-pointer"
+                      >
+                        <FileText className="w-4 h-4" aria-hidden="true" />
+                        <span>
+                          {locale === 'fr' ? 'Facture PDF' : 'PDF Invoice'}
+                        </span>
+                      </button>
+                    </ActionIconTooltip>
                     <button
                       type="button"
                       onClick={onBackToCatalog}

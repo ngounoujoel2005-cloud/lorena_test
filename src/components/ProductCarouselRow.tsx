@@ -2,6 +2,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { useRef } from 'react';
 import { TRANSLATIONS } from '../i18n/translations';
 import { CategorySlug, Locale, Product } from '../types/store';
+import { ActionIconTooltip } from './ActionIconTooltip';
 import { ProductCard } from './ProductCard';
 
 interface ProductCarouselRowProps {
@@ -66,22 +67,40 @@ export function ProductCarouselRow({
           </h2>
           <div className="flex items-center gap-2">
             <div className="hidden sm:flex items-center gap-1.5 mr-1">
-              <button
-                type="button"
-                aria-label="Précédent"
-                onClick={() => scrollBy(-450)}
-                className="glass-pill-frost w-8 h-8 rounded-full text-[#000000] flex items-center justify-center cursor-pointer"
+              <ActionIconTooltip
+                placement="top"
+                text={
+                  locale === 'fr'
+                    ? 'Faire défiler la liste vers la gauche'
+                    : 'Scroll product row left'
+                }
               >
-                <ChevronLeft className="w-4 h-4" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                aria-label="Suivant"
-                onClick={() => scrollBy(450)}
-                className="glass-pill-cta w-8 h-8 rounded-full text-white flex items-center justify-center cursor-pointer"
+                <button
+                  type="button"
+                  aria-label="Précédent"
+                  onClick={() => scrollBy(-450)}
+                  className="glass-pill-frost w-8 h-8 rounded-full text-[#000000] flex items-center justify-center cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+                </button>
+              </ActionIconTooltip>
+              <ActionIconTooltip
+                placement="top"
+                text={
+                  locale === 'fr'
+                    ? 'Faire défiler la liste vers la droite'
+                    : 'Scroll product row right'
+                }
               >
-                <ChevronRight className="w-4 h-4" aria-hidden="true" />
-              </button>
+                <button
+                  type="button"
+                  aria-label="Suivant"
+                  onClick={() => scrollBy(450)}
+                  className="glass-pill-cta w-8 h-8 rounded-full text-white flex items-center justify-center cursor-pointer"
+                >
+                  <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                </button>
+              </ActionIconTooltip>
             </div>
             <button
               type="button"

@@ -11,6 +11,7 @@ import { useState } from 'react';
 import { Locale, OrderRecord } from '../types/store';
 import { formatOrderDate, formatXAF } from '../utils/format';
 import { generateInvoicePdf } from '../utils/generateInvoicePdf';
+import { ActionIconTooltip } from './ActionIconTooltip';
 
 interface InvoiceDocumentProps {
   order: OrderRecord;
@@ -73,9 +74,19 @@ export function InvoiceDocument({
       {!hideToolbar && (
         <div className="no-print max-w-[840px] mx-auto ice-obsidian text-white rounded-3xl p-4 sm:px-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <span className="glass-pill-cta w-10 h-10 rounded-2xl text-[#F4BE38] flex items-center justify-center shrink-0">
-              <FileText className="w-5 h-5" aria-hidden="true" />
-            </span>
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Aperçu de la facture officielle Lorena Market'
+                  : 'Official Lorena Market invoice preview'
+              }
+              placement="right"
+              focusable
+            >
+              <span className="glass-pill-cta w-10 h-10 rounded-2xl text-[#F4BE38] flex items-center justify-center shrink-0">
+                <FileText className="w-5 h-5" aria-hidden="true" />
+              </span>
+            </ActionIconTooltip>
             <div>
               <div className="flex items-center gap-2 flex-wrap">
                 <h3 className="font-display text-sm sm:text-base font-bold text-white">
@@ -104,31 +115,49 @@ export function InvoiceDocument({
           </div>
 
           <div className="flex items-center gap-2.5 shrink-0">
-            <button
-              type="button"
-              disabled={isGeneratingPdf}
-              onClick={handleDownloadPdf}
-              className="glass-pill-gold min-h-[42px] px-4 py-2 rounded-full text-[#000000] text-xs font-extrabold inline-flex items-center gap-2 cursor-pointer disabled:opacity-60"
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Exporter et télécharger cette facture au format PDF'
+                  : 'Export and download this invoice as PDF'
+              }
+              placement="top"
             >
-              <Download className="w-4 h-4" aria-hidden="true" />
-              <span>
-                {isGeneratingPdf
-                  ? locale === 'fr'
-                    ? 'Génération...'
-                    : 'Generating...'
-                  : locale === 'fr'
-                  ? 'Télécharger PDF'
-                  : 'Download PDF'}
-              </span>
-            </button>
-            <button
-              type="button"
-              onClick={handlePrint}
-              className="glass-pill-cta min-h-[42px] px-4 py-2 rounded-full text-white text-xs font-bold inline-flex items-center gap-2 cursor-pointer"
+              <button
+                type="button"
+                disabled={isGeneratingPdf}
+                onClick={handleDownloadPdf}
+                className="glass-pill-gold min-h-[42px] px-4 py-2 rounded-full text-[#000000] text-xs font-extrabold inline-flex items-center gap-2 cursor-pointer disabled:opacity-60"
+              >
+                <Download className="w-4 h-4" aria-hidden="true" />
+                <span>
+                  {isGeneratingPdf
+                    ? locale === 'fr'
+                      ? 'Génération...'
+                      : 'Generating...'
+                    : locale === 'fr'
+                    ? 'Télécharger PDF'
+                    : 'Download PDF'}
+                </span>
+              </button>
+            </ActionIconTooltip>
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Lancer l’impression de la facture'
+                  : 'Print this invoice'
+              }
+              placement="left"
             >
-              <Printer className="w-4 h-4" aria-hidden="true" />
-              <span>{locale === 'fr' ? 'Imprimer' : 'Print'}</span>
-            </button>
+              <button
+                type="button"
+                onClick={handlePrint}
+                className="glass-pill-cta min-h-[42px] px-4 py-2 rounded-full text-white text-xs font-bold inline-flex items-center gap-2 cursor-pointer"
+              >
+                <Printer className="w-4 h-4" aria-hidden="true" />
+                <span>{locale === 'fr' ? 'Imprimer' : 'Print'}</span>
+              </button>
+            </ActionIconTooltip>
           </div>
         </div>
       )}
@@ -183,18 +212,32 @@ export function InvoiceDocument({
                 </span>
               )}
 
-              <span
-                className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-extrabold tracking-wide ${
-                  isMtn
-                    ? 'bg-[#F4BE38] text-[#000000]'
-                    : isOrange
-                    ? 'bg-[#FF6600] text-white'
-                    : 'bg-[#000000] text-white'
-                }`}
+              <ActionIconTooltip
+                text={
+                  order.paymentVerified
+                    ? locale === 'fr'
+                      ? 'Paiement confirmé et validé'
+                      : 'Payment verified and confirmed'
+                    : locale === 'fr'
+                    ? 'Règlement en espèces prévu à la remise'
+                    : 'Cash payment due upon delivery'
+                }
+                placement="left"
+                focusable
               >
-                <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>{paymentStatusLabel}</span>
-              </span>
+                <span
+                  className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-lg text-xs font-extrabold tracking-wide ${
+                    isMtn
+                      ? 'bg-[#F4BE38] text-[#000000]'
+                      : isOrange
+                      ? 'bg-[#FF6600] text-white'
+                      : 'bg-[#000000] text-white'
+                  }`}
+                >
+                  <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span>{paymentStatusLabel}</span>
+                </span>
+              </ActionIconTooltip>
             </div>
           </div>
 
@@ -225,7 +268,17 @@ export function InvoiceDocument({
                   : 'Payment System & Transaction'}
               </span>
               <div className="flex items-center gap-2">
-                <Smartphone className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+                <ActionIconTooltip
+                  text={
+                    locale === 'fr'
+                      ? 'Moyen de paiement enregistré sur cette commande'
+                      : 'Payment method recorded on this order'
+                  }
+                  placement="top"
+                  focusable
+                >
+                  <Smartphone className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+                </ActionIconTooltip>
                 <span className="font-display text-sm font-bold text-[#000000]">
                   {paymentMethodLabel}
                 </span>
@@ -304,7 +357,17 @@ export function InvoiceDocument({
           <div className="grid grid-cols-1 sm:grid-cols-12 gap-5 items-start">
             <div className="sm:col-span-6 rounded-xl border border-[#E5E7EB] bg-white/90 p-4 space-y-2">
               <div className="flex items-center gap-2 text-xs font-extrabold uppercase tracking-wider text-[#5A5AA1]">
-                <ShieldCheck className="w-4 h-4" aria-hidden="true" />
+                <ActionIconTooltip
+                  text={
+                    locale === 'fr'
+                      ? 'Sert de justificatif pour la garantie et le SAV Lorena'
+                      : 'Serves as proof for Lorena warranty and after-sales'
+                  }
+                  placement="right"
+                  focusable
+                >
+                  <ShieldCheck className="w-4 h-4" aria-hidden="true" />
+                </ActionIconTooltip>
                 <span>
                   {locale === 'fr'
                     ? 'Certificat de garantie & authenticité'

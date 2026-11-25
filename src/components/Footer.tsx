@@ -2,6 +2,7 @@ import { ArrowUp, Check, Mail, MessageCircle } from 'lucide-react';
 import { FormEvent, useState } from 'react';
 import { TRANSLATIONS } from '../i18n/translations';
 import { AppScreen, Locale } from '../types/store';
+import { ActionIconTooltip } from './ActionIconTooltip';
 
 interface FooterProps {
   locale: Locale;
@@ -85,7 +86,7 @@ export function Footer({ locale, onNavigate }: FooterProps) {
 
   return (
     <footer className="no-print max-w-[1360px] mx-auto px-4 pb-6 mt-12">
-      <div className="ice-obsidian rounded-[32px] text-white overflow-hidden">
+      <div className="ice-obsidian rounded-[32px] text-white">
         {/* Top Email Newsletter & WhatsApp / SMS Alerts Block */}
         <div className="px-6 sm:px-8 pt-10 pb-8 border-b border-white/15 text-center">
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-white">
@@ -103,9 +104,19 @@ export function Footer({ locale, onNavigate }: FooterProps) {
                 {locale === 'fr' ? 'Newsletter par e-mail' : 'Email Newsletter'}
               </label>
               <div className="glass-input-recessed flex items-center rounded-full p-1.5">
-                <div className="flex items-center pl-3.5 pr-2 text-[#5A5AA1] shrink-0">
-                  <Mail className="w-4 h-4" aria-hidden="true" />
-                </div>
+                <ActionIconTooltip
+                  focusable
+                  placement="top"
+                  text={
+                    locale === 'fr'
+                      ? 'Saisissez votre e-mail pour recevoir les promos Lorena'
+                      : 'Enter your email to receive Lorena promo alerts'
+                  }
+                >
+                  <div className="flex items-center pl-3.5 pr-2 text-[#5A5AA1] shrink-0">
+                    <Mail className="w-4 h-4" aria-hidden="true" />
+                  </div>
+                </ActionIconTooltip>
 
                 <input
                   id="footer-newsletter-email"
@@ -374,15 +385,31 @@ export function Footer({ locale, onNavigate }: FooterProps) {
               {t.footerFollowUs}
             </h3>
             <div className="flex items-center gap-2">
-              {['f', 'ig', 'x', 'yt', 'tk'].map((code) => (
-                <button
-                  key={code}
-                  type="button"
-                  onClick={() => onNavigate('help')}
-                  className="glass-pill-frost w-8 h-8 rounded-full text-[#000000] text-xs font-extrabold uppercase flex items-center justify-center cursor-pointer"
+              {[
+                { code: 'f', label: 'Facebook' },
+                { code: 'ig', label: 'Instagram' },
+                { code: 'x', label: 'X / Twitter' },
+                { code: 'yt', label: 'YouTube' },
+                { code: 'tk', label: 'TikTok' },
+              ].map((social) => (
+                <ActionIconTooltip
+                  key={social.code}
+                  placement="top"
+                  text={
+                    locale === 'fr'
+                      ? `Suivre Lorena Market sur ${social.label}`
+                      : `Follow Lorena Market on ${social.label}`
+                  }
                 >
-                  {code}
-                </button>
+                  <button
+                    type="button"
+                    aria-label={social.label}
+                    onClick={() => onNavigate('help')}
+                    className="glass-pill-frost w-8 h-8 rounded-full text-[#000000] text-xs font-extrabold uppercase flex items-center justify-center cursor-pointer"
+                  >
+                    {social.code}
+                  </button>
+                </ActionIconTooltip>
               ))}
             </div>
 
@@ -394,14 +421,23 @@ export function Footer({ locale, onNavigate }: FooterProps) {
               <p className="text-xs text-white/60">Lun — Sam · 8h — 18h</p>
             </div>
 
-            <button
-              type="button"
-              onClick={() => onNavigate('help')}
-              className="glass-pill-cta min-h-[38px] px-4 py-2 rounded-full text-white text-xs font-semibold inline-flex items-center gap-2 cursor-pointer"
+            <ActionIconTooltip
+              placement="top"
+              text={
+                locale === 'fr'
+                  ? 'Contacter le support client ou poser une question'
+                  : 'Contact customer support or open help center'
+              }
             >
-              <MessageCircle className="w-4 h-4" aria-hidden="true" />
-              <span>{t.writeWhatsapp}</span>
-            </button>
+              <button
+                type="button"
+                onClick={() => onNavigate('help')}
+                className="glass-pill-cta min-h-[38px] px-4 py-2 rounded-full text-white text-xs font-semibold inline-flex items-center gap-2 cursor-pointer"
+              >
+                <MessageCircle className="w-4 h-4" aria-hidden="true" />
+                <span>{t.writeWhatsapp}</span>
+              </button>
+            </ActionIconTooltip>
           </div>
         </div>
 
@@ -432,14 +468,23 @@ export function Footer({ locale, onNavigate }: FooterProps) {
 
             <div className="flex items-center gap-4">
               <span className="text-xs text-white/70">{t.copyright}</span>
-              <button
-                type="button"
-                aria-label="Haut de page"
-                onClick={scrollToTop}
-                className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center cursor-pointer"
+              <ActionIconTooltip
+                placement="left"
+                text={
+                  locale === 'fr'
+                    ? 'Remonter en haut de la page'
+                    : 'Scroll back to top of page'
+                }
               >
-                <ArrowUp className="w-4 h-4" aria-hidden="true" />
-              </button>
+                <button
+                  type="button"
+                  aria-label="Haut de page"
+                  onClick={scrollToTop}
+                  className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center cursor-pointer"
+                >
+                  <ArrowUp className="w-4 h-4" aria-hidden="true" />
+                </button>
+              </ActionIconTooltip>
             </div>
           </div>
         </div>

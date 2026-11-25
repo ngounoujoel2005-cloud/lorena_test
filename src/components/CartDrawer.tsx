@@ -3,6 +3,7 @@ import { FREE_DELIVERY_THRESHOLD } from '../data/catalog';
 import { TRANSLATIONS } from '../i18n/translations';
 import { CartItem, Locale } from '../types/store';
 import { formatXAF } from '../utils/format';
+import { ActionIconTooltip } from './ActionIconTooltip';
 import { ProductImage } from './ProductImage';
 
 interface CartDrawerProps {
@@ -54,19 +55,34 @@ export function CartDrawer({
       <aside className="ice-surface relative w-full max-w-md h-full flex flex-col border-l border-white/90 shadow-2xl">
         <div className="ice-obsidian px-5 py-4 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <ShoppingBag className="w-5 h-5 text-[#F4BE38]" aria-hidden="true" />
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Aperçu rapide de votre panier'
+                  : 'Quick overview of your shopping bag'
+              }
+              placement="right"
+              focusable
+            >
+              <ShoppingBag className="w-5 h-5 text-[#F4BE38]" aria-hidden="true" />
+            </ActionIconTooltip>
             <h2 className="font-display text-lg font-bold">
               {locale === 'fr' ? 'Mon Panier' : 'My Shopping Bag'}
             </h2>
           </div>
-          <button
-            type="button"
-            aria-label="Fermer le panier"
-            onClick={onClose}
-            className="min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-full hover:bg-white/15 text-white cursor-pointer"
+          <ActionIconTooltip
+            text={locale === 'fr' ? 'Fermer le tiroir du panier' : 'Close cart drawer'}
+            placement="left"
           >
-            <X className="w-5 h-5" aria-hidden="true" />
-          </button>
+            <button
+              type="button"
+              aria-label="Fermer le panier"
+              onClick={onClose}
+              className="min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-full hover:bg-white/15 text-white cursor-pointer"
+            >
+              <X className="w-5 h-5" aria-hidden="true" />
+            </button>
+          </ActionIconTooltip>
         </div>
 
         {items.length > 0 && (
@@ -141,41 +157,60 @@ export function CartDrawer({
                         {item.variantLabel}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      aria-label={`Supprimer ${item.name}`}
-                      onClick={() => onRemoveItem(item.productId, item.variantId)}
-                      className="p-1.5 text-[#3F3F56] hover:text-[#ba1a1a] cursor-pointer"
+                    <ActionIconTooltip
+                      text={
+                        locale === 'fr'
+                          ? 'Retirer cet article du panier'
+                          : 'Remove this item from cart'
+                      }
+                      placement="left"
                     >
-                      <Trash2 className="w-4 h-4" aria-hidden="true" />
-                    </button>
+                      <button
+                        type="button"
+                        aria-label={`Supprimer ${item.name}`}
+                        onClick={() => onRemoveItem(item.productId, item.variantId)}
+                        className="p-1.5 text-[#3F3F56] hover:text-[#ba1a1a] cursor-pointer"
+                      >
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
+                      </button>
+                    </ActionIconTooltip>
                   </div>
 
                   <div className="mt-3 flex items-center justify-between gap-2">
-                    <div className="glass-input-recessed inline-flex items-center rounded-full overflow-hidden">
-                      <button
-                        type="button"
-                        aria-label="Diminuer la quantité"
-                        onClick={() =>
-                          onUpdateQuantity(item.productId, item.variantId, -1)
-                        }
-                        className="w-8 h-8 inline-flex items-center justify-center text-[#000000] hover:bg-white/60 cursor-pointer"
+                    <div className="glass-input-recessed inline-flex items-center rounded-full">
+                      <ActionIconTooltip
+                        text={locale === 'fr' ? 'Réduire la quantité' : 'Decrease quantity'}
+                        placement="top"
                       >
-                        <Minus className="w-3.5 h-3.5" aria-hidden="true" />
-                      </button>
+                        <button
+                          type="button"
+                          aria-label="Diminuer la quantité"
+                          onClick={() =>
+                            onUpdateQuantity(item.productId, item.variantId, -1)
+                          }
+                          className="w-8 h-8 rounded-l-full inline-flex items-center justify-center text-[#000000] hover:bg-white/60 cursor-pointer"
+                        >
+                          <Minus className="w-3.5 h-3.5" aria-hidden="true" />
+                        </button>
+                      </ActionIconTooltip>
                       <span className="px-2.5 text-sm font-bold tabular-nums text-[#000000]">
                         {item.quantity}
                       </span>
-                      <button
-                        type="button"
-                        aria-label="Augmenter la quantité"
-                        onClick={() =>
-                          onUpdateQuantity(item.productId, item.variantId, 1)
-                        }
-                        className="w-8 h-8 inline-flex items-center justify-center text-[#000000] hover:bg-white/60 cursor-pointer"
+                      <ActionIconTooltip
+                        text={locale === 'fr' ? 'Augmenter la quantité' : 'Increase quantity'}
+                        placement="top"
                       >
-                        <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-                      </button>
+                        <button
+                          type="button"
+                          aria-label="Augmenter la quantité"
+                          onClick={() =>
+                            onUpdateQuantity(item.productId, item.variantId, 1)
+                          }
+                          className="w-8 h-8 rounded-r-full inline-flex items-center justify-center text-[#000000] hover:bg-white/60 cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+                        </button>
+                      </ActionIconTooltip>
                     </div>
 
                     <span className="font-display text-sm font-extrabold text-[#000000] tabular-nums">
@@ -197,7 +232,17 @@ export function CartDrawer({
               </span>
             </div>
             <div className="flex items-center gap-1.5 text-xs text-[#5A5AA1] font-bold">
-              <ShieldCheck className="w-4 h-4 shrink-0" aria-hidden="true" />
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Paiements mobiles et livraison protégés'
+                    : 'Protected mobile money and cash-on-delivery payments'
+                }
+                placement="right"
+                focusable
+              >
+                <ShieldCheck className="w-4 h-4 shrink-0" aria-hidden="true" />
+              </ActionIconTooltip>
               <span>
                 {locale === 'fr'
                   ? 'MTN MoMo, Orange Money ou Paiement à la livraison'
@@ -205,14 +250,24 @@ export function CartDrawer({
               </span>
             </div>
             <div className="grid grid-cols-1 gap-2">
-              <button
-                type="button"
-                onClick={onProceedToCheckout}
-                className="glass-pill-cta w-full min-h-[46px] px-5 py-3 text-white font-bold text-sm rounded-full inline-flex items-center justify-center gap-2 cursor-pointer"
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Passer à la saisie d’adresse et au paiement'
+                    : 'Proceed to delivery address and payment'
+                }
+                placement="top"
+                className="w-full"
               >
-                <span>{t.proceedCheckout}</span>
-                <ArrowRight className="w-4 h-4" aria-hidden="true" />
-              </button>
+                <button
+                  type="button"
+                  onClick={onProceedToCheckout}
+                  className="glass-pill-cta w-full min-h-[46px] px-5 py-3 text-white font-bold text-sm rounded-full inline-flex items-center justify-center gap-2 cursor-pointer"
+                >
+                  <span>{t.proceedCheckout}</span>
+                  <ArrowRight className="w-4 h-4" aria-hidden="true" />
+                </button>
+              </ActionIconTooltip>
               <button
                 type="button"
                 onClick={onOpenFullCart}

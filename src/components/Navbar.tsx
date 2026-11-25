@@ -20,6 +20,7 @@ import { CATEGORIES_META, PRODUCTS } from '../data/catalog';
 import { TRANSLATIONS } from '../i18n/translations';
 import { AppScreen, CategorySlug, Locale, Product, UserSession } from '../types/store';
 import { formatXAF } from '../utils/format';
+import { ActionIconTooltip } from './ActionIconTooltip';
 import { ProductImage } from './ProductImage';
 
 interface NavbarProps {
@@ -144,26 +145,35 @@ export function Navbar({
       <div className="bg-gradient-to-r from-[#FFF7CC]/90 via-[#FFE47A]/86 to-[#F4BE38]/88 backdrop-blur-xl border-b border-white/80 text-[#000000]">
         <div className="max-w-[1360px] mx-auto px-4 py-3 flex flex-wrap lg:flex-nowrap items-center justify-between gap-3 lg:gap-6">
           {/* Brand Logo */}
-          <button
-            type="button"
-            onClick={() => onNavigate('home')}
-            aria-label="Lorena Market"
-            className="glass-pill-frost flex items-center shrink-0 px-3.5 py-1.5 rounded-full cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5A5AA1]"
+          <ActionIconTooltip
+            placement="bottom"
+            text={
+              locale === 'fr'
+                ? 'Retour à la page d’accueil Lorena Market'
+                : 'Return to Lorena Market homepage'
+            }
           >
-            {!logoFailed ? (
-              <img
-                src="/assets/aistudio/lorena-logo-noir-transparent_36764768.png"
-                alt="Lorena Market"
-                onError={() => setLogoFailed(true)}
-                className="h-7 sm:h-8 w-auto object-contain"
-              />
-            ) : (
-              <span className="inline-flex items-center gap-1.5 py-0.5 font-display text-sm font-extrabold text-[#000000]">
-                <ShoppingBag className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
-                <span>Lorena Market</span>
-              </span>
-            )}
-          </button>
+            <button
+              type="button"
+              onClick={() => onNavigate('home')}
+              aria-label="Lorena Market"
+              className="glass-pill-frost flex items-center shrink-0 px-3.5 py-1.5 rounded-full cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5A5AA1]"
+            >
+              {!logoFailed ? (
+                <img
+                  src="/assets/aistudio/lorena-logo-noir-transparent_36764768.png"
+                  alt="Lorena Market"
+                  onError={() => setLogoFailed(true)}
+                  className="h-7 sm:h-8 w-auto object-contain"
+                />
+              ) : (
+                <span className="inline-flex items-center gap-1.5 py-0.5 font-display text-sm font-extrabold text-[#000000]">
+                  <ShoppingBag className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
+                  <span>Lorena Market</span>
+                </span>
+              )}
+            </button>
+          </ActionIconTooltip>
 
           {/* Search Bar + Live Suggestions Dropdown (Liquid Glass Pill) */}
           <div
@@ -174,10 +184,23 @@ export function Navbar({
               onSubmit={handleFormSubmit}
               className="glass-search-bar flex items-center rounded-full p-1"
             >
-              <Search
-                className="w-4 h-4 text-[#5A5AA1] ml-3 shrink-0"
-                aria-hidden="true"
-              />
+              <ActionIconTooltip
+                focusable
+                placement="bottom"
+                className="inline-flex items-center shrink-0 ml-3"
+                text={
+                  locale === 'fr'
+                    ? 'Rechercher par nom, marque ou code SKU'
+                    : 'Search by product name, brand, or SKU'
+                }
+              >
+                <span className="flex items-center shrink-0">
+                  <Search
+                    className="w-4 h-4 text-[#5A5AA1]"
+                    aria-hidden="true"
+                  />
+                </span>
+              </ActionIconTooltip>
               <input
                 type="search"
                 value={searchQuery}
@@ -315,104 +338,150 @@ export function Navbar({
           {/* Right Utility Actions (Crystal Glass Pills) */}
           <div className="order-2 lg:order-3 flex items-center gap-2 sm:gap-2.5 shrink-0">
             {/* FR / EN Selector */}
-            <button
-              type="button"
-              onClick={onToggleLocale}
-              aria-label="Changer de langue"
-              className="glass-pill-frost min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold text-[#000000] inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
+            <ActionIconTooltip
+              placement="bottom"
+              text={
+                locale === 'fr'
+                  ? 'Basculer la langue du site (Français / Anglais)'
+                  : 'Switch site language (French / English)'
+              }
             >
-              <Globe className="w-3.5 h-3.5 text-[#2563EB]" aria-hidden="true" />
-              <span>{locale.toUpperCase()}</span>
-            </button>
-
-            {/* Comparateur */}
-            <button
-              type="button"
-              onClick={() => onNavigate('compare')}
-              className={`relative min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-2 text-left cursor-pointer transition-all ${
-                activeScreen === 'compare'
-                  ? 'glass-pill-cta text-white'
-                  : 'glass-pill-frost text-[#000000]'
-              }`}
-            >
-              <div className="relative">
-                <Scale className="w-4 h-4" aria-hidden="true" />
-                {compareCount > 0 && (
-                  <span className="glass-pill-gold absolute -top-2 -right-2 min-w-[16px] h-4 px-1 rounded-full text-[#000000] text-[10px] font-extrabold flex items-center justify-center tabular-nums">
-                    {compareCount}
-                  </span>
-                )}
-              </div>
-              <div className="hidden xl:block leading-tight">
-                <span className="block text-xs font-bold">
-                  {locale === 'fr' ? 'Comparer' : 'Compare'}
-                </span>
-              </div>
-            </button>
-
-            {/* Favoris */}
-            <button
-              type="button"
-              onClick={() => onNavigate('wishlist')}
-              className={`relative min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-2 text-left cursor-pointer transition-all ${
-                activeScreen === 'wishlist'
-                  ? 'glass-pill-cta text-white'
-                  : 'glass-pill-frost text-[#000000]'
-              }`}
-            >
-              <div className="relative">
-                <Heart className="w-4 h-4" aria-hidden="true" />
-                {wishlistCount > 0 && (
-                  <span className="glass-pill-gold absolute -top-2 -right-2 min-w-[16px] h-4 px-1 rounded-full text-[#000000] text-[10px] font-extrabold flex items-center justify-center tabular-nums">
-                    {wishlistCount}
-                  </span>
-                )}
-              </div>
-              <div className="hidden xl:block leading-tight">
-                <span className="block text-xs font-bold">{t.favorites}</span>
-              </div>
-            </button>
-
-            {/* Panier */}
-            <button
-              type="button"
-              onClick={onOpenCart}
-              className={`relative min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-2 text-left cursor-pointer transition-all ${
-                activeScreen === 'cart'
-                  ? 'glass-pill-cta text-white'
-                  : 'glass-pill-frost text-[#000000]'
-              }`}
-            >
-              <div className="relative">
-                <ShoppingBag className="w-4 h-4" aria-hidden="true" />
-                <span className="glass-pill-cta absolute -top-2 -right-2 min-w-[17px] h-[17px] px-1 rounded-full text-white text-[10px] font-bold flex items-center justify-center tabular-nums">
-                  {cartCount}
-                </span>
-              </div>
-              <div className="hidden xl:block leading-tight">
-                <span className="block text-xs font-bold">{t.cart}</span>
-              </div>
-            </button>
-
-            {/* Compte Dropdown */}
-            <div ref={accountMenuRef} className="relative">
               <button
                 type="button"
-                onClick={() => setAccountOpen((o) => !o)}
-                className={`min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-1.5 text-left cursor-pointer transition-all ${
-                  activeScreen === 'account' || accountOpen
+                onClick={onToggleLocale}
+                aria-label="Changer de langue"
+                className="glass-pill-frost min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold text-[#000000] inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
+              >
+                <Globe className="w-3.5 h-3.5 text-[#2563EB]" aria-hidden="true" />
+                <span>{locale.toUpperCase()}</span>
+              </button>
+            </ActionIconTooltip>
+
+            {/* Comparateur */}
+            <ActionIconTooltip
+              placement="bottom"
+              text={
+                locale === 'fr'
+                  ? 'Ouvrir le comparateur côte à côte (jusqu’à 3 produits)'
+                  : 'Open side-by-side product comparison (up to 3 items)'
+              }
+            >
+              <button
+                type="button"
+                onClick={() => onNavigate('compare')}
+                className={`relative min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-2 text-left cursor-pointer transition-all ${
+                  activeScreen === 'compare'
                     ? 'glass-pill-cta text-white'
                     : 'glass-pill-frost text-[#000000]'
                 }`}
               >
-                <User className="w-4 h-4 shrink-0" aria-hidden="true" />
-                <div className="hidden xl:flex items-center gap-1 leading-tight">
-                  <span className="text-xs font-bold">
-                    {userSession ? userSession.fullName.split(' ')[0] : t.account}
+                <div className="relative">
+                  <Scale className="w-4 h-4" aria-hidden="true" />
+                  {compareCount > 0 && (
+                    <span className="glass-pill-gold absolute -top-2 -right-2 min-w-[16px] h-4 px-1 rounded-full text-[#000000] text-[10px] font-extrabold flex items-center justify-center tabular-nums">
+                      {compareCount}
+                    </span>
+                  )}
+                </div>
+                <div className="hidden xl:block leading-tight">
+                  <span className="block text-xs font-bold">
+                    {locale === 'fr' ? 'Comparer' : 'Compare'}
                   </span>
-                  <ChevronDown className="w-3 h-3" aria-hidden="true" />
                 </div>
               </button>
+            </ActionIconTooltip>
+
+            {/* Favoris */}
+            <ActionIconTooltip
+              placement="bottom"
+              text={
+                locale === 'fr'
+                  ? 'Consulter vos produits likés et favoris enregistrés'
+                  : 'View your liked and saved favorite products'
+              }
+            >
+              <button
+                type="button"
+                onClick={() => onNavigate('wishlist')}
+                className={`relative min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-2 text-left cursor-pointer transition-all ${
+                  activeScreen === 'wishlist'
+                    ? 'glass-pill-cta text-white'
+                    : 'glass-pill-frost text-[#000000]'
+                }`}
+              >
+                <div className="relative">
+                  <Heart className="w-4 h-4" aria-hidden="true" />
+                  {wishlistCount > 0 && (
+                    <span className="glass-pill-gold absolute -top-2 -right-2 min-w-[16px] h-4 px-1 rounded-full text-[#000000] text-[10px] font-extrabold flex items-center justify-center tabular-nums">
+                      {wishlistCount}
+                    </span>
+                  )}
+                </div>
+                <div className="hidden xl:block leading-tight">
+                  <span className="block text-xs font-bold">{t.favorites}</span>
+                </div>
+              </button>
+            </ActionIconTooltip>
+
+            {/* Panier */}
+            <ActionIconTooltip
+              placement="bottom"
+              text={
+                locale === 'fr'
+                  ? 'Ouvrir votre panier pour vérifier ou commander'
+                  : 'Open your shopping bag to review or checkout'
+              }
+            >
+              <button
+                type="button"
+                onClick={onOpenCart}
+                className={`relative min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-2 text-left cursor-pointer transition-all ${
+                  activeScreen === 'cart'
+                    ? 'glass-pill-cta text-white'
+                    : 'glass-pill-frost text-[#000000]'
+                }`}
+              >
+                <div className="relative">
+                  <ShoppingBag className="w-4 h-4" aria-hidden="true" />
+                  <span className="glass-pill-cta absolute -top-2 -right-2 min-w-[17px] h-[17px] px-1 rounded-full text-white text-[10px] font-bold flex items-center justify-center tabular-nums">
+                    {cartCount}
+                  </span>
+                </div>
+                <div className="hidden xl:block leading-tight">
+                  <span className="block text-xs font-bold">{t.cart}</span>
+                </div>
+              </button>
+            </ActionIconTooltip>
+
+            {/* Compte Dropdown */}
+            <div ref={accountMenuRef} className="relative">
+              <ActionIconTooltip
+                placement="bottom"
+                disabled={accountOpen}
+                text={
+                  locale === 'fr'
+                    ? 'Gérer votre compte, commandes et factures PDF'
+                    : 'Manage your account, orders, and PDF invoices'
+                }
+              >
+                <button
+                  type="button"
+                  onClick={() => setAccountOpen((o) => !o)}
+                  className={`min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-1.5 text-left cursor-pointer transition-all ${
+                    activeScreen === 'account' || accountOpen
+                      ? 'glass-pill-cta text-white'
+                      : 'glass-pill-frost text-[#000000]'
+                  }`}
+                >
+                  <User className="w-4 h-4 shrink-0" aria-hidden="true" />
+                  <div className="hidden xl:flex items-center gap-1 leading-tight">
+                    <span className="text-xs font-bold">
+                      {userSession ? userSession.fullName.split(' ')[0] : t.account}
+                    </span>
+                    <ChevronDown className="w-3 h-3" aria-hidden="true" />
+                  </div>
+                </button>
+              </ActionIconTooltip>
 
               {accountOpen && (
                 <div className="ice-surface absolute right-0 top-full mt-2 w-64 text-[#000000] rounded-3xl overflow-hidden z-50">
@@ -514,20 +583,29 @@ export function Navbar({
             </div>
 
             {/* Aide */}
-            <button
-              type="button"
-              onClick={() => onNavigate('help')}
-              className={`min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-1.5 text-left cursor-pointer transition-all ${
-                activeScreen === 'help' || activeScreen === 'tracking'
-                  ? 'glass-pill-cta text-white'
-                  : 'glass-pill-frost text-[#000000]'
-              }`}
+            <ActionIconTooltip
+              placement="left"
+              text={
+                locale === 'fr'
+                  ? 'Centre d’aide, garanties et suivi de colis'
+                  : 'Help center, warranty lookup, and parcel tracking'
+              }
             >
-              <HelpCircle className="w-4 h-4 shrink-0 text-[#5A5AA1]" aria-hidden="true" />
-              <div className="hidden xl:block leading-tight">
-                <span className="block text-xs font-bold">{t.help}</span>
-              </div>
-            </button>
+              <button
+                type="button"
+                onClick={() => onNavigate('help')}
+                className={`min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-1.5 text-left cursor-pointer transition-all ${
+                  activeScreen === 'help' || activeScreen === 'tracking'
+                    ? 'glass-pill-cta text-white'
+                    : 'glass-pill-frost text-[#000000]'
+                }`}
+              >
+                <HelpCircle className="w-4 h-4 shrink-0 text-[#5A5AA1]" aria-hidden="true" />
+                <div className="hidden xl:block leading-tight">
+                  <span className="block text-xs font-bold">{t.help}</span>
+                </div>
+              </button>
+            </ActionIconTooltip>
           </div>
         </div>
       </div>
@@ -535,14 +613,23 @@ export function Navbar({
       {/* Category Pill Strip + Drawer Button (Frosted Ice Strip) */}
       <div className="border-b border-white/75 bg-white/55 backdrop-blur-xl">
         <div className="max-w-[1360px] mx-auto px-4 py-2 flex items-center gap-2">
-          <button
-            type="button"
-            onClick={onOpenCategoryDrawer}
-            className="glass-pill-gold min-h-[34px] px-3.5 py-1 rounded-full text-[#000000] text-xs font-extrabold inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+          <ActionIconTooltip
+            placement="bottom"
+            text={
+              locale === 'fr'
+                ? 'Ouvrir le menu latéral de tous les rayons'
+                : 'Open the full department & category drawer'
+            }
           >
-            <LayoutGrid className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>{locale === 'fr' ? 'Catégories' : 'Categories'}</span>
-          </button>
+            <button
+              type="button"
+              onClick={onOpenCategoryDrawer}
+              className="glass-pill-gold min-h-[34px] px-3.5 py-1 rounded-full text-[#000000] text-xs font-extrabold inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+            >
+              <LayoutGrid className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>{locale === 'fr' ? 'Catégories' : 'Categories'}</span>
+            </button>
+          </ActionIconTooltip>
 
           <div
             ref={catScrollRef}
@@ -580,14 +667,23 @@ export function Navbar({
             })}
           </div>
 
-          <button
-            type="button"
-            aria-label="Défiler les catégories"
-            onClick={scrollCatsRight}
-            className="glass-pill-cta w-8 h-8 rounded-full text-white flex items-center justify-center shrink-0 cursor-pointer"
+          <ActionIconTooltip
+            placement="left"
+            text={
+              locale === 'fr'
+                ? 'Faire défiler la barre des catégories vers la droite'
+                : 'Scroll categories bar to the right'
+            }
           >
-            <ChevronRight className="w-4 h-4" aria-hidden="true" />
-          </button>
+            <button
+              type="button"
+              aria-label="Défiler les catégories"
+              onClick={scrollCatsRight}
+              className="glass-pill-cta w-8 h-8 rounded-full text-white flex items-center justify-center shrink-0 cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </ActionIconTooltip>
         </div>
       </div>
     </header>

@@ -12,6 +12,7 @@ import { CategoryDrawer } from './components/CategoryDrawer';
 import { CheckoutScreen } from './components/CheckoutScreen';
 import { CompareBar } from './components/CompareBar';
 import { CompareScreen } from './components/CompareScreen';
+import { FloatingScrollControls } from './components/FloatingScrollControls';
 import { Footer } from './components/Footer';
 import { GeminiChatbot } from './components/GeminiChatbot';
 import { HomePageScreen } from './components/HomePageScreen';
@@ -722,6 +723,12 @@ export default function App() {
         />
       )}
 
+      <FloatingScrollControls
+        locale={locale}
+        elevated={activeScreen === 'product'}
+        hidden={chatOpen}
+      />
+
       <GeminiChatbot
         locale={locale}
         isOpen={chatOpen}
@@ -732,6 +739,7 @@ export default function App() {
         comparedProducts={comparedProducts}
         queuedPrompt={queuedChatPrompt}
         onClearQueuedPrompt={() => setQueuedChatPrompt(null)}
+        elevated={activeScreen === 'product'}
       />
 
       <CartDrawer

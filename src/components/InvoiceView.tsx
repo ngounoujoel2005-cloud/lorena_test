@@ -14,6 +14,7 @@ import { useState } from 'react';
 import { Locale, OrderRecord, PaymentMethod } from '../types/store';
 import { formatOrderDate, formatXAF } from '../utils/format';
 import { generateInvoicePdf } from '../utils/generateInvoicePdf';
+import { ActionIconTooltip } from './ActionIconTooltip';
 import { InvoiceDocument } from './InvoiceDocument';
 
 interface InvoiceViewProps {
@@ -130,27 +131,49 @@ export function InvoiceView({
       {/* 3-Step Checkout Progress Bar (Step 3 Active) */}
       <div className="no-print max-w-xl mx-auto ice-surface rounded-3xl px-6 py-4 flex items-center justify-between gap-2">
         <div className="flex flex-col items-center gap-1.5">
-          <span className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center">
-            <Check className="w-4 h-4" aria-hidden="true" />
-          </span>
+          <ActionIconTooltip
+            text={locale === 'fr' ? 'Étape 1 : Panier validé' : 'Step 1: Cart confirmed'}
+            placement="bottom"
+            focusable
+          >
+            <span className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center">
+              <Check className="w-4 h-4" aria-hidden="true" />
+            </span>
+          </ActionIconTooltip>
           <span className="text-xs font-bold text-[#5A5AA1]">
             {locale === 'fr' ? 'Panier' : 'Cart'}
           </span>
         </div>
         <div className="flex-1 h-1 rounded-full bg-[#5A5AA1]/60 mb-5" />
         <div className="flex flex-col items-center gap-1.5">
-          <span className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center">
-            <Check className="w-4 h-4" aria-hidden="true" />
-          </span>
+          <ActionIconTooltip
+            text={locale === 'fr' ? 'Étape 2 : Commande confirmée' : 'Step 2: Order confirmed'}
+            placement="bottom"
+            focusable
+          >
+            <span className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center">
+              <Check className="w-4 h-4" aria-hidden="true" />
+            </span>
+          </ActionIconTooltip>
           <span className="text-xs font-bold text-[#5A5AA1]">
             {locale === 'fr' ? 'Commande' : 'Checkout'}
           </span>
         </div>
         <div className="flex-1 h-1 rounded-full bg-[#5A5AA1]/60 mb-5" />
         <div className="flex flex-col items-center gap-1.5">
-          <span className="glass-pill-black w-10 h-10 rounded-full text-[#F4BE38] flex items-center justify-center">
-            <FileText className="w-4 h-4" aria-hidden="true" />
-          </span>
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Étape 3 : Facture PDF officielle générée'
+                : 'Step 3: Official PDF invoice ready'
+            }
+            placement="bottom"
+            focusable
+          >
+            <span className="glass-pill-black w-10 h-10 rounded-full text-[#F4BE38] flex items-center justify-center">
+              <FileText className="w-4 h-4" aria-hidden="true" />
+            </span>
+          </ActionIconTooltip>
           <span className="text-xs font-extrabold text-[#000000]">
             {locale === 'fr' ? 'Facture PDF' : 'PDF Invoice'}
           </span>
@@ -176,14 +199,24 @@ export function InvoiceView({
                 <span>Lorena Market</span>
               </span>
             )}
-            <span className="glass-pill-gold px-3 py-1 rounded-full text-[#000000] text-xs font-extrabold inline-flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>
-                {locale === 'fr'
-                  ? `Facture FAC-${selectedOrder.id} prête`
-                  : `Invoice FAC-${selectedOrder.id} Ready`}
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Document officiel prêt au téléchargement ou à l’impression'
+                  : 'Official document ready to download or print'
+              }
+              placement="right"
+              focusable
+            >
+              <span className="glass-pill-gold px-3 py-1 rounded-full text-[#000000] text-xs font-extrabold inline-flex items-center gap-1">
+                <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>
+                  {locale === 'fr'
+                    ? `Facture FAC-${selectedOrder.id} prête`
+                    : `Invoice FAC-${selectedOrder.id} Ready`}
+                </span>
               </span>
-            </span>
+            </ActionIconTooltip>
           </div>
 
           <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-[#000000]">
@@ -203,43 +236,70 @@ export function InvoiceView({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
-          <button
-            type="button"
-            onClick={onGoToTracking}
-            className="glass-pill-frost min-h-[44px] px-4 py-2 rounded-full text-[#000000] text-sm font-bold inline-flex items-center gap-2 cursor-pointer"
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Suivre l’avancement de la livraison de cette commande'
+                : 'Track delivery progress for this order'
+            }
+            placement="bottom"
           >
-            <Truck className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
-            <span>
-              {locale === 'fr' ? 'Suivre la livraison' : 'Track Delivery'}
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={onGoToTracking}
+              className="glass-pill-frost min-h-[44px] px-4 py-2 rounded-full text-[#000000] text-sm font-bold inline-flex items-center gap-2 cursor-pointer"
+            >
+              <Truck className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
+              <span>
+                {locale === 'fr' ? 'Suivre la livraison' : 'Track Delivery'}
+              </span>
+            </button>
+          </ActionIconTooltip>
 
-          <button
-            type="button"
-            disabled={isGeneratingPdf}
-            onClick={handleDownloadPdf}
-            className="glass-pill-cta min-h-[44px] px-5 py-2 rounded-full text-white text-sm font-bold inline-flex items-center gap-2 cursor-pointer disabled:opacity-60"
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Télécharger le fichier PDF officiel avec en-tête Lorena'
+                : 'Download official PDF with Lorena letterhead'
+            }
+            placement="bottom"
           >
-            <Download className="w-4 h-4" aria-hidden="true" />
-            <span>
-              {isGeneratingPdf
-                ? locale === 'fr'
-                  ? 'Création du PDF...'
-                  : 'Generating PDF...'
-                : locale === 'fr'
-                ? 'Télécharger la facture PDF'
-                : 'Download PDF Invoice'}
-            </span>
-          </button>
+            <button
+              type="button"
+              disabled={isGeneratingPdf}
+              onClick={handleDownloadPdf}
+              className="glass-pill-cta min-h-[44px] px-5 py-2 rounded-full text-white text-sm font-bold inline-flex items-center gap-2 cursor-pointer disabled:opacity-60"
+            >
+              <Download className="w-4 h-4" aria-hidden="true" />
+              <span>
+                {isGeneratingPdf
+                  ? locale === 'fr'
+                    ? 'Création du PDF...'
+                    : 'Generating PDF...'
+                  : locale === 'fr'
+                  ? 'Télécharger la facture PDF'
+                  : 'Download PDF Invoice'}
+              </span>
+            </button>
+          </ActionIconTooltip>
 
-          <button
-            type="button"
-            onClick={() => window.print()}
-            className="glass-pill-black min-h-[44px] px-4 py-2 rounded-full text-[#F4BE38] text-sm font-bold inline-flex items-center gap-2 cursor-pointer"
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Imprimer directement cette facture'
+                : 'Print this invoice directly'
+            }
+            placement="left"
           >
-            <Printer className="w-4 h-4" aria-hidden="true" />
-            <span>{locale === 'fr' ? 'Imprimer' : 'Print'}</span>
-          </button>
+            <button
+              type="button"
+              onClick={() => window.print()}
+              className="glass-pill-black min-h-[44px] px-4 py-2 rounded-full text-[#F4BE38] text-sm font-bold inline-flex items-center gap-2 cursor-pointer"
+            >
+              <Printer className="w-4 h-4" aria-hidden="true" />
+              <span>{locale === 'fr' ? 'Imprimer' : 'Print'}</span>
+            </button>
+          </ActionIconTooltip>
         </div>
       </div>
 
@@ -328,7 +388,17 @@ export function InvoiceView({
           {/* MTN Mobile Money & Orange Money Payment Options Card */}
           <div className="ice-surface rounded-3xl p-5 space-y-4">
             <div className="flex items-center gap-2 pb-3 border-b border-white/75">
-              <Smartphone className="w-5 h-5 text-[#5A5AA1]" aria-hidden="true" />
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Choisissez ou mettez à jour le réseau Mobile Money sur la facture'
+                    : 'Choose or update the Mobile Money option on the invoice'
+                }
+                placement="right"
+                focusable
+              >
+                <Smartphone className="w-5 h-5 text-[#5A5AA1]" aria-hidden="true" />
+              </ActionIconTooltip>
               <h2 className="font-display text-base font-bold text-[#000000]">
                 {locale === 'fr'
                   ? 'Options de paiement MTN & Orange Money'
@@ -417,7 +487,17 @@ export function InvoiceView({
             )}
 
             <div className="ice-obsidian p-3.5 rounded-2xl text-white flex items-start gap-2.5 text-xs">
-              <ShieldCheck className="w-4 h-4 text-[#F4BE38] shrink-0 mt-0.5" aria-hidden="true" />
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Référence et numéro de série garantie certifiés'
+                    : 'Verified transaction reference and warranty serial'
+                }
+                placement="right"
+                focusable
+              >
+                <ShieldCheck className="w-4 h-4 text-[#F4BE38] shrink-0 mt-0.5" aria-hidden="true" />
+              </ActionIconTooltip>
               <span>
                 {locale === 'fr'
                   ? `Référence active : ${selectedOrder.paymentReference} · Garantie ${selectedOrder.warrantySerial}`
@@ -426,16 +506,26 @@ export function InvoiceView({
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={onBackToCatalog}
-            className="glass-pill-frost w-full min-h-[44px] px-4 py-2.5 rounded-full text-[#000000] text-sm font-bold inline-flex items-center justify-center gap-2 cursor-pointer"
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Revenir parcourir les articles de la boutique'
+                : 'Return to browse the storefront'
+            }
+            placement="top"
+            className="w-full"
           >
-            <ArrowLeft className="w-4 h-4" aria-hidden="true" />
-            <span>
-              {locale === 'fr' ? 'Continuer mes achats' : 'Continue Shopping'}
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={onBackToCatalog}
+              className="glass-pill-frost w-full min-h-[44px] px-4 py-2.5 rounded-full text-[#000000] text-sm font-bold inline-flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <ArrowLeft className="w-4 h-4" aria-hidden="true" />
+              <span>
+                {locale === 'fr' ? 'Continuer mes achats' : 'Continue Shopping'}
+              </span>
+            </button>
+          </ActionIconTooltip>
         </aside>
 
         {/* Official Stylized Letterhead PDF Preview */}

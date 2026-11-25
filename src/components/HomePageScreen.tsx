@@ -8,6 +8,8 @@ import {
 } from '../data/catalog';
 import { TRANSLATIONS } from '../i18n/translations';
 import { CategorySlug, Locale, Product } from '../types/store';
+import { ActionIconTooltip } from './ActionIconTooltip';
+import { DailySpecialsSection } from './DailySpecialsSection';
 import { HeroShowcaseCarousel } from './HeroShowcaseCarousel';
 import { ProductCard } from './ProductCard';
 import { ProductCarouselRow } from './ProductCarouselRow';
@@ -195,6 +197,18 @@ export function HomePageScreen({
         onSelectCategory={onSelectCategory}
       />
 
+      {/* 1.5 DAILY SPECIALS — 4 ROTATING FEATURED DEALS UPDATED BY DAY OF WEEK */}
+      <DailySpecialsSection
+        locale={locale}
+        wishlistIds={wishlistIds}
+        compareIds={compareIds}
+        recentlyAddedId={recentlyAddedId}
+        onSelectProduct={onSelectProduct}
+        onQuickAdd={onQuickAdd}
+        onToggleWishlist={onToggleWishlist}
+        onToggleCompare={onToggleCompare}
+      />
+
       {/* 2. PARCOURIR PAR CATÉGORIE — CIRCULAR CRYSTAL ICE MEDALLIONS */}
       <section className="max-w-[1360px] mx-auto px-4">
         <div className="ice-surface rounded-3xl p-5 space-y-4">
@@ -291,22 +305,40 @@ export function HomePageScreen({
               </div>
 
               <div className="flex items-center gap-2">
-                <button
-                  type="button"
-                  aria-label="Précédent"
-                  onClick={() => scrollBestOffers(-450)}
-                  className="glass-pill-frost w-8 h-8 rounded-full text-[#000000] flex items-center justify-center cursor-pointer"
+                <ActionIconTooltip
+                  placement="top"
+                  text={
+                    locale === 'fr'
+                      ? 'Défiler les meilleures offres vers la gauche'
+                      : 'Scroll best offers left'
+                  }
                 >
-                  <ChevronLeft className="w-4 h-4" aria-hidden="true" />
-                </button>
-                <button
-                  type="button"
-                  aria-label="Suivant"
-                  onClick={() => scrollBestOffers(450)}
-                  className="glass-pill-cta w-8 h-8 rounded-full text-white flex items-center justify-center cursor-pointer"
+                  <button
+                    type="button"
+                    aria-label="Précédent"
+                    onClick={() => scrollBestOffers(-450)}
+                    className="glass-pill-frost w-8 h-8 rounded-full text-[#000000] flex items-center justify-center cursor-pointer"
+                  >
+                    <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                </ActionIconTooltip>
+                <ActionIconTooltip
+                  placement="top"
+                  text={
+                    locale === 'fr'
+                      ? 'Défiler les meilleures offres vers la droite'
+                      : 'Scroll best offers right'
+                  }
                 >
-                  <ChevronRight className="w-4 h-4" aria-hidden="true" />
-                </button>
+                  <button
+                    type="button"
+                    aria-label="Suivant"
+                    onClick={() => scrollBestOffers(450)}
+                    className="glass-pill-cta w-8 h-8 rounded-full text-white flex items-center justify-center cursor-pointer"
+                  >
+                    <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                  </button>
+                </ActionIconTooltip>
                 <button
                   type="button"
                   onClick={() => onSelectCategory('all')}
@@ -415,9 +447,19 @@ export function HomePageScreen({
         >
           <div className="ice-obsidian text-white rounded-3xl px-5 py-3.5 flex flex-wrap items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <span className="glass-pill-gold w-9 h-9 rounded-full text-[#000000] flex items-center justify-center shrink-0">
-                <History className="w-4 h-4" aria-hidden="true" />
-              </span>
+              <ActionIconTooltip
+                focusable
+                placement="right"
+                text={
+                  locale === 'fr'
+                    ? 'Historique local de vos produits récemment consultés'
+                    : 'Local history of your recently viewed products'
+                }
+              >
+                <span className="glass-pill-gold w-9 h-9 rounded-full text-[#000000] flex items-center justify-center shrink-0">
+                  <History className="w-4 h-4" aria-hidden="true" />
+                </span>
+              </ActionIconTooltip>
               <div>
                 <h2
                   id="based-on-history-heading"
@@ -437,31 +479,58 @@ export function HomePageScreen({
 
             <div className="flex items-center gap-2">
               {onClearHistory && (
+                <ActionIconTooltip
+                  placement="top"
+                  text={
+                    locale === 'fr'
+                      ? 'Effacer votre historique de navigation récent'
+                      : 'Clear your recent browsing history'
+                  }
+                >
+                  <button
+                    type="button"
+                    onClick={onClearHistory}
+                    className="min-h-[32px] px-3 py-1 rounded-full bg-white/10 border border-white/25 hover:border-[#F4BE38] text-white/85 hover:text-[#F4BE38] text-[11px] font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                  >
+                    <Trash2 className="w-3 h-3" aria-hidden="true" />
+                    <span>{locale === 'fr' ? 'Effacer' : 'Clear'}</span>
+                  </button>
+                </ActionIconTooltip>
+              )}
+              <ActionIconTooltip
+                placement="top"
+                text={
+                  locale === 'fr'
+                    ? 'Voir les recommandations précédentes'
+                    : 'Scroll recommendations left'
+                }
+              >
                 <button
                   type="button"
-                  onClick={onClearHistory}
-                  className="min-h-[32px] px-3 py-1 rounded-full bg-white/10 border border-white/25 hover:border-[#F4BE38] text-white/85 hover:text-[#F4BE38] text-[11px] font-semibold inline-flex items-center gap-1 cursor-pointer transition-colors"
+                  aria-label={locale === 'fr' ? 'Précédent' : 'Previous'}
+                  onClick={() => scrollHistoryRow(-420)}
+                  className="glass-pill-frost w-8 h-8 rounded-full text-[#000000] flex items-center justify-center cursor-pointer"
                 >
-                  <Trash2 className="w-3 h-3" aria-hidden="true" />
-                  <span>{locale === 'fr' ? 'Effacer' : 'Clear'}</span>
+                  <ChevronLeft className="w-4 h-4" aria-hidden="true" />
                 </button>
-              )}
-              <button
-                type="button"
-                aria-label={locale === 'fr' ? 'Précédent' : 'Previous'}
-                onClick={() => scrollHistoryRow(-420)}
-                className="glass-pill-frost w-8 h-8 rounded-full text-[#000000] flex items-center justify-center cursor-pointer"
+              </ActionIconTooltip>
+              <ActionIconTooltip
+                placement="top"
+                text={
+                  locale === 'fr'
+                    ? 'Voir plus de recommandations similaires'
+                    : 'Scroll recommendations right'
+                }
               >
-                <ChevronLeft className="w-4 h-4" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                aria-label={locale === 'fr' ? 'Suivant' : 'Next'}
-                onClick={() => scrollHistoryRow(420)}
-                className="glass-pill-cta w-8 h-8 rounded-full text-white flex items-center justify-center cursor-pointer"
-              >
-                <ChevronRight className="w-4 h-4" aria-hidden="true" />
-              </button>
+                <button
+                  type="button"
+                  aria-label={locale === 'fr' ? 'Suivant' : 'Next'}
+                  onClick={() => scrollHistoryRow(420)}
+                  className="glass-pill-cta w-8 h-8 rounded-full text-white flex items-center justify-center cursor-pointer"
+                >
+                  <ChevronRight className="w-4 h-4" aria-hidden="true" />
+                </button>
+              </ActionIconTooltip>
               <button
                 type="button"
                 onClick={() => onSelectCategory(historyProducts[0].category)}

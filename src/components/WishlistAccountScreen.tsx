@@ -16,6 +16,7 @@ import { TRANSLATIONS } from '../i18n/translations';
 import { Locale, OrderRecord, Product, UserSession } from '../types/store';
 import { exportOrdersToCsv } from '../utils/exportOrdersCsv';
 import { formatOrderDate, formatXAF } from '../utils/format';
+import { ActionIconTooltip } from './ActionIconTooltip';
 import { ProductCard } from './ProductCard';
 
 interface WishlistAccountScreenProps {
@@ -70,23 +71,53 @@ export function WishlistAccountScreen({
     <div className="max-w-[1360px] mx-auto px-4 py-8 pb-16 space-y-8">
       <div className="ice-surface rounded-3xl p-6 flex flex-wrap items-end justify-between gap-4">
         <div>
-          <button
-            type="button"
-            onClick={onBackHome}
-            className="glass-pill-frost inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-[#5A5AA1] mb-3 cursor-pointer"
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? "Revenir à la page d'accueil Lorena Market"
+                : 'Return to Lorena Market homepage'
+            }
+            placement="bottom"
+            className="inline-flex mb-3"
           >
-            <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>{t.backToHome}</span>
-          </button>
+            <button
+              type="button"
+              onClick={onBackHome}
+              className="glass-pill-frost inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-[#5A5AA1] cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>{t.backToHome}</span>
+            </button>
+          </ActionIconTooltip>
           <div className="flex items-center gap-3">
             {mode === 'wishlist' ? (
-              <span className="glass-pill-black w-10 h-10 rounded-2xl text-[#F4BE38] flex items-center justify-center">
-                <Heart className="w-5 h-5" aria-hidden="true" />
-              </span>
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Liste de vos articles enregistrés en favoris'
+                    : 'Your saved wishlist items'
+                }
+                placement="right"
+                focusable
+              >
+                <span className="glass-pill-black w-10 h-10 rounded-2xl text-[#F4BE38] flex items-center justify-center">
+                  <Heart className="w-5 h-5" aria-hidden="true" />
+                </span>
+              </ActionIconTooltip>
             ) : (
-              <span className="glass-pill-black w-10 h-10 rounded-2xl text-[#F4BE38] flex items-center justify-center">
-                <User className="w-5 h-5" aria-hidden="true" />
-              </span>
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Profil client, adresse et historique de commandes'
+                    : 'Customer profile, saved address & order history'
+                }
+                placement="right"
+                focusable
+              >
+                <span className="glass-pill-black w-10 h-10 rounded-2xl text-[#F4BE38] flex items-center justify-center">
+                  <User className="w-5 h-5" aria-hidden="true" />
+                </span>
+              </ActionIconTooltip>
             )}
             <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-[#000000]">
               {mode === 'wishlist'
@@ -103,25 +134,43 @@ export function WishlistAccountScreen({
         {mode === 'account' && (
           <div>
             {userSession ? (
-              <button
-                type="button"
-                onClick={onLogout}
-                className="glass-pill-frost min-h-[40px] px-4 py-2 rounded-full text-xs font-bold text-[#ba1a1a] inline-flex items-center gap-2 cursor-pointer"
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Se déconnecter de votre compte client Lorena'
+                    : 'Sign out of your Lorena customer account'
+                }
+                placement="left"
               >
-                <LogOut className="w-4 h-4" aria-hidden="true" />
-                <span>{locale === 'fr' ? 'Déconnexion' : 'Sign out'}</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={onLogout}
+                  className="glass-pill-frost min-h-[40px] px-4 py-2 rounded-full text-xs font-bold text-[#ba1a1a] inline-flex items-center gap-2 cursor-pointer"
+                >
+                  <LogOut className="w-4 h-4" aria-hidden="true" />
+                  <span>{locale === 'fr' ? 'Déconnexion' : 'Sign out'}</span>
+                </button>
+              </ActionIconTooltip>
             ) : (
-              <button
-                type="button"
-                onClick={() => onOpenAuth('login')}
-                className="glass-pill-cta min-h-[40px] px-5 py-2 rounded-full text-white text-xs font-bold inline-flex items-center gap-2 cursor-pointer"
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Ouvrir le formulaire de connexion ou création de compte'
+                    : 'Open sign-in or registration modal'
+                }
+                placement="left"
               >
-                <LogIn className="w-4 h-4" aria-hidden="true" />
-                <span>
-                  {locale === 'fr' ? 'Se connecter / S’inscrire' : 'Sign in / Register'}
-                </span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => onOpenAuth('login')}
+                  className="glass-pill-cta min-h-[40px] px-5 py-2 rounded-full text-white text-xs font-bold inline-flex items-center gap-2 cursor-pointer"
+                >
+                  <LogIn className="w-4 h-4" aria-hidden="true" />
+                  <span>
+                    {locale === 'fr' ? 'Se connecter / S’inscrire' : 'Sign in / Register'}
+                  </span>
+                </button>
+              </ActionIconTooltip>
             )}
           </div>
         )}
@@ -206,7 +255,17 @@ export function WishlistAccountScreen({
 
             <div className="ice-surface rounded-3xl p-6 space-y-2">
               <div className="flex items-center gap-2 text-xs font-bold uppercase text-[#5A5AA1]">
-                <MapPin className="w-4 h-4" aria-hidden="true" />
+                <ActionIconTooltip
+                  text={
+                    locale === 'fr'
+                      ? 'Adresse de livraison enregistrée au Cameroun'
+                      : 'Saved Cameroon delivery address'
+                  }
+                  placement="right"
+                  focusable
+                >
+                  <MapPin className="w-4 h-4" aria-hidden="true" />
+                </ActionIconTooltip>
                 <span>
                   {locale === 'fr' ? 'Adresse par défaut' : 'Default Address'}
                 </span>
@@ -226,7 +285,17 @@ export function WishlistAccountScreen({
           <div className="lg:col-span-8 ice-surface rounded-3xl p-6 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/75">
               <div className="flex items-center gap-2">
-                <Package className="w-5 h-5 text-[#5A5AA1]" aria-hidden="true" />
+                <ActionIconTooltip
+                  text={
+                    locale === 'fr'
+                      ? 'Historique complet de vos commandes Lorena'
+                      : 'Complete history of your Lorena orders'
+                  }
+                  placement="right"
+                  focusable
+                >
+                  <Package className="w-5 h-5 text-[#5A5AA1]" aria-hidden="true" />
+                </ActionIconTooltip>
                 <h2 className="font-display text-lg font-extrabold text-[#000000]">
                   {locale === 'fr' ? 'Mes Commandes' : 'My Orders'} ({orders.length})
                 </h2>
@@ -242,15 +311,24 @@ export function WishlistAccountScreen({
                     <span>{locale === 'fr' ? 'CSV téléchargé' : 'CSV downloaded'}</span>
                   </span>
                 )}
-                <button
-                  type="button"
-                  disabled={orders.length === 0}
-                  onClick={handleExportCsv}
-                  className="glass-pill-frost min-h-[38px] px-4 py-1.5 rounded-full text-[#000000] text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                <ActionIconTooltip
+                  text={
+                    locale === 'fr'
+                      ? 'Télécharger votre historique d’achats au format CSV pour votre suivi'
+                      : 'Download your purchase history as a CSV file for tracking'
+                  }
+                  placement="left"
                 >
-                  <Download className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
-                  <span>{locale === 'fr' ? 'Exporter CSV' : 'Export CSV'}</span>
-                </button>
+                  <button
+                    type="button"
+                    disabled={orders.length === 0}
+                    onClick={handleExportCsv}
+                    className="glass-pill-frost min-h-[38px] px-4 py-1.5 rounded-full text-[#000000] text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    <Download className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
+                    <span>{locale === 'fr' ? 'Exporter CSV' : 'Export CSV'}</span>
+                  </button>
+                </ActionIconTooltip>
               </div>
             </div>
 
@@ -284,14 +362,23 @@ export function WishlistAccountScreen({
                       {formatXAF(order.total)}
                     </span>
                     {onOpenInvoice && (
-                      <button
-                        type="button"
-                        onClick={() => onOpenInvoice(order.id)}
-                        className="glass-pill-black min-h-[38px] px-3.5 py-1.5 rounded-full text-[#F4BE38] text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
+                      <ActionIconTooltip
+                        text={
+                          locale === 'fr'
+                            ? 'Ouvrir et télécharger la facture PDF officielle de cette commande'
+                            : 'Open and download the official PDF invoice for this order'
+                        }
+                        placement="top"
                       >
-                        <FileText className="w-3.5 h-3.5" aria-hidden="true" />
-                        <span>{locale === 'fr' ? 'Facture PDF' : 'PDF Invoice'}</span>
-                      </button>
+                        <button
+                          type="button"
+                          onClick={() => onOpenInvoice(order.id)}
+                          className="glass-pill-black min-h-[38px] px-3.5 py-1.5 rounded-full text-[#F4BE38] text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
+                        >
+                          <FileText className="w-3.5 h-3.5" aria-hidden="true" />
+                          <span>{locale === 'fr' ? 'Facture PDF' : 'PDF Invoice'}</span>
+                        </button>
+                      </ActionIconTooltip>
                     )}
                     <button
                       type="button"

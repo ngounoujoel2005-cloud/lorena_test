@@ -23,6 +23,7 @@ import { FormEvent, useMemo, useState } from 'react';
 import { HELP_TOPICS } from '../data/helpAndCategories';
 import { Locale, OrderRecord } from '../types/store';
 import { formatOrderDate } from '../utils/format';
+import { ActionIconTooltip } from './ActionIconTooltip';
 
 interface WarrantyScreenProps {
   locale: Locale;
@@ -151,71 +152,121 @@ export function WarrantyScreen({
       {/* 5 Overlapping Quick Shortcut Cards */}
       <div className="max-w-[1360px] mx-auto px-4 -mt-10 relative z-10">
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-4">
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTopicId('confidentialite');
-              setFaqSearch('');
-            }}
-            className="ice-surface rounded-2xl p-4 flex items-center gap-3 text-left transition-transform hover:-translate-y-0.5 cursor-pointer"
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Consulter la politique de confidentialité Lorena'
+                : 'Read Lorena privacy policy'
+            }
+            placement="top"
+            className="w-full"
           >
-            <ShieldCheck className="w-5 h-5 text-[#5A5AA1] shrink-0" aria-hidden="true" />
-            <span className="text-xs sm:text-sm font-bold text-[#000000]">
-              {locale === 'fr' ? 'Politique Confidentialité' : 'Privacy Policy'}
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTopicId('confidentialite');
+                setFaqSearch('');
+              }}
+              className="ice-surface w-full rounded-2xl p-4 flex items-center gap-3 text-left transition-transform hover:-translate-y-0.5 cursor-pointer"
+            >
+              <ShieldCheck className="w-5 h-5 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+              <span className="text-xs sm:text-sm font-bold text-[#000000]">
+                {locale === 'fr' ? 'Politique Confidentialité' : 'Privacy Policy'}
+              </span>
+            </button>
+          </ActionIconTooltip>
 
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTopicId('retours');
-              setFaqSearch('');
-            }}
-            className="ice-surface rounded-2xl p-4 flex items-center gap-3 text-left transition-transform hover:-translate-y-0.5 cursor-pointer"
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Voir les conditions de retour et échange'
+                : 'View return and exchange rules'
+            }
+            placement="top"
+            className="w-full"
           >
-            <RefreshCw className="w-5 h-5 text-[#5A5AA1] shrink-0" aria-hidden="true" />
-            <span className="text-xs sm:text-sm font-bold text-[#000000]">
-              {locale === 'fr' ? 'Politique Retour' : 'Return Policy'}
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTopicId('retours');
+                setFaqSearch('');
+              }}
+              className="ice-surface w-full rounded-2xl p-4 flex items-center gap-3 text-left transition-transform hover:-translate-y-0.5 cursor-pointer"
+            >
+              <RefreshCw className="w-5 h-5 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+              <span className="text-xs sm:text-sm font-bold text-[#000000]">
+                {locale === 'fr' ? 'Politique Retour' : 'Return Policy'}
+              </span>
+            </button>
+          </ActionIconTooltip>
 
-          <button
-            type="button"
-            onClick={onBrowseOffers}
-            className="ice-surface rounded-2xl p-4 flex items-center gap-3 text-left transition-transform hover:-translate-y-0.5 cursor-pointer"
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Accéder aux promotions du moment'
+                : 'Browse current promotional deals'
+            }
+            placement="top"
+            className="w-full"
           >
-            <Zap className="w-5 h-5 text-[#F4BE38] shrink-0" aria-hidden="true" />
-            <span className="text-xs sm:text-sm font-bold text-[#000000]">
-              {locale === 'fr' ? 'Meilleures offres' : 'Best Deals'}
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={onBrowseOffers}
+              className="ice-surface w-full rounded-2xl p-4 flex items-center gap-3 text-left transition-transform hover:-translate-y-0.5 cursor-pointer"
+            >
+              <Zap className="w-5 h-5 text-[#F4BE38] shrink-0" aria-hidden="true" />
+              <span className="text-xs sm:text-sm font-bold text-[#000000]">
+                {locale === 'fr' ? 'Meilleures offres' : 'Best Deals'}
+              </span>
+            </button>
+          </ActionIconTooltip>
 
-          <button
-            type="button"
-            onClick={onBackToCatalog}
-            className="ice-surface rounded-2xl p-4 flex items-center gap-3 text-left transition-transform hover:-translate-y-0.5 cursor-pointer"
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Explorer tout le catalogue Lorena'
+                : 'Explore the full Lorena catalog'
+            }
+            placement="top"
+            className="w-full"
           >
-            <Store className="w-5 h-5 text-[#2563EB] shrink-0" aria-hidden="true" />
-            <span className="text-xs sm:text-sm font-bold text-[#000000]">
-              {locale === 'fr' ? 'Boutique' : 'Storefront'}
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={onBackToCatalog}
+              className="ice-surface w-full rounded-2xl p-4 flex items-center gap-3 text-left transition-transform hover:-translate-y-0.5 cursor-pointer"
+            >
+              <Store className="w-5 h-5 text-[#2563EB] shrink-0" aria-hidden="true" />
+              <span className="text-xs sm:text-sm font-bold text-[#000000]">
+                {locale === 'fr' ? 'Boutique' : 'Storefront'}
+              </span>
+            </button>
+          </ActionIconTooltip>
 
-          <button
-            type="button"
-            onClick={() => {
-              setActiveTopicId('commandes');
-              setFaqSearch('');
-            }}
-            className="col-span-2 sm:col-span-1 ice-surface rounded-2xl p-4 flex items-center gap-3 text-left transition-transform hover:-translate-y-0.5 cursor-pointer"
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Guide étape par étape pour passer commande'
+                : 'Step-by-step guide to placing an order'
+            }
+            placement="top"
+            className="col-span-2 sm:col-span-1 w-full"
           >
-            <ShoppingCart className="w-5 h-5 text-[#5A5AA1] shrink-0" aria-hidden="true" />
-            <span className="text-xs sm:text-sm font-bold text-[#000000]">
-              {locale === 'fr'
-                ? 'Comment Acheter sur Lorena'
-                : 'How to Buy on Lorena'}
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTopicId('commandes');
+                setFaqSearch('');
+              }}
+              className="ice-surface w-full rounded-2xl p-4 flex items-center gap-3 text-left transition-transform hover:-translate-y-0.5 cursor-pointer"
+            >
+              <ShoppingCart className="w-5 h-5 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+              <span className="text-xs sm:text-sm font-bold text-[#000000]">
+                {locale === 'fr'
+                  ? 'Comment Acheter sur Lorena'
+                  : 'How to Buy on Lorena'}
+              </span>
+            </button>
+          </ActionIconTooltip>
         </div>
       </div>
 
@@ -282,23 +333,33 @@ export function WarrantyScreen({
             <ChevronRight className="w-4 h-4 shrink-0" aria-hidden="true" />
           </button>
 
-          <button
-            type="button"
-            onClick={onGoToTracking}
-            className="glass-pill-cta w-full px-4 py-3.5 rounded-full text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 cursor-pointer"
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Suivre l’état d’une commande existante'
+                : 'Track an existing order status'
+            }
+            placement="top"
+            className="w-full"
           >
-            <HelpCircle className="w-4 h-4" aria-hidden="true" />
-            <span>
-              {locale === 'fr' ? 'Suivre une commande' : 'Track an Order'}
-            </span>
-          </button>
+            <button
+              type="button"
+              onClick={onGoToTracking}
+              className="glass-pill-cta w-full px-4 py-3.5 rounded-full text-white text-xs sm:text-sm font-bold flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <HelpCircle className="w-4 h-4" aria-hidden="true" />
+              <span>
+                {locale === 'fr' ? 'Suivre une commande' : 'Track an Order'}
+              </span>
+            </button>
+          </ActionIconTooltip>
         </aside>
 
         {/* Right FAQ & Warranty Panel */}
         <div className="lg:col-span-9 space-y-6">
           {!isWarrantyTab && (
-            <section className="ice-surface rounded-3xl overflow-hidden">
-              <div className="p-6 border-b border-white/75 space-y-4">
+            <section className="ice-surface rounded-3xl">
+              <div className="p-6 border-b border-white/75 rounded-t-3xl space-y-4">
                 <div>
                   <h2 className="font-display text-xl font-extrabold text-[#000000]">
                     {faqSearch.trim()
@@ -316,7 +377,17 @@ export function WarrantyScreen({
                 </div>
 
                 <div className="glass-input-recessed rounded-full max-w-md flex items-center px-3.5">
-                  <Search className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+                  <ActionIconTooltip
+                    text={
+                      locale === 'fr'
+                        ? 'Rechercher dans toutes les questions d’aide'
+                        : 'Search across all help center questions'
+                    }
+                    placement="right"
+                    focusable
+                  >
+                    <Search className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+                  </ActionIconTooltip>
                   <input
                     type="search"
                     value={faqSearch}
@@ -355,12 +426,25 @@ export function WarrantyScreen({
                           <span className="text-sm font-bold text-[#000000]">
                             {locale === 'fr' ? item.qFr : item.qEn}
                           </span>
-                          <ChevronDown
-                            className={`w-4 h-4 text-[#5A5AA1] shrink-0 transition-transform ${
-                              isOpen ? 'rotate-180' : ''
-                            }`}
-                            aria-hidden="true"
-                          />
+                          <ActionIconTooltip
+                            text={
+                              isOpen
+                                ? locale === 'fr'
+                                  ? 'Replier la réponse'
+                                  : 'Collapse answer'
+                                : locale === 'fr'
+                                ? 'Lire la réponse'
+                                : 'Expand answer'
+                            }
+                            placement="left"
+                          >
+                            <ChevronDown
+                              className={`w-4 h-4 text-[#5A5AA1] shrink-0 transition-transform ${
+                                isOpen ? 'rotate-180' : ''
+                              }`}
+                              aria-hidden="true"
+                            />
+                          </ActionIconTooltip>
                         </button>
                         {isOpen && (
                           <div className="px-6 pb-5 text-sm text-[#3F3F56] leading-relaxed bg-white/30">
@@ -397,7 +481,17 @@ export function WarrantyScreen({
                 className="mt-4 flex flex-col sm:flex-row gap-2.5"
               >
                 <div className="glass-input-recessed rounded-full flex-1 flex items-center px-3.5">
-                  <Search className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+                  <ActionIconTooltip
+                    text={
+                      locale === 'fr'
+                        ? 'Saisir un numéro de série garantie (LR-WRN...) ou commande'
+                        : 'Enter warranty serial (LR-WRN...) or order ID'
+                    }
+                    placement="right"
+                    focusable
+                  >
+                    <Search className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+                  </ActionIconTooltip>
                   <input
                     type="text"
                     value={serialQuery}
@@ -475,7 +569,17 @@ export function WarrantyScreen({
               >
                 <div className="space-y-1.5">
                   <div className="flex items-center gap-1.5 text-xs font-bold text-[#5A5AA1]">
-                    <MapPin className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    <ActionIconTooltip
+                      text={
+                        locale === 'fr'
+                          ? 'Point de dépôt SAV et retrait de commandes'
+                          : 'Warranty counter and pickup location'
+                      }
+                      placement="right"
+                      focusable
+                    >
+                      <MapPin className="w-4 h-4 shrink-0" aria-hidden="true" />
+                    </ActionIconTooltip>
                     <span>Point Relais</span>
                   </div>
                   <h3 className="font-display text-base font-extrabold text-[#000000]">
@@ -486,10 +590,20 @@ export function WarrantyScreen({
                 <div className="pt-3 border-t border-white/75 space-y-1 text-xs">
                   <p className="text-[#3F3F56] font-semibold">{hub.hours}</p>
                   <p className="inline-flex items-center gap-1 font-mono font-bold text-[#000000]">
-                    <Phone
-                      className="w-3.5 h-3.5 text-[#5A5AA1]"
-                      aria-hidden="true"
-                    />
+                    <ActionIconTooltip
+                      text={
+                        locale === 'fr'
+                          ? 'Numéro direct du comptoir SAV'
+                          : 'Direct service counter phone'
+                      }
+                      placement="right"
+                      focusable
+                    >
+                      <Phone
+                        className="w-3.5 h-3.5 text-[#5A5AA1]"
+                        aria-hidden="true"
+                      />
+                    </ActionIconTooltip>
                     <span>{hub.phone}</span>
                   </p>
                 </div>

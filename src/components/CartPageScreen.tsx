@@ -18,6 +18,7 @@ import { FREE_DELIVERY_THRESHOLD, PRODUCTS } from '../data/catalog';
 import { TRANSLATIONS } from '../i18n/translations';
 import { CartItem, Locale, Product } from '../types/store';
 import { formatXAF } from '../utils/format';
+import { ActionIconTooltip } from './ActionIconTooltip';
 import { ProductCarouselRow } from './ProductCarouselRow';
 import { ProductImage } from './ProductImage';
 
@@ -134,27 +135,57 @@ export function CartPageScreen({
       {/* 3-Step Checkout Progress Bar (Step 1 Active) */}
       <div className="ice-surface max-w-lg mx-auto rounded-full px-6 py-3 flex items-center justify-between gap-2">
         <div className="flex flex-col items-center gap-1">
-          <span className="glass-pill-black w-10 h-10 rounded-full text-[#F4BE38] flex items-center justify-center">
-            <ShoppingBag className="w-4 h-4" aria-hidden="true" />
-          </span>
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Étape 1 : vérifiez vos articles et codes promo'
+                : 'Step 1: review your items and promo codes'
+            }
+            placement="bottom"
+            focusable
+          >
+            <span className="glass-pill-black w-10 h-10 rounded-full text-[#F4BE38] flex items-center justify-center">
+              <ShoppingBag className="w-4 h-4" aria-hidden="true" />
+            </span>
+          </ActionIconTooltip>
           <span className="text-xs font-bold text-[#000000]">
             {locale === 'fr' ? 'Panier' : 'Cart'}
           </span>
         </div>
         <div className="flex-1 h-0.5 bg-white/80 mb-4 rounded-full" />
         <div className="flex flex-col items-center gap-1">
-          <span className="glass-pill-frost w-10 h-10 rounded-full text-[#3F3F56] flex items-center justify-center">
-            <ClipboardList className="w-4 h-4" aria-hidden="true" />
-          </span>
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Étape 2 : adresse de livraison et mode de paiement'
+                : 'Step 2: delivery address and payment method'
+            }
+            placement="bottom"
+            focusable
+          >
+            <span className="glass-pill-frost w-10 h-10 rounded-full text-[#3F3F56] flex items-center justify-center">
+              <ClipboardList className="w-4 h-4" aria-hidden="true" />
+            </span>
+          </ActionIconTooltip>
           <span className="text-xs font-medium text-[#3F3F56]">
             {locale === 'fr' ? 'Commande' : 'Checkout'}
           </span>
         </div>
         <div className="flex-1 h-0.5 bg-white/80 mb-4 rounded-full" />
         <div className="flex flex-col items-center gap-1">
-          <span className="glass-pill-frost w-10 h-10 rounded-full text-[#3F3F56] flex items-center justify-center">
-            <Package className="w-4 h-4" aria-hidden="true" />
-          </span>
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Étape 3 : reçu PDF et suivi de livraison'
+                : 'Step 3: PDF invoice and delivery tracking'
+            }
+            placement="bottom"
+            focusable
+          >
+            <span className="glass-pill-frost w-10 h-10 rounded-full text-[#3F3F56] flex items-center justify-center">
+              <Package className="w-4 h-4" aria-hidden="true" />
+            </span>
+          </ActionIconTooltip>
           <span className="text-xs font-medium text-[#3F3F56]">
             {locale === 'fr' ? 'Confirmation' : 'Confirmation'}
           </span>
@@ -223,41 +254,60 @@ export function CartPageScreen({
                         {formatXAF(item.unitPrice)} · {item.variantLabel}
                       </p>
                     </div>
-                    <button
-                      type="button"
-                      aria-label={`Supprimer ${item.name}`}
-                      onClick={() => onRemoveItem(item.productId, item.variantId)}
-                      className="p-2 text-[#3F3F56] hover:text-[#ba1a1a] cursor-pointer shrink-0"
+                    <ActionIconTooltip
+                      text={
+                        locale === 'fr'
+                          ? 'Supprimer cet article du panier'
+                          : 'Remove this item from cart'
+                      }
+                      placement="left"
                     >
-                      <Trash2 className="w-4 h-4" aria-hidden="true" />
-                    </button>
+                      <button
+                        type="button"
+                        aria-label={`Supprimer ${item.name}`}
+                        onClick={() => onRemoveItem(item.productId, item.variantId)}
+                        className="p-2 text-[#3F3F56] hover:text-[#ba1a1a] cursor-pointer shrink-0"
+                      >
+                        <Trash2 className="w-4 h-4" aria-hidden="true" />
+                      </button>
+                    </ActionIconTooltip>
                   </div>
 
                   <div className="flex items-center justify-between gap-4 pt-1">
-                    <div className="glass-input-recessed inline-flex items-center rounded-full overflow-hidden">
-                      <button
-                        type="button"
-                        aria-label="Diminuer"
-                        onClick={() =>
-                          onUpdateQuantity(item.productId, item.variantId, -1)
-                        }
-                        className="w-9 h-9 inline-flex items-center justify-center text-[#000000] hover:bg-white/60 cursor-pointer"
+                    <div className="glass-input-recessed inline-flex items-center rounded-full">
+                      <ActionIconTooltip
+                        text={locale === 'fr' ? 'Réduire la quantité' : 'Decrease quantity'}
+                        placement="top"
                       >
-                        <Minus className="w-3.5 h-3.5" aria-hidden="true" />
-                      </button>
+                        <button
+                          type="button"
+                          aria-label="Diminuer"
+                          onClick={() =>
+                            onUpdateQuantity(item.productId, item.variantId, -1)
+                          }
+                          className="w-9 h-9 rounded-l-full inline-flex items-center justify-center text-[#000000] hover:bg-white/60 cursor-pointer"
+                        >
+                          <Minus className="w-3.5 h-3.5" aria-hidden="true" />
+                        </button>
+                      </ActionIconTooltip>
                       <span className="px-3.5 text-sm font-bold tabular-nums text-[#000000]">
                         {item.quantity}
                       </span>
-                      <button
-                        type="button"
-                        aria-label="Augmenter"
-                        onClick={() =>
-                          onUpdateQuantity(item.productId, item.variantId, 1)
-                        }
-                        className="glass-pill-cta w-9 h-9 inline-flex items-center justify-center text-white rounded-full cursor-pointer"
+                      <ActionIconTooltip
+                        text={locale === 'fr' ? 'Augmenter la quantité' : 'Increase quantity'}
+                        placement="top"
                       >
-                        <Plus className="w-3.5 h-3.5" aria-hidden="true" />
-                      </button>
+                        <button
+                          type="button"
+                          aria-label="Augmenter"
+                          onClick={() =>
+                            onUpdateQuantity(item.productId, item.variantId, 1)
+                          }
+                          className="glass-pill-cta w-9 h-9 inline-flex items-center justify-center text-white rounded-full cursor-pointer"
+                        >
+                          <Plus className="w-3.5 h-3.5" aria-hidden="true" />
+                        </button>
+                      </ActionIconTooltip>
                     </div>
 
                     <span className="font-display text-base sm:text-lg font-extrabold text-[#000000] tabular-nums">
@@ -333,16 +383,26 @@ export function CartPageScreen({
                 {locale === 'fr' ? 'PASSER LA COMMANDE' : 'PROCEED TO CHECKOUT'}
               </button>
 
-              <button
-                type="button"
-                onClick={onContinueShopping}
-                className="glass-pill-frost w-full py-2 rounded-full inline-flex items-center justify-center gap-1.5 text-xs font-bold text-[#000000] cursor-pointer"
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Retourner parcourir la boutique Lorena'
+                    : 'Return to browse the Lorena store'
+                }
+                placement="top"
+                className="w-full"
               >
-                <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
-                <span>
-                  {locale === 'fr' ? 'Continuer vos achats' : 'Continue shopping'}
-                </span>
-              </button>
+                <button
+                  type="button"
+                  onClick={onContinueShopping}
+                  className="glass-pill-frost w-full py-2 rounded-full inline-flex items-center justify-center gap-1.5 text-xs font-bold text-[#000000] cursor-pointer"
+                >
+                  <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span>
+                    {locale === 'fr' ? 'Continuer vos achats' : 'Continue shopping'}
+                  </span>
+                </button>
+              </ActionIconTooltip>
 
               {/* Promo Code Box */}
               <form
@@ -350,7 +410,17 @@ export function CartPageScreen({
                 className="ice-surface-subtle p-3.5 rounded-2xl space-y-2.5"
               >
                 <div className="flex items-center gap-1.5 text-xs font-bold text-[#000000]">
-                  <Tag className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
+                  <ActionIconTooltip
+                    text={
+                      locale === 'fr'
+                        ? 'Saisissez LORENA10 ou BIENVENUE pour obtenir une remise'
+                        : 'Enter LORENA10 or BIENVENUE to get a discount'
+                    }
+                    placement="top"
+                    focusable
+                  >
+                    <Tag className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
+                  </ActionIconTooltip>
                   <span>{locale === 'fr' ? 'Code promo' : 'Promo code'}</span>
                   <span className="ml-auto text-[10px] text-[#3F3F56]">
                     LORENA10 · BIENVENUE
@@ -387,7 +457,17 @@ export function CartPageScreen({
               {/* 3 Trust Rows */}
               <div className="pt-2 border-t border-white/75 space-y-2.5 text-xs text-[#3F3F56] font-medium">
                 <div className="flex items-center gap-2.5">
-                  <Truck className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+                  <ActionIconTooltip
+                    text={
+                      locale === 'fr'
+                        ? 'Livraison rapide suivie en temps réel'
+                        : 'Fast delivery with live tracking'
+                    }
+                    placement="left"
+                    focusable
+                  >
+                    <Truck className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+                  </ActionIconTooltip>
                   <span>
                     {locale === 'fr'
                       ? 'Livraison suivie au Cameroun'
@@ -395,13 +475,33 @@ export function CartPageScreen({
                   </span>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <Lock className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+                  <ActionIconTooltip
+                    text={
+                      locale === 'fr'
+                        ? 'Paiement sécurisé Mobile Money ou à la livraison'
+                        : 'Secure Mobile Money or Cash on Delivery payment'
+                    }
+                    placement="left"
+                    focusable
+                  >
+                    <Lock className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+                  </ActionIconTooltip>
                   <span>
                     {locale === 'fr' ? 'Paiement sécurisé' : 'Secure payment'}
                   </span>
                 </div>
                 <div className="flex items-center gap-2.5">
-                  <Headphones className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+                  <ActionIconTooltip
+                    text={
+                      locale === 'fr'
+                        ? 'Assistance client dédiée 6 jours sur 7'
+                        : 'Dedicated customer support 6 days a week'
+                    }
+                    placement="left"
+                    focusable
+                  >
+                    <Headphones className="w-4 h-4 text-[#5A5AA1] shrink-0" aria-hidden="true" />
+                  </ActionIconTooltip>
                   <span>
                     {locale === 'fr' ? 'SAV réactif 6j/7' : 'Responsive support 6d/wk'}
                   </span>
@@ -415,9 +515,19 @@ export function CartPageScreen({
               className="ice-surface rounded-3xl p-5 space-y-3"
             >
               <div className="flex items-center gap-2">
-                <span className="glass-pill-black w-7 h-7 rounded-full text-[#F4BE38] flex items-center justify-center shrink-0">
-                  <Phone className="w-3.5 h-3.5" aria-hidden="true" />
-                </span>
+                <ActionIconTooltip
+                  text={
+                    locale === 'fr'
+                      ? 'Sauvegardez ce panier via WhatsApp ou SMS'
+                      : 'Save this cart link via WhatsApp or SMS'
+                  }
+                  placement="left"
+                  focusable
+                >
+                  <span className="glass-pill-black w-7 h-7 rounded-full text-[#F4BE38] flex items-center justify-center shrink-0">
+                    <Phone className="w-3.5 h-3.5" aria-hidden="true" />
+                  </span>
+                </ActionIconTooltip>
                 <h3 className="font-display text-sm font-bold text-[#000000]">
                   {locale === 'fr'
                     ? 'Recevoir un lien pour finaliser plus tard'

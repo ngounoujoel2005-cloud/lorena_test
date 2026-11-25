@@ -19,6 +19,7 @@ import { useState } from 'react';
 import { CATEGORIES_META } from '../data/catalog';
 import { CATEGORY_SUBMENUS } from '../data/helpAndCategories';
 import { CategorySlug, Locale } from '../types/store';
+import { ActionIconTooltip } from './ActionIconTooltip';
 
 interface CategoryDrawerProps {
   isOpen: boolean;
@@ -94,22 +95,37 @@ export function CategoryDrawer({
         {/* Header (Obsidian Crystal) */}
         <div className="ice-obsidian px-5 py-4 text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
-            <LayoutGrid className="w-5 h-5 text-[#F4BE38]" aria-hidden="true" />
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Parcourez tous les rayons Lorena Market'
+                  : 'Browse all Lorena Market departments'
+              }
+              placement="right"
+              focusable
+            >
+              <LayoutGrid className="w-5 h-5 text-[#F4BE38]" aria-hidden="true" />
+            </ActionIconTooltip>
             <h2 className="font-display text-lg font-bold">
               {locale === 'fr' ? 'Catégories' : 'Categories'}
             </h2>
           </div>
-          <button
-            type="button"
-            aria-label="Fermer"
-            onClick={() => {
-              setDrillSlug(null);
-              onClose();
-            }}
-            className="w-9 h-9 rounded-full hover:bg-white/15 text-white flex items-center justify-center cursor-pointer"
+          <ActionIconTooltip
+            text={locale === 'fr' ? 'Fermer le menu des catégories' : 'Close categories menu'}
+            placement="left"
           >
-            <X className="w-5 h-5" aria-hidden="true" />
-          </button>
+            <button
+              type="button"
+              aria-label="Fermer"
+              onClick={() => {
+                setDrillSlug(null);
+                onClose();
+              }}
+              className="w-9 h-9 rounded-full hover:bg-white/15 text-white flex items-center justify-center cursor-pointer"
+            >
+              <X className="w-5 h-5" aria-hidden="true" />
+            </button>
+          </ActionIconTooltip>
         </div>
 
         {/* Body */}
@@ -134,24 +150,42 @@ export function CategoryDrawer({
                         {locale === 'fr' ? cat.labelFr : cat.labelEn}
                       </span>
                     </div>
-                    <ChevronRight
-                      className="w-4 h-4 text-[#3F3F56] group-hover:text-[#5A5AA1] shrink-0"
-                      aria-hidden="true"
-                    />
+                    <ActionIconTooltip
+                      text={
+                        locale === 'fr'
+                          ? `Voir les sous-rayons de ${cat.labelFr}`
+                          : `Explore ${cat.labelEn} subcategories`
+                      }
+                      placement="left"
+                    >
+                      <ChevronRight
+                        className="w-4 h-4 text-[#3F3F56] group-hover:text-[#5A5AA1] shrink-0"
+                        aria-hidden="true"
+                      />
+                    </ActionIconTooltip>
                   </button>
                 );
               })}
             </nav>
           ) : (
             <div className="p-2 space-y-5">
-              <button
-                type="button"
-                onClick={() => setDrillSlug(null)}
-                className="glass-pill-frost px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 text-xs font-bold text-[#000000] cursor-pointer"
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Revenir à la liste des catégories'
+                    : 'Back to all categories'
+                }
+                placement="right"
               >
-                <ChevronLeft className="w-4 h-4" aria-hidden="true" />
-                <span>{locale === 'fr' ? 'Retour' : 'Back'}</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setDrillSlug(null)}
+                  className="glass-pill-frost px-3.5 py-1.5 rounded-full inline-flex items-center gap-1.5 text-xs font-bold text-[#000000] cursor-pointer"
+                >
+                  <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+                  <span>{locale === 'fr' ? 'Retour' : 'Back'}</span>
+                </button>
+              </ActionIconTooltip>
 
               {activeDrillMeta && (
                 <div className="ice-surface-subtle p-3.5 rounded-2xl">
@@ -183,10 +217,19 @@ export function CategoryDrawer({
                           className="w-full py-2.5 flex items-center justify-between gap-2 text-left text-sm text-[#3F3F56] hover:text-[#5A5AA1] font-medium cursor-pointer group"
                         >
                           <span>{locale === 'fr' ? item.labelFr : item.labelEn}</span>
-                          <ChevronRight
-                            className="w-4 h-4 text-[#3F3F56] group-hover:text-[#5A5AA1] shrink-0"
-                            aria-hidden="true"
-                          />
+                          <ActionIconTooltip
+                            text={
+                              locale === 'fr'
+                                ? `Afficher les produits « ${item.labelFr} »`
+                                : `Show "${item.labelEn}" products`
+                            }
+                            placement="left"
+                          >
+                            <ChevronRight
+                              className="w-4 h-4 text-[#3F3F56] group-hover:text-[#5A5AA1] shrink-0"
+                              aria-hidden="true"
+                            />
+                          </ActionIconTooltip>
                         </button>
                       ))}
                     </div>

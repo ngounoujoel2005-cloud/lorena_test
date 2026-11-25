@@ -13,6 +13,7 @@ import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { PRODUCTS } from '../data/catalog';
 import { ChatMessage, Locale, Product } from '../types/store';
 import { formatXAF } from '../utils/format';
+import { ActionIconTooltip } from './ActionIconTooltip';
 
 interface GeminiChatbotProps {
   locale: Locale;
@@ -24,6 +25,7 @@ interface GeminiChatbotProps {
   comparedProducts: Product[];
   queuedPrompt: string | null;
   onClearQueuedPrompt: () => void;
+  elevated?: boolean;
 }
 
 export function GeminiChatbot({
@@ -36,6 +38,7 @@ export function GeminiChatbot({
   comparedProducts,
   queuedPrompt,
   onClearQueuedPrompt,
+  elevated = false,
 }: GeminiChatbotProps) {
   const [input, setInput] = useState('');
   const [modelMode, setModelMode] = useState<'standard' | 'fast'>('standard');
@@ -179,37 +182,68 @@ export function GeminiChatbot({
 
   return (
     <>
-      {/* Floating Launcher Button */}
+      {/* Floating Launcher Button (Persistent popup on every page) */}
       {!isOpen && (
-        <button
-          type="button"
-          onClick={() => onOpenChange(true)}
-          aria-label={
-            locale === 'fr'
-              ? 'Ouvrir Lorena Assistant IA'
-              : 'Open Lorena AI Assistant'
-          }
-          className="no-print glass-pill-black fixed bottom-4 right-4 z-40 min-h-[48px] px-4 py-2.5 rounded-full text-white flex items-center gap-2 hover:scale-105 transition-transform cursor-pointer"
+        <div
+          className={`no-print fixed right-4 z-40 transition-all duration-200 ${
+            elevated ? 'bottom-20' : 'bottom-4'
+          }`}
         >
-          <MessageSquareText className="w-5 h-5 text-[#F4BE38]" aria-hidden="true" />
-          <span className="hidden sm:inline font-display text-xs font-bold">
-            {locale === 'fr' ? 'Lorena IA' : 'Lorena AI'}
-          </span>
-        </button>
+          <ActionIconTooltip
+            text={
+              locale === 'fr'
+                ? 'Ouvrir Lorena Assistant IA pour poser vos questions produits et prix'
+                : 'Open Lorena AI Assistant to ask about products and pricing'
+            }
+            placement="top"
+          >
+            <button
+              type="button"
+              onClick={() => onOpenChange(true)}
+              aria-label={
+                locale === 'fr'
+                  ? 'Ouvrir Lorena Assistant IA'
+                  : 'Open Lorena AI Assistant'
+              }
+              className="glass-pill-black min-h-[44px] px-3.5 py-2 rounded-full text-white flex items-center gap-2 ring-2 ring-[#F4BE38]/80 shadow-[0_10px_28px_-4px_rgba(90,90,161,0.58)] hover:scale-105 transition-transform cursor-pointer"
+            >
+              <span className="relative inline-flex items-center justify-center shrink-0">
+                <MessageSquareText className="w-4 h-4 sm:w-5 sm:h-5 text-[#F4BE38]" aria-hidden="true" />
+                <span
+                  aria-hidden="true"
+                  className="absolute -top-0.5 -right-0.5 w-2 h-2 rounded-full bg-[#F4BE38] animate-pulse"
+                />
+              </span>
+              <span className="font-display text-[11px] sm:text-xs font-extrabold tracking-wide whitespace-nowrap">
+                {locale === 'fr' ? 'Lorena IA' : 'Lorena AI'}
+              </span>
+            </button>
+          </ActionIconTooltip>
+        </div>
       )}
 
       {/* Multi-turn Chat Drawer/Panel */}
       {isOpen && (
         <aside
           aria-label="Lorena Assistant"
-          className="no-print ice-surface fixed bottom-4 right-4 left-4 sm:left-auto sm:w-[400px] h-[540px] max-h-[82vh] z-50 rounded-3xl flex flex-col overflow-hidden"
+          className="no-print ice-surface fixed bottom-4 right-4 left-4 sm:left-auto sm:w-[400px] h-[540px] max-h-[82vh] z-50 rounded-3xl flex flex-col"
         >
           {/* Header (Obsidian Ice) */}
-          <div className="ice-obsidian text-white px-4 py-3.5 flex items-center justify-between gap-2">
+          <div className="ice-obsidian rounded-t-3xl text-white px-4 py-3.5 flex items-center justify-between gap-2">
             <div className="flex items-center gap-2.5 min-w-0">
-              <span className="glass-pill-cta w-9 h-9 rounded-full flex items-center justify-center shrink-0">
-                <Bot className="w-4 h-4 text-[#F4BE38]" aria-hidden="true" />
-              </span>
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Assistant intelligent Lorena pour comparer et choisir'
+                    : 'Lorena AI assistant to compare and choose products'
+                }
+                placement="bottom"
+                focusable
+              >
+                <span className="glass-pill-cta w-9 h-9 rounded-full flex items-center justify-center shrink-0">
+                  <Bot className="w-4 h-4 text-[#F4BE38]" aria-hidden="true" />
+                </span>
+              </ActionIconTooltip>
               <div className="min-w-0">
                 <h2 className="font-display text-sm font-bold truncate">
                   Lorena Assistant
@@ -223,34 +257,47 @@ export function GeminiChatbot({
             </div>
 
             <div className="flex items-center gap-1 shrink-0">
-              <button
-                type="button"
-                title={
+              <ActionIconTooltip
+                text={
                   locale === 'fr'
-                    ? 'Nouvelle conversation'
-                    : 'New conversation'
+                    ? 'Réinitialiser et démarrer une nouvelle conversation'
+                    : 'Reset and start a new conversation'
                 }
-                aria-label={
+                placement="bottom"
+              >
+                <button
+                  type="button"
+                  aria-label={
+                    locale === 'fr'
+                      ? 'Nouvelle conversation'
+                      : 'New conversation'
+                  }
+                  onClick={() => {
+                    onMessagesChange(() => []);
+                    setErrorMsg(null);
+                  }}
+                  className="w-8 h-8 rounded-full hover:bg-white/15 text-white/85 hover:text-white flex items-center justify-center cursor-pointer"
+                >
+                  <RotateCcw className="w-4 h-4" aria-hidden="true" />
+                </button>
+              </ActionIconTooltip>
+              <ActionIconTooltip
+                text={
                   locale === 'fr'
-                    ? 'Nouvelle conversation'
-                    : 'New conversation'
+                    ? 'Fermer la fenêtre de discussion'
+                    : 'Close assistant panel'
                 }
-                onClick={() => {
-                  onMessagesChange(() => []);
-                  setErrorMsg(null);
-                }}
-                className="w-8 h-8 rounded-full hover:bg-white/15 text-white/85 hover:text-white flex items-center justify-center cursor-pointer"
+                placement="left"
               >
-                <RotateCcw className="w-4 h-4" aria-hidden="true" />
-              </button>
-              <button
-                type="button"
-                aria-label="Fermer"
-                onClick={() => onOpenChange(false)}
-                className="w-8 h-8 rounded-full hover:bg-white/15 text-white/85 hover:text-white flex items-center justify-center cursor-pointer"
-              >
-                <X className="w-4 h-4" aria-hidden="true" />
-              </button>
+                <button
+                  type="button"
+                  aria-label="Fermer"
+                  onClick={() => onOpenChange(false)}
+                  className="w-8 h-8 rounded-full hover:bg-white/15 text-white/85 hover:text-white flex items-center justify-center cursor-pointer"
+                >
+                  <X className="w-4 h-4" aria-hidden="true" />
+                </button>
+              </ActionIconTooltip>
             </div>
           </div>
 
@@ -260,30 +307,48 @@ export function GeminiChatbot({
               {locale === 'fr' ? 'Mode réponse :' : 'Response mode:'}
             </span>
             <div className="ice-surface-subtle inline-flex rounded-full p-0.5">
-              <button
-                type="button"
-                onClick={() => setModelMode('standard')}
-                className={`px-3 py-1 rounded-full font-bold inline-flex items-center gap-1 cursor-pointer transition-all ${
-                  modelMode === 'standard'
-                    ? 'glass-pill-cta text-white'
-                    : 'text-[#3F3F56] hover:text-[#000000]'
-                }`}
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Activer des réponses détaillées et complètes'
+                    : 'Enable detailed, thorough AI answers'
+                }
+                placement="bottom"
               >
-                <Sparkles className="w-3 h-3" aria-hidden="true" />
-                <span>{locale === 'fr' ? 'Complet' : 'Standard'}</span>
-              </button>
-              <button
-                type="button"
-                onClick={() => setModelMode('fast')}
-                className={`px-3 py-1 rounded-full font-bold inline-flex items-center gap-1 cursor-pointer transition-all ${
-                  modelMode === 'fast'
-                    ? 'glass-pill-gold text-[#000000]'
-                    : 'text-[#3F3F56] hover:text-[#000000]'
-                }`}
+                <button
+                  type="button"
+                  onClick={() => setModelMode('standard')}
+                  className={`px-3 py-1 rounded-full font-bold inline-flex items-center gap-1 cursor-pointer transition-all ${
+                    modelMode === 'standard'
+                      ? 'glass-pill-cta text-white'
+                      : 'text-[#3F3F56] hover:text-[#000000]'
+                  }`}
+                >
+                  <Sparkles className="w-3 h-3" aria-hidden="true" />
+                  <span>{locale === 'fr' ? 'Complet' : 'Standard'}</span>
+                </button>
+              </ActionIconTooltip>
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Activer des réponses courtes et ultra-rapides'
+                    : 'Enable short, ultra-fast AI answers'
+                }
+                placement="bottom"
               >
-                <Zap className="w-3 h-3" aria-hidden="true" />
-                <span>{locale === 'fr' ? 'Rapide' : 'Fast'}</span>
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setModelMode('fast')}
+                  className={`px-3 py-1 rounded-full font-bold inline-flex items-center gap-1 cursor-pointer transition-all ${
+                    modelMode === 'fast'
+                      ? 'glass-pill-gold text-[#000000]'
+                      : 'text-[#3F3F56] hover:text-[#000000]'
+                  }`}
+                >
+                  <Zap className="w-3 h-3" aria-hidden="true" />
+                  <span>{locale === 'fr' ? 'Rapide' : 'Fast'}</span>
+                </button>
+              </ActionIconTooltip>
             </div>
           </div>
 
@@ -367,7 +432,7 @@ export function GeminiChatbot({
           {/* Composer */}
           <form
             onSubmit={handleSubmit}
-            className="p-3 ice-surface-subtle border-t border-white/75 flex items-center gap-2"
+            className="p-3 ice-surface-subtle rounded-b-3xl border-t border-white/75 flex items-center gap-2"
           >
             <input
               type="text"
@@ -381,14 +446,23 @@ export function GeminiChatbot({
               disabled={isSending}
               className="glass-input-recessed min-h-[40px] flex-1 px-4 rounded-full text-xs sm:text-sm text-[#000000] placeholder:text-[#3F3F56]/70 focus:outline-none min-w-0"
             />
-            <button
-              type="submit"
-              disabled={isSending || !input.trim()}
-              aria-label={locale === 'fr' ? 'Envoyer' : 'Send'}
-              className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center shrink-0 cursor-pointer disabled:opacity-40"
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Envoyer votre message à Lorena Assistant'
+                  : 'Send your message to Lorena Assistant'
+              }
+              placement="left"
             >
-              <Send className="w-4 h-4" aria-hidden="true" />
-            </button>
+              <button
+                type="submit"
+                disabled={isSending || !input.trim()}
+                aria-label={locale === 'fr' ? 'Envoyer' : 'Send'}
+                className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center shrink-0 cursor-pointer disabled:opacity-40"
+              >
+                <Send className="w-4 h-4" aria-hidden="true" />
+              </button>
+            </ActionIconTooltip>
           </form>
         </aside>
       )}

@@ -13,6 +13,7 @@ import { CATEGORIES_META, PRODUCTS } from '../data/catalog';
 import { TRANSLATIONS } from '../i18n/translations';
 import { Locale, Product } from '../types/store';
 import { formatXAF } from '../utils/format';
+import { ActionIconTooltip } from './ActionIconTooltip';
 import { ProductImage } from './ProductImage';
 
 interface CompareScreenProps {
@@ -111,18 +112,34 @@ export function CompareScreen({
       {/* Header */}
       <div className="ice-surface rounded-3xl p-6 flex flex-col md:flex-row md:items-end justify-between gap-4">
         <div>
-          <button
-            type="button"
-            onClick={onBackHome}
-            className="glass-pill-frost inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-[#5A5AA1] mb-3 cursor-pointer"
+          <ActionIconTooltip
+            text={locale === 'fr' ? 'Retourner à l’accueil' : 'Return to homepage'}
+            placement="bottom"
+            className="inline-flex mb-3"
           >
-            <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
-            <span>{t.backToHome}</span>
-          </button>
+            <button
+              type="button"
+              onClick={onBackHome}
+              className="glass-pill-frost inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold text-[#5A5AA1] cursor-pointer"
+            >
+              <ArrowLeft className="w-3.5 h-3.5" aria-hidden="true" />
+              <span>{t.backToHome}</span>
+            </button>
+          </ActionIconTooltip>
           <div className="flex items-center gap-3">
-            <span className="glass-pill-black w-11 h-11 rounded-2xl text-[#F4BE38] flex items-center justify-center shrink-0">
-              <Scale className="w-5 h-5" aria-hidden="true" />
-            </span>
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Comparateur technique et tarifaire Lorena'
+                  : 'Lorena specs and price comparison tool'
+              }
+              placement="right"
+              focusable
+            >
+              <span className="glass-pill-black w-11 h-11 rounded-2xl text-[#F4BE38] flex items-center justify-center shrink-0">
+                <Scale className="w-5 h-5" aria-hidden="true" />
+              </span>
+            </ActionIconTooltip>
             <div>
               <h1 className="font-display text-2xl sm:text-3xl font-extrabold text-[#000000]">
                 {locale === 'fr'
@@ -155,28 +172,46 @@ export function CompareScreen({
                 </span>
               </label>
 
-              <button
-                type="button"
-                onClick={handleAskAssistant}
-                className="glass-pill-cta min-h-[40px] px-4 py-2 rounded-full text-white text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Obtenir un comparatif détaillé généré par l’assistant'
+                    : 'Get an AI-assisted comparison summary'
+                }
+                placement="bottom"
               >
-                <Sparkles className="w-4 h-4 text-[#FFE066]" aria-hidden="true" />
-                <span>
-                  {locale === 'fr' ? 'Analyser avec Gemini IA' : 'Ask Gemini AI'}
-                </span>
-              </button>
+                <button
+                  type="button"
+                  onClick={handleAskAssistant}
+                  className="glass-pill-cta min-h-[40px] px-4 py-2 rounded-full text-white text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Sparkles className="w-4 h-4 text-[#FFE066]" aria-hidden="true" />
+                  <span>
+                    {locale === 'fr' ? 'Analyser avec Gemini IA' : 'Ask Gemini AI'}
+                  </span>
+                </button>
+              </ActionIconTooltip>
             </>
           )}
 
           {selectedProducts.length > 0 && (
-            <button
-              type="button"
-              onClick={onClearCompare}
-              className="glass-pill-frost min-h-[40px] px-4 py-2 rounded-full text-xs font-bold text-[#3F3F56] hover:text-[#ba1a1a] inline-flex items-center gap-1.5 cursor-pointer"
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Retirer tous les produits du tableau comparatif'
+                  : 'Remove all products from comparison table'
+              }
+              placement="bottom"
             >
-              <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
-              <span>{locale === 'fr' ? 'Tout retirer' : 'Clear all'}</span>
-            </button>
+              <button
+                type="button"
+                onClick={onClearCompare}
+                className="glass-pill-frost min-h-[40px] px-4 py-2 rounded-full text-xs font-bold text-[#3F3F56] hover:text-[#ba1a1a] inline-flex items-center gap-1.5 cursor-pointer"
+              >
+                <Trash2 className="w-3.5 h-3.5" aria-hidden="true" />
+                <span>{locale === 'fr' ? 'Tout retirer' : 'Clear all'}</span>
+              </button>
+            </ActionIconTooltip>
           )}
         </div>
       </div>
@@ -274,14 +309,25 @@ export function CompareScreen({
                         key={product.id}
                         className="w-[260px] p-5 bg-white/30 border-l border-white/70 font-normal relative"
                       >
-                        <button
-                          type="button"
-                          aria-label={`Retirer ${name}`}
-                          onClick={() => onRemoveCompare(product.id)}
-                          className="glass-pill-frost absolute top-3 right-3 w-7 h-7 rounded-full text-[#3F3F56] hover:text-[#ba1a1a] flex items-center justify-center cursor-pointer"
-                        >
-                          <X className="w-3.5 h-3.5" aria-hidden="true" />
-                        </button>
+                        <div className="absolute top-3 right-3 z-20">
+                          <ActionIconTooltip
+                            text={
+                              locale === 'fr'
+                                ? 'Retirer ce produit du comparatif'
+                                : 'Remove this product from comparison'
+                            }
+                            placement="left"
+                          >
+                            <button
+                              type="button"
+                              aria-label={`Retirer ${name}`}
+                              onClick={() => onRemoveCompare(product.id)}
+                              className="glass-pill-frost w-7 h-7 rounded-full text-[#3F3F56] hover:text-[#ba1a1a] flex items-center justify-center cursor-pointer"
+                            >
+                              <X className="w-3.5 h-3.5" aria-hidden="true" />
+                            </button>
+                          </ActionIconTooltip>
+                        </div>
 
                         <button
                           type="button"
@@ -329,33 +375,47 @@ export function CompareScreen({
                           </div>
 
                           <div className="pt-2 flex flex-col gap-2">
-                            <button
-                              type="button"
-                              disabled={isOutOfStock}
-                              onClick={() => onQuickAdd(product)}
-                              className={`w-full min-h-[38px] px-3 rounded-full text-xs font-bold inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 ${
-                                isAdded
-                                  ? 'glass-pill-black text-[#F4BE38]'
-                                  : 'glass-pill-cta text-white'
-                              }`}
+                            <ActionIconTooltip
+                              text={
+                                isOutOfStock
+                                  ? locale === 'fr'
+                                    ? 'Article momentanément épuisé'
+                                    : 'Item currently out of stock'
+                                  : locale === 'fr'
+                                  ? 'Ajouter cet article au panier'
+                                  : 'Add this item to cart'
+                              }
+                              placement="top"
+                              className="w-full"
                             >
-                              {isAdded ? (
-                                <>
-                                  <Check className="w-3.5 h-3.5" aria-hidden="true" />
-                                  <span>{t.addedBtn}</span>
-                                </>
-                              ) : (
-                                <>
-                                  <ShoppingCart
-                                    className="w-3.5 h-3.5"
-                                    aria-hidden="true"
-                                  />
-                                  <span>
-                                    {isOutOfStock ? t.outOfStock : t.buyBtn}
-                                  </span>
-                                </>
-                              )}
-                            </button>
+                              <button
+                                type="button"
+                                disabled={isOutOfStock}
+                                onClick={() => onQuickAdd(product)}
+                                className={`w-full min-h-[38px] px-3 rounded-full text-xs font-bold inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 ${
+                                  isAdded
+                                    ? 'glass-pill-black text-[#F4BE38]'
+                                    : 'glass-pill-cta text-white'
+                                }`}
+                              >
+                                {isAdded ? (
+                                  <>
+                                    <Check className="w-3.5 h-3.5" aria-hidden="true" />
+                                    <span>{t.addedBtn}</span>
+                                  </>
+                                ) : (
+                                  <>
+                                    <ShoppingCart
+                                      className="w-3.5 h-3.5"
+                                      aria-hidden="true"
+                                    />
+                                    <span>
+                                      {isOutOfStock ? t.outOfStock : t.buyBtn}
+                                    </span>
+                                  </>
+                                )}
+                              </button>
+                            </ActionIconTooltip>
                           </div>
                         </div>
                       </th>
@@ -368,9 +428,19 @@ export function CompareScreen({
                       className="w-[240px] p-5 bg-white/20 border-l border-white/70 font-normal align-middle text-center"
                     >
                       <div className="ice-surface-subtle border-2 border-dashed border-white/85 rounded-2xl p-4 space-y-3">
-                        <div className="glass-pill-frost w-10 h-10 mx-auto rounded-full flex items-center justify-center text-[#5A5AA1]">
-                          <Plus className="w-5 h-5" aria-hidden="true" />
-                        </div>
+                        <ActionIconTooltip
+                          text={
+                            locale === 'fr'
+                              ? 'Sélectionnez un article ci-dessous à comparer'
+                              : 'Choose a product below to compare'
+                          }
+                          placement="top"
+                          focusable
+                        >
+                          <div className="glass-pill-frost w-10 h-10 mx-auto rounded-full flex items-center justify-center text-[#5A5AA1]">
+                            <Plus className="w-5 h-5" aria-hidden="true" />
+                          </div>
+                        </ActionIconTooltip>
                         <p className="text-xs font-bold text-[#000000]">
                           {locale === 'fr'
                             ? 'Ajouter un produit'
