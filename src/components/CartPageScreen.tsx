@@ -29,6 +29,7 @@ interface CartPageScreenProps {
   historyIds: string[];
   wishlistIds: string[];
   compareIds?: string[];
+  waitlistIds?: string[];
   recentlyAddedId: string | null;
   onApplyPromoCode: (code: string | null) => void;
   onUpdateQuantity: (productId: string, variantId: string, delta: number) => void;
@@ -39,6 +40,7 @@ interface CartPageScreenProps {
   onQuickAdd: (product: Product) => void;
   onToggleWishlist: (productId: string) => void;
   onToggleCompare?: (productId: string) => void;
+  onNotifyMe?: (product: Product) => void;
 }
 
 export function getPromoDiscount(subtotal: number, promoCode: string | null): number {
@@ -60,6 +62,7 @@ export function CartPageScreen({
   historyIds,
   wishlistIds,
   compareIds = [],
+  waitlistIds = [],
   recentlyAddedId,
   onApplyPromoCode,
   onUpdateQuantity,
@@ -70,6 +73,7 @@ export function CartPageScreen({
   onQuickAdd,
   onToggleWishlist,
   onToggleCompare,
+  onNotifyMe,
 }: CartPageScreenProps) {
   const t = TRANSLATIONS[locale];
   const [promoInput, setPromoInput] = useState(appliedPromoCode ?? '');
@@ -586,12 +590,14 @@ export function CartPageScreen({
           locale={locale}
           wishlistIds={wishlistIds}
           compareIds={compareIds}
+          waitlistIds={waitlistIds}
           recentlyAddedId={recentlyAddedId}
           viewAllCategory="all"
           onSelectProduct={onSelectProduct}
           onQuickAdd={onQuickAdd}
           onToggleWishlist={onToggleWishlist}
           onToggleCompare={onToggleCompare}
+          onNotifyMe={onNotifyMe}
           onViewAll={onContinueShopping}
         />
       </div>

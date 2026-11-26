@@ -24,6 +24,7 @@ interface WishlistAccountScreenProps {
   locale: Locale;
   wishlistIds: string[];
   compareIds?: string[];
+  waitlistIds?: string[];
   orders: OrderRecord[];
   userSession: UserSession | null;
   recentlyAddedId: string | null;
@@ -32,6 +33,7 @@ interface WishlistAccountScreenProps {
   onQuickAdd: (product: Product) => void;
   onToggleWishlist: (productId: string) => void;
   onToggleCompare?: (productId: string) => void;
+  onNotifyMe?: (product: Product) => void;
   onInspectOrder: (orderId: string) => void;
   onOpenInvoice?: (orderId: string) => void;
   onOpenAuth: (mode: 'login' | 'register') => void;
@@ -43,6 +45,7 @@ export function WishlistAccountScreen({
   locale,
   wishlistIds,
   compareIds = [],
+  waitlistIds = [],
   orders,
   userSession,
   recentlyAddedId,
@@ -51,6 +54,7 @@ export function WishlistAccountScreen({
   onQuickAdd,
   onToggleWishlist,
   onToggleCompare,
+  onNotifyMe,
   onInspectOrder,
   onOpenInvoice,
   onOpenAuth,
@@ -206,11 +210,13 @@ export function WishlistAccountScreen({
                 locale={locale}
                 isWishlisted
                 isCompared={compareIds.includes(product.id)}
+                isWaitlisted={waitlistIds.includes(product.id)}
                 justAdded={recentlyAddedId === product.id}
                 onSelectProduct={onSelectProduct}
                 onQuickAdd={onQuickAdd}
                 onToggleWishlist={onToggleWishlist}
                 onToggleCompare={onToggleCompare}
+                onNotifyMe={onNotifyMe}
               />
             ))}
           </div>

@@ -1,7 +1,10 @@
 import {
   ChevronDown,
   ChevronRight,
+  Crown,
   FileText,
+  Flame,
+  Gift,
   Globe,
   Heart,
   HelpCircle,
@@ -9,14 +12,20 @@ import {
   LayoutGrid,
   LogOut,
   Package,
+  Percent,
   Scale,
   Search,
   ShoppingBag,
   SlidersHorizontal,
+  Sparkles,
+  Tag,
+  Ticket,
+  Truck,
   User,
+  Zap,
 } from 'lucide-react';
 import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
-import { CATEGORIES_META, PRODUCTS } from '../data/catalog';
+import { PRODUCTS } from '../data/catalog';
 import { TRANSLATIONS } from '../i18n/translations';
 import { AppScreen, CategorySlug, Locale, Product, UserSession } from '../types/store';
 import { formatXAF } from '../utils/format';
@@ -35,7 +44,7 @@ interface NavbarProps {
   onToggleLocale: () => void;
   onSearchChange: (q: string) => void;
   onSearchSubmit: () => void;
-  onSelectCategory: (slug: CategorySlug) => void;
+  onSelectCategory: (slug: CategorySlug, query?: string) => void;
   onSelectProduct: (product: Product) => void;
   onNavigate: (screen: AppScreen) => void;
   onOpenCart: () => void;
@@ -72,8 +81,149 @@ export function Navbar({
   const [searchFocused, setSearchFocused] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
+  const [activePromoChip, setActivePromoChip] = useState<string | null>(null);
 
-  const topCategories = CATEGORIES_META.filter((c) => c.showInTopNav);
+  const topAdSlides = useMemo(
+    () => [
+      {
+        id: 'promo-dates',
+        badgeFr: 'LORENA PROMO',
+        badgeEn: 'LORENA PROMO',
+        textFr: '27 NOV — 18 DÉC 2026 · Jusqu’à -40% sur la boutique',
+        textEn: 'NOV 27 — DEC 18, 2026 · Up to -40% storewide',
+        pillClass: 'glass-pill-gold text-[#000000]',
+        slug: 'all' as CategorySlug,
+        query: '',
+      },
+      {
+        id: 'flash-sale',
+        badgeFr: 'VENTE FLASH',
+        badgeEn: 'FLASH SALE',
+        textFr: 'Smart TV 4K, Réfrigérateurs & Smartphones Pro à prix cassés',
+        textEn: '4K Smart TVs, Fridges & Pro Smartphones on flash markdown',
+        pillClass: 'glass-pill-cta text-white',
+        slug: 'electronique' as CategorySlug,
+        query: '',
+      },
+      {
+        id: 'good-deal-loto',
+        badgeFr: 'GOOD DEAL & LOTO',
+        badgeEn: 'GOOD DEAL & LOTO',
+        textFr: 'Tentez le Jackpot Lorena à chaque commande validée',
+        textEn: 'Unlock Lorena Jackpot rewards with every checkout',
+        pillClass: 'glass-pill-blue text-white',
+        slug: 'all' as CategorySlug,
+        query: '',
+      },
+      {
+        id: 'vip-accessories',
+        badgeFr: 'ACCESSOIRES VIP',
+        badgeEn: 'VIP GEAR',
+        textFr: 'Montres acier, Audio ANC & Accessoires Prestige',
+        textEn: 'Steel Watches, ANC Audio & Luxury Accessories',
+        pillClass: 'glass-pill-gold text-[#000000]',
+        slug: 'fashion' as CategorySlug,
+        query: '',
+      },
+      {
+        id: 'free-delivery',
+        badgeFr: 'LIVRAISON OFFERTE',
+        badgeEn: 'FREE DELIVERY',
+        textFr: 'Gratuite dès 150 000 XAF à Douala & Yaoundé · MTN / Orange Money',
+        textEn: 'Free from 150,000 XAF in Douala & Yaoundé · MoMo & OM',
+        pillClass: 'glass-pill-frost text-[#000000]',
+        slug: 'all' as CategorySlug,
+        query: '',
+      },
+    ],
+    []
+  );
+
+  const promoMenuItems = useMemo(
+    () => [
+      {
+        id: 'promotions',
+        labelFr: 'Promotions',
+        labelEn: 'Promotions',
+        icon: Percent,
+        slug: 'all' as CategorySlug,
+        query: '',
+        variant: 'gold',
+      },
+      {
+        id: 'best-deals',
+        labelFr: 'Meilleurs Deals',
+        labelEn: 'Best Deals',
+        icon: Flame,
+        slug: 'electronique' as CategorySlug,
+        query: '',
+        variant: 'cta',
+      },
+      {
+        id: 'flash-sale',
+        labelFr: 'Vente Flash',
+        labelEn: 'Flash Sale',
+        icon: Zap,
+        slug: 'gros-electromenager' as CategorySlug,
+        query: '',
+        variant: 'frost',
+      },
+      {
+        id: 'trending-acc',
+        labelFr: 'Accessoires en vogue',
+        labelEn: 'Trending Gear',
+        icon: Sparkles,
+        slug: 'telephones-tablettes' as CategorySlug,
+        query: '',
+        variant: 'frost',
+      },
+      {
+        id: 'good-deal',
+        labelFr: 'Good Deal',
+        labelEn: 'Good Deal',
+        icon: Tag,
+        slug: 'petit-electromenager' as CategorySlug,
+        query: '',
+        variant: 'frost',
+      },
+      {
+        id: 'loto',
+        labelFr: 'Lorena Loto',
+        labelEn: 'Lorena Loto',
+        icon: Ticket,
+        slug: 'all' as CategorySlug,
+        query: '',
+        variant: 'gold',
+      },
+      {
+        id: 'vip-luxury',
+        labelFr: 'Accessoires VIP',
+        labelEn: 'VIP Luxury',
+        icon: Crown,
+        slug: 'fashion' as CategorySlug,
+        query: '',
+        variant: 'black',
+      },
+      {
+        id: 'power-packs',
+        labelFr: 'Packs Énergie',
+        labelEn: 'Power Packs',
+        icon: Gift,
+        slug: 'informatique' as CategorySlug,
+        query: '',
+        variant: 'frost',
+      },
+      {
+        id: 'free-shipping',
+        labelFr: 'Livraison Gratuite',
+        labelEn: 'Free Delivery',
+        icon: Truck,
+        screen: 'help' as AppScreen,
+        variant: 'frost',
+      },
+    ],
+    []
+  );
 
   const suggestions = useMemo(() => {
     const q = searchQuery.trim().toLowerCase();
@@ -122,28 +272,53 @@ export function Navbar({
 
   return (
     <header className="no-print sticky top-0 z-40 shadow-[0_10px_30px_-10px_rgba(45,36,12,0.22)]">
-      {/* Slim Top Campaign Banner (Obsidian Ice) */}
-      <div className="ice-obsidian border-x-0 border-t-0 border-b border-white/25 text-white">
-        <div className="max-w-[1360px] mx-auto px-4 py-1.5 flex items-center justify-between gap-4 text-xs sm:text-sm">
-          <div className="flex items-center gap-2">
-            <span className="glass-pill-cta px-2.5 py-0.5 rounded-full text-white font-display font-bold text-[11px] uppercase tracking-wide">
-              Lorena Promo
-            </span>
-            <span className="text-white/90 hidden sm:inline">
-              {t.topPromoPrefix}
-            </span>
-          </div>
-          <div className="flex items-center gap-2 font-display font-bold tracking-wide">
-            <span className="glass-pill-gold px-3 py-0.5 rounded-full text-[#000000] text-xs">
-              {t.topPromoDates}
-            </span>
+      {/* Slim Full-Width Borderless Animated Advertising Carousel Banner */}
+      <div className="relative z-20 w-full bg-gradient-to-r from-[#090913] via-[#1c1a3a] to-[#090913] text-white overflow-hidden border-0">
+        <div
+          aria-hidden="true"
+          className="absolute inset-y-0 w-28 bg-gradient-to-r from-transparent via-[#F4BE38]/15 to-transparent animate-kinetic-sweep pointer-events-none"
+        />
+        <div className="lorena-rtl-track w-full overflow-hidden py-1.5">
+          <div className="animate-lorena-rtl-fast items-center">
+            {[0, 1].map((dupIdx) => (
+              <div
+                key={`top-ad-deck-${dupIdx}`}
+                aria-hidden={dupIdx === 1}
+                className="flex items-center gap-6 pr-6 shrink-0"
+              >
+                {topAdSlides.map((ad) => (
+                  <button
+                    key={`${dupIdx}-${ad.id}`}
+                    type="button"
+                    tabIndex={dupIdx === 1 ? -1 : undefined}
+                    onClick={() => {
+                      setActivePromoChip(ad.id);
+                      onSelectCategory(ad.slug, ad.query);
+                    }}
+                    className="inline-flex items-center gap-2 text-xs whitespace-nowrap cursor-pointer hover:opacity-90 transition-opacity"
+                  >
+                    <span
+                      className={`${ad.pillClass} px-2.5 py-0.5 rounded-full font-display font-extrabold text-[10px] sm:text-[11px] uppercase tracking-wider shrink-0`}
+                    >
+                      {locale === 'fr' ? ad.badgeFr : ad.badgeEn}
+                    </span>
+                    <span className="text-white/95 font-medium text-[11px] sm:text-xs">
+                      {locale === 'fr' ? ad.textFr : ad.textEn}
+                    </span>
+                    <span className="text-[#F4BE38]/60 font-bold" aria-hidden="true">
+                      ✦
+                    </span>
+                  </button>
+                ))}
+              </div>
+            ))}
           </div>
         </div>
       </div>
 
       {/* Main Header Row (Yellow Frosted Ice Glass) */}
-      <div className="bg-gradient-to-r from-[#FFF7CC]/90 via-[#FFE47A]/86 to-[#F4BE38]/88 backdrop-blur-xl border-b border-white/80 text-[#000000]">
-        <div className="max-w-[1360px] mx-auto px-4 py-3 flex flex-wrap lg:flex-nowrap items-center justify-between gap-3 lg:gap-6">
+      <div className="relative z-30 bg-gradient-to-r from-[#FFF7CC]/90 via-[#FFE47A]/86 to-[#F4BE38]/88 backdrop-blur-xl border-b border-white/80 text-[#000000]">
+        <div className="max-w-[1360px] mx-auto px-3 sm:px-4 py-2.5 sm:py-3 flex flex-wrap lg:flex-nowrap items-center justify-between gap-2.5 lg:gap-6">
           {/* Brand Logo */}
           <ActionIconTooltip
             placement="bottom"
@@ -157,17 +332,17 @@ export function Navbar({
               type="button"
               onClick={() => onNavigate('home')}
               aria-label="Lorena Market"
-              className="glass-pill-frost flex items-center shrink-0 px-3.5 py-1.5 rounded-full cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5A5AA1]"
+              className="glass-pill-frost flex items-center shrink-0 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5A5AA1]"
             >
               {!logoFailed ? (
                 <img
                   src="/assets/aistudio/lorena-logo-noir-transparent_36764768.png"
                   alt="Lorena Market"
                   onError={() => setLogoFailed(true)}
-                  className="h-7 sm:h-8 w-auto object-contain"
+                  className="h-6 sm:h-8 w-auto object-contain"
                 />
               ) : (
-                <span className="inline-flex items-center gap-1.5 py-0.5 font-display text-sm font-extrabold text-[#000000]">
+                <span className="inline-flex items-center gap-1.5 py-0.5 font-display text-xs sm:text-sm font-extrabold text-[#000000]">
                   <ShoppingBag className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
                   <span>Lorena Market</span>
                 </span>
@@ -336,7 +511,7 @@ export function Navbar({
           </div>
 
           {/* Right Utility Actions (Crystal Glass Pills) */}
-          <div className="order-2 lg:order-3 flex items-center gap-2 sm:gap-2.5 shrink-0">
+          <div className="order-2 lg:order-3 flex items-center gap-1.5 sm:gap-2.5 shrink-0">
             {/* FR / EN Selector */}
             <ActionIconTooltip
               placement="bottom"
@@ -484,7 +659,7 @@ export function Navbar({
               </ActionIconTooltip>
 
               {accountOpen && (
-                <div className="ice-surface absolute right-0 top-full mt-2 w-64 text-[#000000] rounded-3xl overflow-hidden z-50">
+                <div className="ice-surface absolute right-0 top-full mt-2 w-64 max-w-[calc(100vw-1.5rem)] text-[#000000] rounded-3xl overflow-hidden z-50">
                   {!userSession ? (
                     <div className="p-3.5 bg-white/45 border-b border-white/70 space-y-2">
                       <button
@@ -610,9 +785,9 @@ export function Navbar({
         </div>
       </div>
 
-      {/* Category Pill Strip + Drawer Button (Frosted Ice Strip) */}
-      <div className="border-b border-white/75 bg-white/55 backdrop-blur-xl">
-        <div className="max-w-[1360px] mx-auto px-4 py-2 flex items-center gap-2">
+      {/* Promotional Advertising Strip + Category Drawer Button */}
+      <div className="relative z-10 border-b border-white/75 bg-white/55 backdrop-blur-xl">
+        <div className="max-w-[1360px] mx-auto px-3 sm:px-4 py-2 flex items-center gap-2">
           <ActionIconTooltip
             placement="bottom"
             text={
@@ -624,7 +799,7 @@ export function Navbar({
             <button
               type="button"
               onClick={onOpenCategoryDrawer}
-              className="glass-pill-gold min-h-[34px] px-3.5 py-1 rounded-full text-[#000000] text-xs font-extrabold inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
+              className="glass-pill-gold min-h-[34px] px-3 sm:px-3.5 py-1 rounded-full text-[#000000] text-xs font-extrabold inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
             >
               <LayoutGrid className="w-3.5 h-3.5" aria-hidden="true" />
               <span>{locale === 'fr' ? 'Catégories' : 'Categories'}</span>
@@ -635,33 +810,35 @@ export function Navbar({
             ref={catScrollRef}
             className="flex items-center gap-2 overflow-x-auto no-scrollbar flex-1 py-0.5"
           >
-            <button
-              type="button"
-              onClick={() => onSelectCategory('all')}
-              className={`min-h-[34px] px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                activeScreen === 'category' && activeCategory === 'all'
-                  ? 'glass-pill-cta text-white'
-                  : 'glass-pill-frost text-[#000000]'
-              }`}
-            >
-              {t.allCategories}
-            </button>
+            {promoMenuItems.map((item) => {
+              const Icon = item.icon;
+              const isSelected = activePromoChip === item.id;
+              const pillStyle = isSelected
+                ? 'glass-pill-cta text-white'
+                : item.variant === 'gold'
+                ? 'glass-pill-gold text-[#000000]'
+                : item.variant === 'cta'
+                ? 'glass-pill-cta text-white'
+                : item.variant === 'black'
+                ? 'glass-pill-black text-[#F4BE38]'
+                : 'glass-pill-frost text-[#000000]';
 
-            {topCategories.map((cat) => {
-              const isActive =
-                activeScreen === 'category' && activeCategory === cat.slug;
               return (
                 <button
-                  key={cat.slug}
+                  key={item.id}
                   type="button"
-                  onClick={() => onSelectCategory(cat.slug)}
-                  className={`min-h-[34px] px-3.5 py-1 rounded-full text-xs font-semibold whitespace-nowrap shrink-0 transition-all cursor-pointer ${
-                    isActive
-                      ? 'glass-pill-cta text-white'
-                      : 'glass-pill-frost text-[#000000]'
-                  }`}
+                  onClick={() => {
+                    setActivePromoChip(item.id);
+                    if (item.screen) {
+                      onNavigate(item.screen);
+                    } else if (item.slug) {
+                      onSelectCategory(item.slug, item.query ?? '');
+                    }
+                  }}
+                  className={`min-h-[34px] px-3 sm:px-3.5 py-1 rounded-full text-xs font-extrabold whitespace-nowrap shrink-0 inline-flex items-center gap-1.5 transition-all cursor-pointer ${pillStyle}`}
                 >
-                  {locale === 'fr' ? cat.labelFr : cat.labelEn}
+                  <Icon className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                  <span>{locale === 'fr' ? item.labelFr : item.labelEn}</span>
                 </button>
               );
             })}
@@ -671,13 +848,13 @@ export function Navbar({
             placement="left"
             text={
               locale === 'fr'
-                ? 'Faire défiler la barre des catégories vers la droite'
-                : 'Scroll categories bar to the right'
+                ? 'Faire défiler les offres publicitaires vers la droite'
+                : 'Scroll promotional highlights right'
             }
           >
             <button
               type="button"
-              aria-label="Défiler les catégories"
+              aria-label={locale === 'fr' ? 'Défiler les offres' : 'Scroll offers'}
               onClick={scrollCatsRight}
               className="glass-pill-cta w-8 h-8 rounded-full text-white flex items-center justify-center shrink-0 cursor-pointer"
             >

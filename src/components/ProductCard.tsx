@@ -1,4 +1,4 @@
-import { Check, Heart, Scale, ShoppingCart } from 'lucide-react';
+import { BellRing, Check, Heart, Scale, ShoppingCart } from 'lucide-react';
 import { TRANSLATIONS } from '../i18n/translations';
 import { Locale, Product } from '../types/store';
 import { formatXAF } from '../utils/format';
@@ -10,11 +10,13 @@ interface ProductCardProps {
   locale: Locale;
   isWishlisted: boolean;
   isCompared?: boolean;
+  isWaitlisted?: boolean;
   justAdded: boolean;
   onSelectProduct: (product: Product) => void;
   onQuickAdd: (product: Product) => void;
   onToggleWishlist: (productId: string) => void;
   onToggleCompare?: (productId: string) => void;
+  onNotifyMe?: (product: Product) => void;
   compact?: boolean;
 }
 
@@ -23,11 +25,13 @@ export function ProductCard({
   locale,
   isWishlisted,
   isCompared = false,
+  isWaitlisted = false,
   justAdded,
   onSelectProduct,
   onQuickAdd,
   onToggleWishlist,
   onToggleCompare,
+  onNotifyMe,
   compact = false,
 }: ProductCardProps) {
   const t = TRANSLATIONS[locale];
@@ -37,7 +41,7 @@ export function ProductCard({
   return (
     <article
       className={`ice-surface rounded-3xl flex flex-col transition-all duration-200 hover:-translate-y-1 ${
-        compact ? 'min-w-[205px] w-[205px] sm:min-w-[216px] sm:w-[216px] shrink-0' : 'w-full'
+        compact ? 'min-w-[186px] w-[186px] sm:min-w-[216px] sm:w-[216px] shrink-0' : 'w-full'
       }`}
     >
       {/* Ice-Encapsulated Product Chamber */}
@@ -62,17 +66,26 @@ export function ProductCard({
             )}
           </div>
 
-          <button
-            type="button"
-            onClick={() => onSelectProduct(product)}
-            className="w-full h-full relative z-[5] cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5A5AA1] rounded-xl"
+          <ActionIconTooltip
+            className="w-full h-full flex items-center justify-center relative z-[5]"
+            text={
+              locale === 'fr'
+                ? 'Illustration du produit — cliquez pour consulter la fiche complète et les caractéristiques'
+                : 'Product illustration — click to view full specifications and pricing'
+            }
           >
-            <ProductImage
-              src={product.image}
-              alt={title}
-              className="w-full h-full object-contain"
-            />
-          </button>
+            <button
+              type="button"
+              onClick={() => onSelectProduct(product)}
+              className="w-full h-full cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5A5AA1] rounded-xl"
+            >
+              <ProductImage
+                src={product.image}
+                alt={title}
+                className="w-full h-full object-contain"
+              />
+            </button>
+          </ActionIconTooltip>
         </div>
 
         {/* Top-Right Wishlist & Compare Frost Pills (outside overflow-hidden chamber so tooltips never clip) */}
@@ -221,17 +234,41 @@ export function ProductCard({
               placement="top"
               className="w-full flex"
               text={
-                locale === 'fr'
-                  ? 'Voir la fiche pour les alertes de réapprovisionnement'
-                  : 'Open details for restock information'
+                isWaitlisted
+                  ? locale === 'fr'
+                    ? 'Inscrit sur la liste d’attente — cliquez pour gérer ou simuler l’alerte'
+                    : 'On local waitlist — click to manage or simulate restock alert'
+                  : locale === 'fr'
+                  ? 'Article en rupture — cliquez pour recevoir une alerte par e-mail dès le retour en stock'
+                  : 'Out of stock — click to enter your email and get notified when restocked'
               }
             >
               <button
                 type="button"
-                onClick={() => onSelectProduct(product)}
-                className="glass-pill-frost w-full min-h-[38px] px-3 py-2 rounded-full text-[#3F3F56] text-[11px] font-bold tracking-wide uppercase cursor-pointer opacity-75"
+                onClick={() =>
+                  onNotifyMe ? onNotifyMe(product) : onSelectProduct(product)
+                }
+                className={`w-full min-h-[38px] px-3 py-2 rounded-full text-[11px] font-extrabold tracking-wide inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
+                  isWaitlisted
+                    ? 'glass-pill-black text-[#F4BE38]'
+                    : 'glass-pill-gold text-[#000000]'
+                }`}
               >
-                {t.outOfStock}
+                {isWaitlisted ? (
+                  <>
+                    <Check className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                    <span>
+                      {locale === 'fr' ? 'Liste d’attente' : 'On Waitlist'}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <BellRing className="w-3.5 h-3.5 shrink-0" aria-hidden="true" />
+                    <span>
+                      {locale === 'fr' ? 'M’alerter' : 'Notify Me'}
+                    </span>
+                  </>
+                )}
               </button>
             </ActionIconTooltip>
           ) : (

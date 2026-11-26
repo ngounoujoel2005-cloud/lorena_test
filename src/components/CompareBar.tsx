@@ -32,11 +32,11 @@ export function CompareBar({
 
   return (
     <div
-      className={`no-print fixed left-4 right-32 sm:right-40 z-30 pointer-events-none ${
+      className={`no-print fixed left-3 right-20 sm:left-4 sm:right-40 z-30 pointer-events-none ${
         elevated ? 'bottom-20' : 'bottom-4'
       }`}
     >
-      <div className="max-w-[940px] mx-auto ice-obsidian text-white rounded-3xl px-4 py-3 pointer-events-auto">
+      <div className="max-w-[940px] mx-auto ice-obsidian text-white rounded-3xl px-3 sm:px-4 py-2.5 sm:py-3 pointer-events-auto">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
           <div className="flex flex-wrap items-center gap-2.5">
             <ActionIconTooltip

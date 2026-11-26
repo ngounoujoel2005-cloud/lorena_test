@@ -17,6 +17,7 @@ interface CategoryCatalogScreenProps {
   searchQuery: string;
   wishlistIds: string[];
   compareIds?: string[];
+  waitlistIds?: string[];
   recentlyAddedId: string | null;
   onSelectCategory: (slug: CategorySlug) => void;
   onSearchChange: (q: string) => void;
@@ -26,6 +27,7 @@ interface CategoryCatalogScreenProps {
   onQuickAdd: (product: Product) => void;
   onToggleWishlist: (productId: string) => void;
   onToggleCompare?: (productId: string) => void;
+  onNotifyMe?: (product: Product) => void;
 }
 
 export function CategoryCatalogScreen({
@@ -34,6 +36,7 @@ export function CategoryCatalogScreen({
   searchQuery,
   wishlistIds,
   compareIds = [],
+  waitlistIds = [],
   recentlyAddedId,
   onSelectCategory,
   onSearchChange,
@@ -43,6 +46,7 @@ export function CategoryCatalogScreen({
   onQuickAdd,
   onToggleWishlist,
   onToggleCompare,
+  onNotifyMe,
 }: CategoryCatalogScreenProps) {
   const [onlyInStock, setOnlyInStock] = useState(false);
   const [sortBy, setSortBy] = useState<'featured' | 'price_asc' | 'price_desc'>('featured');
@@ -415,11 +419,13 @@ export function CategoryCatalogScreen({
                   locale={locale}
                   isWishlisted={wishlistIds.includes(product.id)}
                   isCompared={compareIds.includes(product.id)}
+                  isWaitlisted={waitlistIds.includes(product.id)}
                   justAdded={recentlyAddedId === product.id}
                   onSelectProduct={onSelectProduct}
                   onQuickAdd={onQuickAdd}
                   onToggleWishlist={onToggleWishlist}
                   onToggleCompare={onToggleCompare}
+                  onNotifyMe={onNotifyMe}
                 />
               ))}
             </div>

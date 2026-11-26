@@ -46,13 +46,16 @@ export function HeroShowcaseCarousel({
     }
   };
 
-  const renderDeck = (deckKey: string) => (
-    <div className="flex items-stretch gap-4 pr-4 shrink-0">
+  const renderDeck = (deckKey: string, isDuplicate = false) => (
+    <div
+      aria-hidden={isDuplicate}
+      className="flex items-stretch gap-3 sm:gap-4 pr-3 sm:pr-4 shrink-0"
+    >
       {/* SLIDE 1: Kinetic Brand Montage (modeled after video_animation_menu) */}
       <div
         key={`${deckKey}-montage`}
         onClick={() => onSelectCategory('all')}
-        className="ice-obsidian relative w-[310px] sm:w-[360px] min-h-[340px] rounded-3xl overflow-hidden text-white p-6 flex flex-col justify-between cursor-pointer group shrink-0"
+        className="ice-obsidian relative w-[275px] sm:w-[340px] lg:w-[360px] min-h-[320px] sm:min-h-[340px] rounded-3xl overflow-hidden text-white p-5 sm:p-6 flex flex-col justify-between cursor-pointer group shrink-0"
       >
         {/* Ambient Animated Light Sweep & Glows */}
         <div
@@ -71,7 +74,7 @@ export function HeroShowcaseCarousel({
         {/* Top Bar */}
         <div className="relative z-10 flex items-center justify-between gap-2">
           <ActionIconTooltip
-            focusable
+            focusable={!isDuplicate}
             placement="right"
             text={
               locale === 'fr'
@@ -100,12 +103,12 @@ export function HeroShowcaseCarousel({
         <div className="relative z-10 my-auto py-4 text-center space-y-3">
           {montageBeat === 0 && (
             <div key="beat-0" className="animate-kinetic-in space-y-2">
-              <p className="font-display text-2xl sm:text-[26px] font-extrabold leading-tight bg-gradient-to-r from-[#60A5FA] via-[#A084E8] to-[#F4BE38] bg-clip-text text-transparent">
+              <p className="font-display text-xl sm:text-[26px] font-extrabold leading-tight bg-gradient-to-r from-[#60A5FA] via-[#A084E8] to-[#F4BE38] bg-clip-text text-transparent">
                 {locale === 'fr'
                   ? 'Des Solutions Impressionnantes'
                   : 'Impressive Solutions At'}
               </p>
-              <div className="inline-flex items-center gap-1.5 font-display text-xl font-black tracking-tight text-white">
+              <div className="inline-flex items-center gap-1.5 font-display text-lg sm:text-xl font-black tracking-tight text-white">
                 <span>LOR</span>
                 <span className="w-7 h-7 rounded-lg bg-gradient-to-br from-[#60A5FA] to-[#5A5AA1] text-white inline-flex items-center justify-center shadow-md animate-lorena-float border border-white/50">
                   <ShoppingCart className="w-4 h-4 text-[#F4BE38]" aria-hidden="true" />
@@ -121,7 +124,7 @@ export function HeroShowcaseCarousel({
               <span className="inline-block px-3 py-1 rounded-full bg-white/15 backdrop-blur-md border border-white/30 text-[11px] font-bold tracking-widest uppercase text-[#F4BE38]">
                 www.lorena.cm
               </span>
-              <h2 className="font-display text-2xl font-extrabold text-white leading-tight">
+              <h2 className="font-display text-xl sm:text-2xl font-extrabold text-white leading-tight">
                 {locale === 'fr'
                   ? 'Tech · Électro · Mode'
                   : 'Tech · Appliances · Fashion'}
@@ -172,7 +175,7 @@ export function HeroShowcaseCarousel({
       <div
         key={`${deckKey}-rotating`}
         onClick={() => onSelectCategory('fashion')}
-        className="ice-yellow relative w-[310px] sm:w-[350px] min-h-[340px] rounded-3xl overflow-hidden text-[#000000] p-5 flex flex-col justify-between cursor-pointer group shrink-0"
+        className="ice-yellow relative w-[275px] sm:w-[330px] lg:w-[350px] min-h-[320px] sm:min-h-[340px] rounded-3xl overflow-hidden text-[#000000] p-5 flex flex-col justify-between cursor-pointer group shrink-0"
       >
         <div className="flex items-center justify-between gap-2 z-10">
           <span className="glass-pill-black px-2.5 py-1 rounded-full text-[#F4BE38] font-display text-[10px] font-extrabold uppercase tracking-wider">
@@ -185,27 +188,36 @@ export function HeroShowcaseCarousel({
 
         {/* Rotating Self-Spinning Product Medallion Trapped in Crystal Ice */}
         <div className="relative my-auto py-2 flex items-center justify-center">
-          <div className="relative w-44 h-44 flex items-center justify-center">
-            <div
-              aria-hidden="true"
-              className="absolute inset-0 rounded-full border-2 border-dashed border-[#5A5AA1]/60 animate-orbit-reverse"
-            />
-            <div
-              aria-hidden="true"
-              className="absolute inset-2 rounded-full border-2 border-white/90 shadow-[0_0_28px_rgba(255,255,255,0.85)]"
-            />
-            <div
-              className={`ice-product-trap w-36 h-36 rounded-full overflow-hidden border-4 border-white shadow-2xl ${
-                isPlaying ? 'animate-self-spin' : ''
-              }`}
-            >
-              <img
-                src={FEATURED_PRODUCT_PHOTO}
-                alt="Lorena Produit Sélection"
-                className="w-full h-full object-cover"
+          <ActionIconTooltip
+            focusable={!isDuplicate}
+            text={
+              locale === 'fr'
+                ? 'Illustration rotative Collection Lorena — cliquez pour voir la sélection mode et accessoires'
+                : 'Rotating Lorena Collection illustration — click to explore fashion & accessories'
+            }
+          >
+            <div className="relative w-40 h-40 sm:w-44 sm:h-44 flex items-center justify-center">
+              <div
+                aria-hidden="true"
+                className="absolute inset-0 rounded-full border-2 border-dashed border-[#5A5AA1]/60 animate-orbit-reverse"
               />
+              <div
+                aria-hidden="true"
+                className="absolute inset-2 rounded-full border-2 border-white/90 shadow-[0_0_28px_rgba(255,255,255,0.85)]"
+              />
+              <div
+                className={`ice-product-trap w-32 h-32 sm:w-36 sm:h-36 rounded-full overflow-hidden border-4 border-white shadow-2xl ${
+                  isPlaying ? 'animate-self-spin' : ''
+                }`}
+              >
+                <img
+                  src={FEATURED_PRODUCT_PHOTO}
+                  alt="Lorena Produit Sélection"
+                  className="w-full h-full object-cover"
+                />
+              </div>
             </div>
-          </div>
+          </ActionIconTooltip>
         </div>
 
         <div className="z-10 flex items-center justify-between gap-2">
@@ -227,7 +239,7 @@ export function HeroShowcaseCarousel({
       <div
         key={`${deckKey}-chair`}
         onClick={() => onSelectProduct(findProduct('chair-ergo-study'))}
-        className="ice-violet w-[270px] sm:w-[290px] min-h-[340px] rounded-3xl overflow-hidden text-white p-5 flex flex-col justify-between cursor-pointer group shrink-0"
+        className="ice-violet w-[255px] sm:w-[290px] min-h-[320px] sm:min-h-[340px] rounded-3xl overflow-hidden text-white p-5 flex flex-col justify-between cursor-pointer group shrink-0"
       >
         <div>
           <p className="font-display text-sm font-semibold leading-snug text-white">
@@ -235,23 +247,33 @@ export function HeroShowcaseCarousel({
               ? "Le confort au service de l'apprentissage, à partir de"
               : 'Study & office comfort starting from'}
           </p>
-          <p className="mt-1 font-display text-3xl font-extrabold text-[#F4BE38] tabular-nums drop-shadow-sm">
+          <p className="mt-1 font-display text-2xl sm:text-3xl font-extrabold text-[#F4BE38] tabular-nums drop-shadow-sm">
             55 000 Fcfa
           </p>
         </div>
-        <div className="ice-product-trap my-3 h-40 rounded-2xl p-2 flex items-center justify-center">
-          <ProductImage
-            src={IMAGES.heroChair}
-            alt="Chaise ergonomique bureau"
-            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-          />
-        </div>
+        <ActionIconTooltip
+          className="block w-full my-3"
+          focusable={!isDuplicate}
+          text={
+            locale === 'fr'
+              ? 'Illustration Chaise Ergonomique — cliquez pour voir le prix et commander'
+              : 'Ergonomic Chair illustration — click to inspect price and order'
+          }
+        >
+          <div className="ice-product-trap h-36 sm:h-40 rounded-2xl p-2 flex items-center justify-center">
+            <ProductImage
+              src={IMAGES.heroChair}
+              alt="Chaise ergonomique bureau"
+              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+        </ActionIconTooltip>
         <div className="flex items-center justify-between">
           <span className="glass-pill-frost px-4 py-1.5 rounded-full text-[#000000] text-xs font-bold">
             {locale === 'fr' ? "Voir l'offre" : 'View offer'}
           </span>
           <ActionIconTooltip
-            focusable
+            focusable={!isDuplicate}
             placement="left"
             text={
               locale === 'fr'
@@ -270,7 +292,7 @@ export function HeroShowcaseCarousel({
       <div
         key={`${deckKey}-fridge`}
         onClick={() => onSelectCategory('gros-electromenager')}
-        className="ice-surface w-[240px] sm:w-[260px] min-h-[340px] rounded-3xl overflow-hidden p-4 flex flex-col justify-between cursor-pointer group shrink-0"
+        className="ice-surface w-[235px] sm:w-[260px] min-h-[320px] sm:min-h-[340px] rounded-3xl overflow-hidden p-4 flex flex-col justify-between cursor-pointer group shrink-0"
       >
         <div>
           <span className="glass-pill-gold inline-block px-2.5 py-0.5 rounded-full text-[#000000] font-display text-xs font-extrabold">
@@ -282,13 +304,23 @@ export function HeroShowcaseCarousel({
               : 'Explore top refrigerators at unbeatable XAF prices.'}
           </p>
         </div>
-        <div className="ice-product-trap my-2 h-40 rounded-2xl p-2 flex items-center justify-center">
-          <ProductImage
-            src={IMAGES.fridge}
-            alt="Réfrigérateurs Lorena"
-            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-          />
-        </div>
+        <ActionIconTooltip
+          className="block w-full my-2"
+          focusable={!isDuplicate}
+          text={
+            locale === 'fr'
+              ? 'Illustration Réfrigérateurs — cliquez pour parcourir le gros électroménager'
+              : 'Refrigerator illustration — click to browse home appliances'
+          }
+        >
+          <div className="ice-product-trap h-36 sm:h-40 rounded-2xl p-2 flex items-center justify-center">
+            <ProductImage
+              src={IMAGES.fridge}
+              alt="Réfrigérateurs Lorena"
+              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+        </ActionIconTooltip>
         <span className="glass-pill-cta inline-block w-fit px-4 py-1.5 rounded-full text-white text-[11px] font-bold uppercase">
           {locale === 'fr' ? 'DÉCOUVRIR !' : 'DISCOVER!'}
         </span>
@@ -298,7 +330,7 @@ export function HeroShowcaseCarousel({
       <div
         key={`${deckKey}-phone`}
         onClick={() => onSelectProduct(findProduct('titan-x5-pro'))}
-        className="ice-obsidian w-[270px] sm:w-[295px] min-h-[340px] rounded-3xl overflow-hidden text-white p-5 flex flex-col justify-between cursor-pointer group shrink-0"
+        className="ice-obsidian w-[255px] sm:w-[295px] min-h-[320px] sm:min-h-[340px] rounded-3xl overflow-hidden text-white p-5 flex flex-col justify-between cursor-pointer group shrink-0"
       >
         <div>
           <h3 className="font-display text-lg font-extrabold leading-tight">
@@ -312,13 +344,23 @@ export function HeroShowcaseCarousel({
               : 'Titanium power and 5G clarity in one flagship phone.'}
           </p>
         </div>
-        <div className="ice-product-trap my-3 h-40 rounded-2xl p-2 flex items-center justify-center">
-          <ProductImage
-            src={IMAGES.smartphone}
-            alt="Smartphone Pro 5G"
-            className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
-          />
-        </div>
+        <ActionIconTooltip
+          className="block w-full my-3"
+          focusable={!isDuplicate}
+          text={
+            locale === 'fr'
+              ? 'Illustration Smartphone Pro 5G — cliquez pour consulter la fiche technique'
+              : 'Pro 5G Smartphone illustration — click to view specifications'
+          }
+        >
+          <div className="ice-product-trap h-36 sm:h-40 rounded-2xl p-2 flex items-center justify-center">
+            <ProductImage
+              src={IMAGES.smartphone}
+              alt="Smartphone Pro 5G"
+              className="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300"
+            />
+          </div>
+        </ActionIconTooltip>
         <span className="glass-pill-blue inline-block w-fit px-4 py-1.5 rounded-full text-white text-[11px] font-bold uppercase">
           {locale === 'fr' ? 'ACHETEZ !' : 'SHOP NOW!'}
         </span>
@@ -327,7 +369,7 @@ export function HeroShowcaseCarousel({
       {/* SLIDE 6: Logistics + Kitchen Kettle Stacked Column */}
       <div
         key={`${deckKey}-stacked`}
-        className="w-[235px] sm:w-[250px] min-h-[340px] flex flex-col gap-3.5 shrink-0"
+        className="w-[230px] sm:w-[250px] min-h-[320px] sm:min-h-[340px] flex flex-col gap-3.5 shrink-0"
       >
         <div
           onClick={() => onSelectCategory('all')}
@@ -371,105 +413,102 @@ export function HeroShowcaseCarousel({
   );
 
   return (
-    <section className="max-w-[1360px] mx-auto px-4 pt-5">
-      {/* First Div: Right-to-Left Auto-Scrolling Showcase Carousel encased in Frosted Ice */}
-      <div className="ice-surface relative rounded-[32px] p-3 sm:p-5">
-        {/* Carousel Header & Liquid Glass Controls */}
-        <div className="flex flex-wrap items-center justify-between gap-2 pb-3.5">
-          <div className="flex items-center gap-2.5">
-            <span className="glass-pill-gold px-3.5 py-1 rounded-full text-[11px] font-extrabold text-[#000000] uppercase tracking-wider">
-              {locale === 'fr' ? 'En vedette · Carrousel' : 'Featured · Carousel'}
-            </span>
-            <h1 className="font-display text-sm sm:text-base font-bold text-[#000000]">
-              {locale === 'fr'
-                ? 'Vitrine animée Lorena Market'
-                : 'Lorena Market Live Showcase'}
-            </h1>
-          </div>
-
-          <div className="flex items-center gap-2">
-            <ActionIconTooltip
-              placement="bottom"
-              text={
-                isPlaying
-                  ? locale === 'fr'
-                    ? 'Mettre en pause le défilement automatique du carrousel'
-                    : 'Pause automatic carousel sliding & rotation'
-                  : locale === 'fr'
-                  ? 'Relancer le défilement automatique de droite à gauche'
-                  : 'Resume automatic right-to-left scrolling'
-              }
-            >
-              <button
-                type="button"
-                onClick={() => setIsPlaying((p) => !p)}
-                aria-label={isPlaying ? 'Pause' : 'Play'}
-                className="glass-pill-frost min-h-[34px] px-3 py-1 rounded-full text-xs font-bold text-[#000000] inline-flex items-center gap-1.5 cursor-pointer"
-              >
-                {isPlaying ? (
-                  <>
-                    <Pause className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
-                    <span>{locale === 'fr' ? 'Pause' : 'Pause'}</span>
-                  </>
-                ) : (
-                  <>
-                    <Play className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
-                    <span>{locale === 'fr' ? 'Défiler' : 'Play'}</span>
-                  </>
-                )}
-              </button>
-            </ActionIconTooltip>
-
-            <ActionIconTooltip
-              placement="bottom"
-              text={
-                locale === 'fr'
-                  ? 'Revenir à la carte précédente du carrousel'
-                  : 'Jump to previous carousel slide'
-              }
-            >
-              <button
-                type="button"
-                onClick={() => nudgeCarousel(-340)}
-                aria-label={locale === 'fr' ? 'Carte précédente' : 'Previous slide'}
-                className="glass-pill-frost w-9 h-9 rounded-full flex items-center justify-center text-[#000000] cursor-pointer"
-              >
-                <ChevronLeft className="w-4 h-4" aria-hidden="true" />
-              </button>
-            </ActionIconTooltip>
-            <ActionIconTooltip
-              placement="left"
-              text={
-                locale === 'fr'
-                  ? 'Avancer vers la carte suivante du carrousel'
-                  : 'Advance to next carousel slide'
-              }
-            >
-              <button
-                type="button"
-                onClick={() => nudgeCarousel(340)}
-                aria-label={locale === 'fr' ? 'Carte suivante' : 'Next slide'}
-                className="glass-pill-cta w-9 h-9 rounded-full flex items-center justify-center text-white cursor-pointer"
-              >
-                <ChevronRight className="w-4 h-4" aria-hidden="true" />
-              </button>
-            </ActionIconTooltip>
-          </div>
+    <section className="w-full pt-4 sm:pt-5">
+      {/* Carousel Header & Liquid Glass Controls */}
+      <div className="max-w-[1360px] mx-auto px-3 sm:px-4 pb-3 flex flex-wrap items-center justify-between gap-2">
+        <div className="flex flex-wrap items-center gap-2">
+          <span className="glass-pill-gold px-3.5 py-1 rounded-full text-[11px] font-extrabold text-[#000000] uppercase tracking-wider">
+            {locale === 'fr' ? 'En vedette · Carrousel' : 'Featured · Carousel'}
+          </span>
+          <h1 className="font-display text-sm sm:text-base font-bold text-[#000000]">
+            {locale === 'fr'
+              ? 'Vitrine animée Lorena Market'
+              : 'Lorena Market Live Showcase'}
+          </h1>
         </div>
 
-        {/* Continuous Right-to-Left Sliding Marquee Container */}
-        <div
-          ref={scrollContainerRef}
-          className="lorena-rtl-track overflow-x-auto no-scrollbar rounded-2xl py-1"
-        >
-          <div
-            className={`animate-lorena-rtl ${
-              isPlaying ? '' : 'animate-lorena-rtl-paused'
-            }`}
+        <div className="flex items-center gap-2">
+          <ActionIconTooltip
+            placement="bottom"
+            text={
+              isPlaying
+                ? locale === 'fr'
+                  ? 'Mettre en pause le défilement automatique du carrousel'
+                  : 'Pause automatic carousel sliding & rotation'
+                : locale === 'fr'
+                ? 'Relancer le défilement automatique de droite à gauche'
+                : 'Resume automatic right-to-left scrolling'
+            }
           >
-            {renderDeck('deck-a')}
-            {renderDeck('deck-b')}
-          </div>
+            <button
+              type="button"
+              onClick={() => setIsPlaying((p) => !p)}
+              aria-label={isPlaying ? 'Pause' : 'Play'}
+              className="glass-pill-frost min-h-[34px] px-3 py-1 rounded-full text-xs font-bold text-[#000000] inline-flex items-center gap-1.5 cursor-pointer"
+            >
+              {isPlaying ? (
+                <>
+                  <Pause className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
+                  <span>{locale === 'fr' ? 'Pause' : 'Pause'}</span>
+                </>
+              ) : (
+                <>
+                  <Play className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
+                  <span>{locale === 'fr' ? 'Défiler' : 'Play'}</span>
+                </>
+              )}
+            </button>
+          </ActionIconTooltip>
+
+          <ActionIconTooltip
+            placement="bottom"
+            text={
+              locale === 'fr'
+                ? 'Revenir à la carte précédente du carrousel'
+                : 'Jump to previous carousel slide'
+            }
+          >
+            <button
+              type="button"
+              onClick={() => nudgeCarousel(-340)}
+              aria-label={locale === 'fr' ? 'Carte précédente' : 'Previous slide'}
+              className="glass-pill-frost w-9 h-9 rounded-full flex items-center justify-center text-[#000000] cursor-pointer"
+            >
+              <ChevronLeft className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </ActionIconTooltip>
+          <ActionIconTooltip
+            placement="left"
+            text={
+              locale === 'fr'
+                ? 'Avancer vers la carte suivante du carrousel'
+                : 'Advance to next carousel slide'
+            }
+          >
+            <button
+              type="button"
+              onClick={() => nudgeCarousel(340)}
+              aria-label={locale === 'fr' ? 'Carte suivante' : 'Next slide'}
+              className="glass-pill-cta w-9 h-9 rounded-full flex items-center justify-center text-white cursor-pointer"
+            >
+              <ChevronRight className="w-4 h-4" aria-hidden="true" />
+            </button>
+          </ActionIconTooltip>
+        </div>
+      </div>
+
+      {/* Full-Width Borderless Continuous Right-to-Left Sliding Carousel */}
+      <div
+        ref={scrollContainerRef}
+        className="lorena-rtl-track w-full overflow-x-auto no-scrollbar border-0 rounded-none py-2 px-3 sm:px-4"
+      >
+        <div
+          className={`animate-lorena-rtl ${
+            isPlaying ? '' : 'animate-lorena-rtl-paused'
+          }`}
+        >
+          {renderDeck('deck-a', false)}
+          {renderDeck('deck-b', true)}
         </div>
       </div>
     </section>

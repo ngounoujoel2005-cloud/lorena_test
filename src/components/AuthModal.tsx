@@ -205,18 +205,27 @@ export function AuthModal({
         <div className="relative z-10 px-6 sm:px-8 pt-8 pb-6 space-y-5">
           {/* Centered Elevated Squircle Logo Medallion */}
           <div className="flex flex-col items-center text-center">
-            <div className="ice-product-trap w-20 h-20 rounded-[24px] flex items-center justify-center p-2.5">
-              {!logoFailed ? (
-                <img
-                  src="/assets/aistudio/lorena-logo-noir-transparent_36764768.png"
-                  alt="Lorena Market"
-                  onError={() => setLogoFailed(true)}
-                  className="w-full h-auto object-contain relative z-10"
-                />
-              ) : (
-                <ShoppingBag className="w-8 h-8 text-[#5A5AA1] relative z-10" aria-hidden="true" />
-              )}
-            </div>
+            <ActionIconTooltip
+              focusable
+              text={
+                locale === 'fr'
+                  ? 'Emblème officiel Lorena Market — espace client sécurisé'
+                  : 'Official Lorena Market badge — secure customer portal'
+              }
+            >
+              <div className="ice-product-trap w-20 h-20 rounded-[24px] flex items-center justify-center p-2.5">
+                {!logoFailed ? (
+                  <img
+                    src="/assets/aistudio/lorena-logo-noir-transparent_36764768.png"
+                    alt="Lorena Market"
+                    onError={() => setLogoFailed(true)}
+                    className="w-full h-auto object-contain relative z-10"
+                  />
+                ) : (
+                  <ShoppingBag className="w-8 h-8 text-[#5A5AA1] relative z-10" aria-hidden="true" />
+                )}
+              </div>
+            </ActionIconTooltip>
 
             <h2 className="mt-4 font-display text-2xl font-extrabold text-[#000000] tracking-tight">
               {titleText}

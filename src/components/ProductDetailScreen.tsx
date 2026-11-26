@@ -1,6 +1,7 @@
 import {
   AlertTriangle,
   ArrowLeft,
+  BellRing,
   Check,
   ChevronDown,
   ChevronUp,
@@ -20,6 +21,7 @@ import {
   Star,
   ThumbsUp,
   Truck,
+  X,
   Zap,
   ZoomIn,
 } from 'lucide-react';
@@ -39,6 +41,8 @@ interface ProductDetailScreenProps {
   isWishlisted: boolean;
   wishlistIds: string[];
   compareIds?: string[];
+  waitlistIds?: string[];
+  waitlistEmail?: string;
   recentlyAddedId: string | null;
   reviews: ProductReview[];
   onBackToCatalog: () => void;
@@ -51,6 +55,7 @@ interface ProductDetailScreenProps {
   onGoToReturnPolicy: () => void;
   onToggleWishlist: (productId: string) => void;
   onToggleCompare?: (productId: string) => void;
+  onNotifyMe?: (product: Product) => void;
   onAddReview: (review: Omit<ProductReview, 'id' | 'date' | 'helpfulCount'>) => void;
   onMarkReviewHelpful: (reviewId: string) => void;
 }
@@ -61,6 +66,8 @@ export function ProductDetailScreen({
   isWishlisted,
   wishlistIds,
   compareIds = [],
+  waitlistIds = [],
+  waitlistEmail,
   recentlyAddedId,
   reviews,
   onBackToCatalog,
@@ -73,6 +80,7 @@ export function ProductDetailScreen({
   onGoToReturnPolicy,
   onToggleWishlist,
   onToggleCompare,
+  onNotifyMe,
   onAddReview,
   onMarkReviewHelpful,
 }: ProductDetailScreenProps) {
@@ -82,7 +90,8 @@ export function ProductDetailScreen({
   const [activeThumbIndex, setActiveThumbIndex] = useState(0);
   const [addedFeedback, setAddedFeedback] = useState(false);
   const [copiedSku, setCopiedSku] = useState(false);
-  const [copiedShare, setCopiedShare] = useState(false);
+  const [shareStatus, setShareStatus] = useState<'idle' | 'shared' | 'copied'>('idle');
+  const [shareMenuOpen, setShareMenuOpen] = useState(false);
 
   const allCities = useMemo(() => LOGISTICS_REGIONS.flatMap((r) => r.cities), []);
   const [estimatorCity, setEstimatorCity] = useState(allCities[0].name);
@@ -169,10 +178,50 @@ export function ProductDetailScreen({
     setTimeout(() => setCopiedSku(false), 1800);
   };
 
-  const handleShare = () => {
-    navigator.clipboard?.writeText(window.location.href).catch(() => {});
-    setCopiedShare(true);
-    setTimeout(() => setCopiedShare(false), 1800);
+  const shareUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const selectedVariantLabel =
+    locale === 'fr' ? selectedVariant.labelFr : selectedVariant.labelEn;
+  const shareText =
+    locale === 'fr'
+      ? `${title} (${product.brand} · ${selectedVariantLabel}) à ${formatXAF(
+          unitPrice
+        )} sur Lorena Market — ${shortNote}`
+      : `${title} (${product.brand} · ${selectedVariantLabel}) for ${formatXAF(
+          unitPrice
+        )} on Lorena Market — ${shortNote}`;
+
+  const copyShareDetails = async () => {
+    try {
+      await navigator.clipboard?.writeText(`${shareText}\n${shareUrl}`);
+      setShareStatus('copied');
+      setTimeout(() => setShareStatus('idle'), 2200);
+    } catch {
+      // Ignore clipboard permission errors
+    }
+  };
+
+  const handleShare = async () => {
+    if (typeof navigator !== 'undefined' && typeof navigator.share === 'function') {
+      try {
+        await navigator.share({
+          title: `${title} | Lorena Market`,
+          text: shareText,
+          url: shareUrl,
+        });
+        setShareStatus('shared');
+        setShareMenuOpen(false);
+        setTimeout(() => setShareStatus('idle'), 2200);
+        return;
+      } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+          return;
+        }
+        // Fall through to clipboard + social/messaging share panel if blocked or unsupported
+      }
+    }
+
+    await copyShareDetails();
+    setShareMenuOpen((prev) => !prev);
   };
 
   const handleSubmitReport = (e: FormEvent) => {
@@ -319,33 +368,57 @@ export function ProductDetailScreen({
                 ZOOM_ORIGINS[zoomZone.row][zoomZone.col]
               } ${zoomed ? 'scale-[2.2]' : 'scale-100'}`}
             >
-              <ProductImage
-                src={product.image}
-                alt={title}
-                className={`w-full h-full object-contain transition-transform duration-200 ${galleryFrames[activeThumbIndex].transform}`}
-              />
+              <ActionIconTooltip
+                className="w-full h-full flex items-center justify-center"
+                text={
+                  locale === 'fr'
+                    ? 'Illustration haute précision — déplacez le curseur pour inspecter les détails en zoom 2.2×'
+                    : 'High-detail product illustration — move cursor to inspect details at 2.2× zoom'
+                }
+              >
+                <ProductImage
+                  src={product.image}
+                  alt={title}
+                  className={`w-full h-full object-contain transition-transform duration-200 ${galleryFrames[activeThumbIndex].transform}`}
+                />
+              </ActionIconTooltip>
             </div>
           </div>
 
           <div className="grid grid-cols-3 gap-2.5">
             {galleryFrames.map((frame, idx) => (
-              <button
+              <ActionIconTooltip
                 key={frame.labelFr}
-                type="button"
-                onClick={() => setActiveThumbIndex(idx)}
-                aria-label={frame.labelFr}
-                className={`ice-product-trap aspect-square rounded-2xl p-2 cursor-pointer transition-all ${
-                  activeThumbIndex === idx
-                    ? 'border-[#5A5AA1] ring-2 ring-[#5A5AA1]/35'
-                    : 'hover:border-[#A084E8]'
-                }`}
+                className="w-full"
+                text={
+                  locale === 'fr'
+                    ? `Angle d’illustration : ${frame.labelFr} — cliquez pour afficher`
+                    : `Illustration angle: ${
+                        idx === 0
+                          ? 'Front view'
+                          : idx === 1
+                          ? 'Studio angle'
+                          : 'Close-up detail'
+                      } — click to preview`
+                }
               >
-                <ProductImage
-                  src={product.image}
-                  alt={`${title} - ${frame.labelFr}`}
-                  className={`w-full h-full object-contain ${frame.transform}`}
-                />
-              </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveThumbIndex(idx)}
+                  aria-label={frame.labelFr}
+                  className={`ice-product-trap w-full aspect-square rounded-2xl p-2 cursor-pointer transition-all ${
+                    activeThumbIndex === idx
+                      ? 'border-[#5A5AA1] ring-2 ring-[#5A5AA1]/35'
+                      : 'hover:border-[#A084E8]'
+                  }`}
+                >
+                  <ProductImage
+                    src={product.image}
+                    alt={`${title} - ${frame.labelFr}`}
+                    className={`w-full h-full object-contain ${frame.transform}`}
+                  />
+                </button>
+              </ActionIconTooltip>
             ))}
           </div>
 
@@ -412,8 +485,8 @@ export function ProductDetailScreen({
 
         {/* Column 2: Main Product Info & CTAs */}
         <div className="ice-surface lg:col-span-5 rounded-3xl p-6 space-y-5">
-          <div className="flex items-start justify-between gap-3">
-            <h1 className="font-display text-xl sm:text-2xl font-bold text-[#000000] leading-snug">
+          <div className="flex flex-wrap sm:flex-nowrap items-start justify-between gap-3">
+            <h1 className="font-display text-xl sm:text-2xl font-bold text-[#000000] leading-snug min-w-0">
               {title}
             </h1>
             <div className="flex items-center gap-1.5 shrink-0">
@@ -483,31 +556,133 @@ export function ProductDetailScreen({
               </ActionIconTooltip>
               <ActionIconTooltip
                 text={
-                  copiedShare
+                  shareStatus === 'shared'
                     ? locale === 'fr'
-                      ? 'Lien du produit copié !'
-                      : 'Product link copied!'
+                      ? 'Produit partagé !'
+                      : 'Product shared!'
+                    : shareStatus === 'copied'
+                    ? locale === 'fr'
+                      ? 'Détails et lien copiés !'
+                      : 'Details & link copied!'
                     : locale === 'fr'
-                    ? 'Copier le lien pour partager ce produit'
-                    : 'Copy link to share this product'
+                    ? 'Partager ce produit via vos applications ou réseaux sociaux'
+                    : 'Share this product via social platforms or messaging apps'
                 }
                 placement="left"
               >
                 <button
                   type="button"
-                  aria-label="Partager"
-                  onClick={handleShare}
-                  className="glass-pill-frost w-9 h-9 rounded-full text-[#3F3F56] hover:text-[#5A5AA1] flex items-center justify-center cursor-pointer"
+                  aria-label={locale === 'fr' ? 'Partager ce produit' : 'Share this product'}
+                  onClick={() => void handleShare()}
+                  className={`min-h-[36px] px-3 rounded-full inline-flex items-center gap-1.5 text-xs font-bold cursor-pointer whitespace-nowrap transition-all ${
+                    shareStatus !== 'idle' || shareMenuOpen
+                      ? 'glass-pill-gold text-[#000000]'
+                      : 'glass-pill-frost text-[#3F3F56] hover:text-[#5A5AA1]'
+                  }`}
                 >
-                  {copiedShare ? (
-                    <Check className="w-4 h-4 text-[#5A5AA1]" aria-hidden="true" />
+                  {shareStatus !== 'idle' ? (
+                    <Check className="w-3.5 h-3.5 text-[#000000]" aria-hidden="true" />
                   ) : (
-                    <Share2 className="w-4 h-4" aria-hidden="true" />
+                    <Share2 className="w-3.5 h-3.5" aria-hidden="true" />
                   )}
+                  <span>
+                    {shareStatus === 'shared'
+                      ? locale === 'fr'
+                        ? 'Partagé !'
+                        : 'Shared!'
+                      : shareStatus === 'copied'
+                      ? locale === 'fr'
+                        ? 'Copié !'
+                        : 'Copied!'
+                      : locale === 'fr'
+                      ? 'Partager'
+                      : 'Share'}
+                  </span>
                 </button>
               </ActionIconTooltip>
             </div>
           </div>
+
+          {shareMenuOpen && (
+            <div className="ice-surface-subtle rounded-2xl p-3.5 space-y-2.5 border border-white/85">
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#5A5AA1]">
+                  {locale === 'fr'
+                    ? 'Partager ce produit sur'
+                    : 'Share this product via'}
+                </p>
+                <button
+                  type="button"
+                  aria-label={locale === 'fr' ? 'Fermer' : 'Close'}
+                  onClick={() => setShareMenuOpen(false)}
+                  className="w-6 h-6 rounded-full glass-pill-frost flex items-center justify-center text-[#3F3F56] cursor-pointer"
+                >
+                  <X className="w-3.5 h-3.5" aria-hidden="true" />
+                </button>
+              </div>
+              <div className="flex flex-wrap gap-2">
+                <a
+                  href={`https://wa.me/?text=${encodeURIComponent(
+                    `${shareText} ${shareUrl}`
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="glass-pill-frost px-3 py-1.5 rounded-full text-xs font-bold text-[#000000] inline-flex items-center gap-1.5"
+                >
+                  <MessageCircle className="w-3.5 h-3.5 text-[#16A34A]" aria-hidden="true" />
+                  <span>WhatsApp</span>
+                </a>
+                <a
+                  href={`https://t.me/share/url?url=${encodeURIComponent(
+                    shareUrl
+                  )}&text=${encodeURIComponent(shareText)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="glass-pill-frost px-3 py-1.5 rounded-full text-xs font-bold text-[#000000] inline-flex items-center gap-1.5"
+                >
+                  <span>Telegram</span>
+                </a>
+                <a
+                  href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(
+                    shareUrl
+                  )}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="glass-pill-frost px-3 py-1.5 rounded-full text-xs font-bold text-[#000000] inline-flex items-center gap-1.5"
+                >
+                  <span>Facebook</span>
+                </a>
+                <a
+                  href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(
+                    shareText
+                  )}&url=${encodeURIComponent(shareUrl)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="glass-pill-frost px-3 py-1.5 rounded-full text-xs font-bold text-[#000000] inline-flex items-center gap-1.5"
+                >
+                  <span>X / Twitter</span>
+                </a>
+                <a
+                  href={`mailto:?subject=${encodeURIComponent(
+                    `${title} — Lorena Market`
+                  )}&body=${encodeURIComponent(`${shareText}\n\n${shareUrl}`)}`}
+                  className="glass-pill-frost px-3 py-1.5 rounded-full text-xs font-bold text-[#000000] inline-flex items-center gap-1.5"
+                >
+                  <span>Email</span>
+                </a>
+                <button
+                  type="button"
+                  onClick={() => void copyShareDetails()}
+                  className="glass-pill-cta px-3 py-1.5 rounded-full text-xs font-bold text-white inline-flex items-center gap-1.5 cursor-pointer"
+                >
+                  <Copy className="w-3.5 h-3.5" aria-hidden="true" />
+                  <span>
+                    {locale === 'fr' ? 'Copier le lien' : 'Copy link'}
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
 
           {/* Category + Stars Summary */}
           <div className="flex flex-wrap items-center gap-2 text-xs text-[#3F3F56]">
@@ -630,13 +805,53 @@ export function ProductDetailScreen({
             </div>
 
             {isOutOfStock ? (
-              <button
-                type="button"
-                disabled
-                className="ice-surface-subtle w-full min-h-[46px] px-5 py-3 rounded-full text-[#3F3F56] font-bold text-sm"
-              >
-                {t.outOfStock}
-              </button>
+              <div className="space-y-2.5">
+                <div className="ice-surface-subtle w-full px-4 py-2 rounded-full text-center text-[#ba1a1a] font-bold text-xs uppercase tracking-wide">
+                  {t.outOfStock}
+                </div>
+                <ActionIconTooltip
+                  className="w-full"
+                  text={
+                    waitlistIds.includes(product.id)
+                      ? locale === 'fr'
+                        ? 'Vous êtes sur la liste d’attente — cliquez pour gérer ou simuler l’alerte'
+                        : 'You are on the waitlist — click to manage or simulate restock alert'
+                      : locale === 'fr'
+                      ? 'Saisir votre e-mail pour recevoir une alerte dès le retour en stock'
+                      : 'Enter your email to get notified when this product is restocked'
+                  }
+                >
+                  <button
+                    type="button"
+                    onClick={() => onNotifyMe?.(product)}
+                    className={`w-full min-h-[46px] px-5 py-3 rounded-full font-display font-bold text-sm inline-flex items-center justify-center gap-2 cursor-pointer ${
+                      waitlistIds.includes(product.id)
+                        ? 'glass-pill-black text-[#F4BE38]'
+                        : 'glass-pill-gold text-[#000000]'
+                    }`}
+                  >
+                    {waitlistIds.includes(product.id) ? (
+                      <>
+                        <Check className="w-4 h-4" aria-hidden="true" />
+                        <span>
+                          {locale === 'fr'
+                            ? `Liste d’attente active (${waitlistEmail || ''})`
+                            : `On Waitlist (${waitlistEmail || ''})`}
+                        </span>
+                      </>
+                    ) : (
+                      <>
+                        <BellRing className="w-4 h-4" aria-hidden="true" />
+                        <span>
+                          {locale === 'fr'
+                            ? 'Me prévenir dès le retour en stock'
+                            : 'Notify Me When Restocked'}
+                        </span>
+                      </>
+                    )}
+                  </button>
+                </ActionIconTooltip>
+              </div>
             ) : (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
                 <ActionIconTooltip
@@ -1365,18 +1580,67 @@ export function ProductDetailScreen({
         locale={locale}
         wishlistIds={wishlistIds}
         compareIds={compareIds}
+        waitlistIds={waitlistIds}
         recentlyAddedId={recentlyAddedId}
         viewAllCategory={product.category}
         onSelectProduct={onSelectProduct}
         onQuickAdd={onQuickAdd}
         onToggleWishlist={onToggleWishlist}
         onToggleCompare={onToggleCompare}
+        onNotifyMe={onNotifyMe}
         onViewAll={onSelectCategory}
       />
 
-      {/* Sticky Bottom Purchase Bar Encased in Frosted Ice */}
-      {!isOutOfStock && (
-        <div className="fixed bottom-0 inset-x-0 z-30 ice-surface border-t border-white/90">
+      {/* Sticky Bottom Purchase / Waitlist Bar Encased in Frosted Ice */}
+      <div className="fixed bottom-0 inset-x-0 z-30 ice-surface border-t border-white/90">
+        {isOutOfStock ? (
+          <div className="max-w-[1360px] mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <span className="block text-[10px] font-bold uppercase text-[#ba1a1a]">
+                {t.outOfStock}
+              </span>
+              <span className="font-display text-sm sm:text-base font-extrabold text-[#000000] tabular-nums">
+                {formatXAF(unitPrice)}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <ActionIconTooltip
+                text={
+                  locale === 'fr'
+                    ? 'Recevoir une alerte par e-mail lors du retour en stock'
+                    : 'Get an email alert when back in stock'
+                }
+              >
+                <button
+                  type="button"
+                  onClick={() => onNotifyMe?.(product)}
+                  className={`min-h-[40px] px-5 rounded-full text-xs font-extrabold inline-flex items-center gap-2 cursor-pointer ${
+                    waitlistIds.includes(product.id)
+                      ? 'glass-pill-black text-[#F4BE38]'
+                      : 'glass-pill-gold text-[#000000]'
+                  }`}
+                >
+                  {waitlistIds.includes(product.id) ? (
+                    <>
+                      <Check className="w-4 h-4" aria-hidden="true" />
+                      <span>
+                        {locale === 'fr' ? 'Sur liste d’attente' : 'On Waitlist'}
+                      </span>
+                    </>
+                  ) : (
+                    <>
+                      <BellRing className="w-4 h-4" aria-hidden="true" />
+                      <span>
+                        {locale === 'fr' ? 'M’alerter' : 'Notify Me'}
+                      </span>
+                    </>
+                  )}
+                </button>
+              </ActionIconTooltip>
+            </div>
+          </div>
+        ) : (
           <div className="max-w-[1360px] mx-auto px-4 py-2.5 flex items-center justify-between gap-3">
             <div className="flex items-center gap-4">
               <div className="glass-input-recessed hidden sm:inline-flex items-center rounded-full">
@@ -1465,8 +1729,8 @@ export function ProductDetailScreen({
               </ActionIconTooltip>
             </div>
           </div>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 }

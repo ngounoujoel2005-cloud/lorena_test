@@ -3,6 +3,8 @@ import { createPortal } from 'react-dom';
 
 export type TooltipPlacement = 'top' | 'bottom' | 'left' | 'right';
 
+const HOVER_DELAY_MS = 2050;
+
 interface ActionIconTooltipProps {
   text: string;
   placement?: TooltipPlacement;
@@ -57,6 +59,7 @@ export function ActionIconTooltip({
   children,
 }: ActionIconTooltipProps) {
   const triggerRef = useRef<HTMLSpanElement>(null);
+  const hoverTimerRef = useRef<number | null>(null);
   const [visible, setVisible] = useState(false);
   const [coords, setCoords] = useState<TooltipCoords>({
     top: 0,
@@ -66,6 +69,32 @@ export function ActionIconTooltip({
   });
 
   const wrapperClass = normalizeWrapperClass(className);
+
+  const clearHoverTimer = useCallback(() => {
+    if (hoverTimerRef.current !== null) {
+      window.clearTimeout(hoverTimerRef.current);
+      hoverTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleReveal = useCallback(() => {
+    clearHoverTimer();
+    hoverTimerRef.current = window.setTimeout(() => {
+      setVisible(true);
+      hoverTimerRef.current = null;
+    }, HOVER_DELAY_MS);
+  }, [clearHoverTimer]);
+
+  const hideTooltip = useCallback(() => {
+    clearHoverTimer();
+    setVisible(false);
+  }, [clearHoverTimer]);
+
+  useEffect(() => {
+    return () => {
+      clearHoverTimer();
+    };
+  }, [clearHoverTimer]);
 
   const updatePosition = useCallback(() => {
     const el = triggerRef.current;
@@ -97,7 +126,7 @@ export function ActionIconTooltip({
 
   useEffect(() => {
     if (!visible) return;
-    const handleScroll = () => setVisible(false);
+    const handleScroll = () => hideTooltip();
     const handleResize = () => updatePosition();
     window.addEventListener('scroll', handleScroll, { capture: true, passive: true });
     window.addEventListener('resize', handleResize);
@@ -105,7 +134,7 @@ export function ActionIconTooltip({
       window.removeEventListener('scroll', handleScroll, true);
       window.removeEventListener('resize', handleResize);
     };
-  }, [visible, updatePosition]);
+  }, [visible, updatePosition, hideTooltip]);
 
   if (disabled || !text.trim()) {
     return <span className={wrapperClass}>{children}</span>;
@@ -126,7 +155,7 @@ export function ActionIconTooltip({
             }
           : undefined
       }
-      className={`ice-obsidian pointer-events-none w-max max-w-[220px] rounded-2xl border border-white/45 px-3 py-1.5 text-[11px] font-semibold leading-snug text-white shadow-2xl ${
+      className={`ice-obsidian pointer-events-none w-max max-w-[225px] rounded-2xl border border-white/45 px-3 py-1.5 text-[11px] font-semibold leading-snug text-white shadow-2xl ${
         visible
           ? 'block opacity-100 fixed z-50'
           : 'hidden opacity-0'
@@ -152,17 +181,17 @@ export function ActionIconTooltip({
     <span
       ref={triggerRef}
       tabIndex={focusable ? 0 : undefined}
-      onMouseEnter={() => setVisible(true)}
-      onMouseLeave={() => setVisible(false)}
-      onFocus={() => setVisible(true)}
+      onMouseEnter={scheduleReveal}
+      onMouseLeave={hideTooltip}
+      onFocus={scheduleReveal}
       onBlur={(e) => {
         if (!e.currentTarget.contains(e.relatedTarget as Node | null)) {
-          setVisible(false);
+          hideTooltip();
         }
       }}
       onKeyDown={(e) => {
         if (e.key === 'Escape') {
-          setVisible(false);
+          hideTooltip();
         }
       }}
       className={`${wrapperClass} ${

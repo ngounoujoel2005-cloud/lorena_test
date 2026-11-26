@@ -93,9 +93,9 @@ export function DailySpecialsSection({
   return (
     <section
       aria-labelledby="daily-specials-heading"
-      className="max-w-[1360px] mx-auto px-4"
+      className="max-w-[1360px] mx-auto px-3 sm:px-4"
     >
-      <div className="ice-surface rounded-3xl p-5 sm:p-6 space-y-5">
+      <div className="ice-surface rounded-3xl p-4 sm:p-6 space-y-5">
         {/* Header Bar */}
         <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-white/80">
           <div className="flex items-center gap-3">
@@ -172,17 +172,26 @@ export function DailySpecialsSection({
                       </span>
                     )}
 
-                    <button
-                      type="button"
-                      onClick={() => onSelectProduct(product)}
-                      className="w-full h-full relative z-[5] cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5A5AA1] rounded-xl"
+                    <ActionIconTooltip
+                      className="w-full h-full flex items-center justify-center relative z-[5]"
+                      text={
+                        locale === 'fr'
+                          ? 'Illustration offre du jour — cliquez pour voir la fiche produit'
+                          : 'Daily special illustration — click to inspect product details'
+                      }
                     >
-                      <ProductImage
-                        src={product.image}
-                        alt={title}
-                        className="w-full h-full object-contain"
-                      />
-                    </button>
+                      <button
+                        type="button"
+                        onClick={() => onSelectProduct(product)}
+                        className="w-full h-full cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5A5AA1] rounded-xl"
+                      >
+                        <ProductImage
+                          src={product.image}
+                          alt={title}
+                          className="w-full h-full object-contain"
+                        />
+                      </button>
+                    </ActionIconTooltip>
                   </div>
 
                   {/* Like & Compare Floating Buttons outside overflow-hidden chamber */}

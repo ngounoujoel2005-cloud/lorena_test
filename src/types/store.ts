@@ -169,3 +169,9 @@ export interface ChatMessage {
   createdAt: string;
   error?: boolean;
 }
+
+export interface WaitlistEntry {
+  productId: string;
+  email: string;
+  createdAt: string;
+}

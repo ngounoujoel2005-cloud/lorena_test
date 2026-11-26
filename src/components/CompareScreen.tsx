@@ -1,5 +1,6 @@
 import {
   ArrowLeft,
+  BellRing,
   Check,
   Plus,
   Scale,
@@ -19,12 +20,14 @@ import { ProductImage } from './ProductImage';
 interface CompareScreenProps {
   locale: Locale;
   compareIds: string[];
+  waitlistIds?: string[];
   recentlyAddedId: string | null;
   onAddCompare: (productId: string) => void;
   onRemoveCompare: (productId: string) => void;
   onClearCompare: () => void;
   onSelectProduct: (product: Product) => void;
   onQuickAdd: (product: Product) => void;
+  onNotifyMe?: (product: Product) => void;
   onBackHome: () => void;
   onAskAiComparison: (prompt: string) => void;
 }
@@ -32,12 +35,14 @@ interface CompareScreenProps {
 export function CompareScreen({
   locale,
   compareIds,
+  waitlistIds = [],
   recentlyAddedId,
   onAddCompare,
   onRemoveCompare,
   onClearCompare,
   onSelectProduct,
   onQuickAdd,
+  onNotifyMe,
   onBackHome,
   onAskAiComparison,
 }: CompareScreenProps) {
@@ -375,47 +380,86 @@ export function CompareScreen({
                           </div>
 
                           <div className="pt-2 flex flex-col gap-2">
-                            <ActionIconTooltip
-                              text={
-                                isOutOfStock
-                                  ? locale === 'fr'
-                                    ? 'Article momentanément épuisé'
-                                    : 'Item currently out of stock'
-                                  : locale === 'fr'
-                                  ? 'Ajouter cet article au panier'
-                                  : 'Add this item to cart'
-                              }
-                              placement="top"
-                              className="w-full"
-                            >
-                              <button
-                                type="button"
-                                disabled={isOutOfStock}
-                                onClick={() => onQuickAdd(product)}
-                                className={`w-full min-h-[38px] px-3 rounded-full text-xs font-bold inline-flex items-center justify-center gap-1.5 cursor-pointer disabled:opacity-50 ${
-                                  isAdded
-                                    ? 'glass-pill-black text-[#F4BE38]'
-                                    : 'glass-pill-cta text-white'
-                                }`}
+                            {isOutOfStock ? (
+                              <ActionIconTooltip
+                                text={
+                                  waitlistIds.includes(product.id)
+                                    ? locale === 'fr'
+                                      ? 'Déjà inscrit — cliquez pour gérer ou simuler l’alerte stock'
+                                      : 'Already on waitlist — click to manage or simulate alert'
+                                    : locale === 'fr'
+                                    ? 'Article épuisé — cliquez pour recevoir une alerte par e-mail dès le réapprovisionnement'
+                                    : 'Out of stock — click to receive an email notification on restock'
+                                }
+                                placement="top"
+                                className="w-full"
                               >
-                                {isAdded ? (
-                                  <>
-                                    <Check className="w-3.5 h-3.5" aria-hidden="true" />
-                                    <span>{t.addedBtn}</span>
-                                  </>
-                                ) : (
-                                  <>
-                                    <ShoppingCart
-                                      className="w-3.5 h-3.5"
-                                      aria-hidden="true"
-                                    />
-                                    <span>
-                                      {isOutOfStock ? t.outOfStock : t.buyBtn}
-                                    </span>
-                                  </>
-                                )}
-                              </button>
-                            </ActionIconTooltip>
+                                <button
+                                  type="button"
+                                  onClick={() =>
+                                    onNotifyMe
+                                      ? onNotifyMe(product)
+                                      : onSelectProduct(product)
+                                  }
+                                  className={`w-full min-h-[38px] px-3 rounded-full text-xs font-extrabold inline-flex items-center justify-center gap-1.5 cursor-pointer ${
+                                    waitlistIds.includes(product.id)
+                                      ? 'glass-pill-black text-[#F4BE38]'
+                                      : 'glass-pill-gold text-[#000000]'
+                                  }`}
+                                >
+                                  {waitlistIds.includes(product.id) ? (
+                                    <>
+                                      <Check className="w-3.5 h-3.5" aria-hidden="true" />
+                                      <span>
+                                        {locale === 'fr' ? 'Liste d’attente' : 'On Waitlist'}
+                                      </span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <BellRing className="w-3.5 h-3.5" aria-hidden="true" />
+                                      <span>
+                                        {locale === 'fr' ? 'M’alerter' : 'Notify Me'}
+                                      </span>
+                                    </>
+                                  )}
+                                </button>
+                              </ActionIconTooltip>
+                            ) : (
+                              <ActionIconTooltip
+                                text={
+                                  locale === 'fr'
+                                    ? 'Ajouter cet article au panier'
+                                    : 'Add this item to cart'
+                                }
+                                placement="top"
+                                className="w-full"
+                              >
+                                <button
+                                  type="button"
+                                  onClick={() => onQuickAdd(product)}
+                                  className={`w-full min-h-[38px] px-3 rounded-full text-xs font-bold inline-flex items-center justify-center gap-1.5 cursor-pointer ${
+                                    isAdded
+                                      ? 'glass-pill-black text-[#F4BE38]'
+                                      : 'glass-pill-cta text-white'
+                                  }`}
+                                >
+                                  {isAdded ? (
+                                    <>
+                                      <Check className="w-3.5 h-3.5" aria-hidden="true" />
+                                      <span>{t.addedBtn}</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <ShoppingCart
+                                        className="w-3.5 h-3.5"
+                                        aria-hidden="true"
+                                      />
+                                      <span>{t.buyBtn}</span>
+                                    </>
+                                  )}
+                                </button>
+                              </ActionIconTooltip>
+                            )}
                           </div>
                         </div>
                       </th>

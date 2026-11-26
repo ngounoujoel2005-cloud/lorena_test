@@ -85,10 +85,10 @@ export function Footer({ locale, onNavigate }: FooterProps) {
   };
 
   return (
-    <footer className="no-print max-w-[1360px] mx-auto px-4 pb-6 mt-12">
-      <div className="ice-obsidian rounded-[32px] text-white">
+    <footer className="no-print max-w-[1360px] mx-auto px-3 sm:px-4 pb-6 mt-12">
+      <div className="ice-obsidian rounded-[28px] sm:rounded-[32px] overflow-hidden text-white">
         {/* Top Email Newsletter & WhatsApp / SMS Alerts Block */}
-        <div className="px-6 sm:px-8 pt-10 pb-8 border-b border-white/15 text-center">
+        <div className="px-4 sm:px-8 pt-8 sm:pt-10 pb-8 border-b border-white/15 text-center">
           <h2 className="font-display text-2xl sm:text-3xl font-bold text-white">
             {t.newsletterTitle}
           </h2>
@@ -256,7 +256,7 @@ export function Footer({ locale, onNavigate }: FooterProps) {
         </div>
 
         {/* 5-Column Links Grid */}
-        <div className="px-6 sm:px-8 py-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-8 text-sm">
+        <div className="px-4 sm:px-8 py-8 sm:py-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 text-sm">
           <div>
             <h3 className="font-display text-xs font-bold uppercase tracking-wider text-[#F4BE38] mb-4">
               {t.footerCustomerService}
@@ -443,15 +443,24 @@ export function Footer({ locale, onNavigate }: FooterProps) {
 
         {/* Bottom Payment Methods & Copyright */}
         <div className="border-t border-white/15 bg-black/25">
-          <div className="px-6 sm:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div className="flex flex-wrap items-center gap-3">
-              <span className="glass-pill-frost px-3 py-1 rounded-full inline-flex items-center">
-                <img
-                  src="/assets/aistudio/lorena-logo-noir-transparent_36764768.png"
-                  alt="Lorena Market"
-                  className="h-5 w-auto object-contain"
-                />
-              </span>
+          <div className="px-4 sm:px-8 py-5 flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center justify-center sm:justify-start gap-2.5 sm:gap-3">
+              <ActionIconTooltip
+                focusable
+                text={
+                  locale === 'fr'
+                    ? 'Logo officiel Lorena Market — boutique en ligne au Cameroun'
+                    : 'Official Lorena Market emblem — online shopping in Cameroon'
+                }
+              >
+                <span className="glass-pill-frost px-3 py-1 rounded-full inline-flex items-center">
+                  <img
+                    src="/assets/aistudio/lorena-logo-noir-transparent_36764768.png"
+                    alt="Lorena Market"
+                    className="h-5 w-auto object-contain"
+                  />
+                </span>
+              </ActionIconTooltip>
               <span className="text-[11px] font-semibold uppercase tracking-wider text-white/70">
                 {t.paymentMethodsLabel}
               </span>

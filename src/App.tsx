@@ -3,7 +3,9 @@
  * SPDX-License-Identifier: Apache-2.0
  */
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { BellRing, X } from 'lucide-react';
+import { ActionIconTooltip } from './components/ActionIconTooltip';
 import { AuthModal } from './components/AuthModal';
 import { CartDrawer } from './components/CartDrawer';
 import { CartPageScreen } from './components/CartPageScreen';
@@ -19,6 +21,7 @@ import { HomePageScreen } from './components/HomePageScreen';
 import { InvoiceView } from './components/InvoiceView';
 import { Navbar } from './components/Navbar';
 import { ProductDetailScreen } from './components/ProductDetailScreen';
+import { RestockWaitlistModal } from './components/RestockWaitlistModal';
 import { TrackingScreen } from './components/TrackingScreen';
 import { WarrantyScreen } from './components/WarrantyScreen';
 import { WishlistAccountScreen } from './components/WishlistAccountScreen';
@@ -35,6 +38,7 @@ import {
   Product,
   ProductReview,
   UserSession,
+  WaitlistEntry,
 } from './types/store';
 
 const CART_STORAGE_KEY = 'lorena_market_cart_v1';
@@ -46,6 +50,7 @@ const LOCALE_STORAGE_KEY = 'lorena_market_locale_v1';
 const REVIEWS_STORAGE_KEY = 'lorena_market_reviews_v1';
 const SESSION_STORAGE_KEY = 'lorena_market_session_v1';
 const HISTORY_STORAGE_KEY = 'lorena_market_history_v1';
+const WAITLIST_STORAGE_KEY = 'lorena_market_waitlist_v1';
 
 const DEFAULT_CART: CartItem[] = [
   {
@@ -193,6 +198,26 @@ export default function App() {
     return [];
   });
 
+  const [waitlistEntries, setWaitlistEntries] = useState<WaitlistEntry[]>(() => {
+    try {
+      const saved = localStorage.getItem(WAITLIST_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {
+      // Ignore
+    }
+    return [];
+  });
+
+  const [waitlistProduct, setWaitlistProduct] = useState<Product | null>(null);
+  const [restockAlert, setRestockAlert] = useState<{
+    product: Product;
+    email: string;
+  } | null>(null);
+  const restockTimerRef = useRef<number | null>(null);
+
   useEffect(() => {
     try {
       localStorage.setItem(CART_STORAGE_KEY, JSON.stringify(cart));
@@ -269,6 +294,22 @@ export default function App() {
       // Ignore
     }
   }, [chatMessages]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(WAITLIST_STORAGE_KEY, JSON.stringify(waitlistEntries));
+    } catch {
+      // Ignore
+    }
+  }, [waitlistEntries]);
+
+  useEffect(() => {
+    return () => {
+      if (restockTimerRef.current !== null) {
+        window.clearTimeout(restockTimerRef.current);
+      }
+    };
+  }, []);
 
   const navigateTo = (screen: AppScreen) => {
     setActiveScreen(screen);
@@ -493,6 +534,43 @@ export default function App() {
     setAuthModalOpen(true);
   };
 
+  const triggerRestockAlert = (product: Product, email: string) => {
+    if (restockTimerRef.current !== null) {
+      window.clearTimeout(restockTimerRef.current);
+      restockTimerRef.current = null;
+    }
+    setRestockAlert({ product, email });
+  };
+
+  const handleJoinWaitlist = (product: Product, email: string) => {
+    const cleanEmail = email.trim();
+    setWaitlistEntries((prev) => {
+      const filtered = prev.filter((entry) => entry.productId !== product.id);
+      return [
+        {
+          productId: product.id,
+          email: cleanEmail,
+          createdAt: new Date().toISOString(),
+        },
+        ...filtered,
+      ];
+    });
+    if (restockTimerRef.current !== null) {
+      window.clearTimeout(restockTimerRef.current);
+    }
+    restockTimerRef.current = window.setTimeout(() => {
+      setRestockAlert({ product, email: cleanEmail });
+      restockTimerRef.current = null;
+    }, 5000);
+  };
+
+  const handleLeaveWaitlist = (productId: string) => {
+    setWaitlistEntries((prev) =>
+      prev.filter((entry) => entry.productId !== productId)
+    );
+  };
+
+  const waitlistIds = waitlistEntries.map((entry) => entry.productId);
   const totalBagCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const comparedProducts = compareIds
     .map((id) => PRODUCTS.find((p) => p.id === id))
@@ -512,7 +590,7 @@ export default function App() {
         onToggleLocale={() => setLocale((l) => (l === 'fr' ? 'en' : 'fr'))}
         onSearchChange={setSearchQuery}
         onSearchSubmit={handleSearchSubmit}
-        onSelectCategory={(slug) => handleSelectCategory(slug)}
+        onSelectCategory={handleSelectCategory}
         onSelectProduct={handleSelectProduct}
         onNavigate={navigateTo}
         onOpenCart={() => setCartOpen(true)}
@@ -528,9 +606,11 @@ export default function App() {
             wishlistIds={wishlistIds}
             compareIds={compareIds}
             historyIds={historyIds}
+            waitlistIds={waitlistIds}
             recentlyAddedId={recentlyAddedId}
             onSelectProduct={handleSelectProduct}
             onQuickAdd={handleQuickAdd}
+            onNotifyMe={setWaitlistProduct}
             onToggleWishlist={handleToggleWishlist}
             onToggleCompare={handleToggleCompare}
             onSelectCategory={(slug) => handleSelectCategory(slug)}
@@ -545,6 +625,7 @@ export default function App() {
             searchQuery={searchQuery}
             wishlistIds={wishlistIds}
             compareIds={compareIds}
+            waitlistIds={waitlistIds}
             recentlyAddedId={recentlyAddedId}
             onSelectCategory={(slug) => setActiveCategory(slug)}
             onSearchChange={setSearchQuery}
@@ -552,6 +633,7 @@ export default function App() {
             onBackHome={() => navigateTo('home')}
             onSelectProduct={handleSelectProduct}
             onQuickAdd={handleQuickAdd}
+            onNotifyMe={setWaitlistProduct}
             onToggleWishlist={handleToggleWishlist}
             onToggleCompare={handleToggleCompare}
           />
@@ -565,12 +647,18 @@ export default function App() {
             isWishlisted={wishlistIds.includes(selectedProduct.id)}
             wishlistIds={wishlistIds}
             compareIds={compareIds}
+            waitlistIds={waitlistIds}
+            waitlistEmail={
+              waitlistEntries.find((e) => e.productId === selectedProduct.id)
+                ?.email
+            }
             recentlyAddedId={recentlyAddedId}
             reviews={reviews}
             onBackToCatalog={() => navigateTo('home')}
             onSelectCategory={(slug) => handleSelectCategory(slug)}
             onSelectProduct={handleSelectProduct}
             onQuickAdd={handleQuickAdd}
+            onNotifyMe={setWaitlistProduct}
             onAddToCart={addItemToCart}
             onBuyNow={handleBuyNow}
             onOpenCartPage={() => navigateTo('cart')}
@@ -586,6 +674,7 @@ export default function App() {
           <CompareScreen
             locale={locale}
             compareIds={compareIds}
+            waitlistIds={waitlistIds}
             recentlyAddedId={recentlyAddedId}
             onAddCompare={handleAddCompare}
             onRemoveCompare={(id) =>
@@ -594,6 +683,7 @@ export default function App() {
             onClearCompare={() => setCompareIds([])}
             onSelectProduct={handleSelectProduct}
             onQuickAdd={handleQuickAdd}
+            onNotifyMe={setWaitlistProduct}
             onBackHome={() => navigateTo('home')}
             onAskAiComparison={(prompt) => {
               setQueuedChatPrompt(prompt);
@@ -610,6 +700,7 @@ export default function App() {
             historyIds={historyIds}
             wishlistIds={wishlistIds}
             compareIds={compareIds}
+            waitlistIds={waitlistIds}
             recentlyAddedId={recentlyAddedId}
             onApplyPromoCode={setAppliedPromoCode}
             onUpdateQuantity={handleUpdateQuantity}
@@ -618,6 +709,7 @@ export default function App() {
             onContinueShopping={() => navigateTo('home')}
             onSelectProduct={handleSelectProduct}
             onQuickAdd={handleQuickAdd}
+            onNotifyMe={setWaitlistProduct}
             onToggleWishlist={handleToggleWishlist}
             onToggleCompare={handleToggleCompare}
           />
@@ -665,12 +757,14 @@ export default function App() {
             locale={locale}
             wishlistIds={wishlistIds}
             compareIds={compareIds}
+            waitlistIds={waitlistIds}
             orders={orders}
             userSession={userSession}
             recentlyAddedId={recentlyAddedId}
             onBackHome={() => navigateTo('home')}
             onSelectProduct={handleSelectProduct}
             onQuickAdd={handleQuickAdd}
+            onNotifyMe={setWaitlistProduct}
             onToggleWishlist={handleToggleWishlist}
             onToggleCompare={handleToggleCompare}
             onInspectOrder={(orderId) => {
@@ -710,6 +804,71 @@ export default function App() {
         </div>
       )}
 
+      {restockAlert && (
+        <div
+          role="status"
+          className="fixed top-28 right-4 z-[95] max-w-sm p-4 rounded-2xl ice-obsidian text-[#FFFDF5] shadow-2xl border border-[#F4BE38]/60"
+        >
+          <div className="flex items-start gap-3">
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Notification de réapprovisionnement simulée.'
+                  : 'Simulated restock notification.'
+              }
+            >
+              <div className="w-9 h-9 rounded-xl bg-[#F4BE38] text-[#1A1033] flex items-center justify-center shrink-0">
+                <BellRing className="w-4 h-4" />
+              </div>
+            </ActionIconTooltip>
+            <div className="flex-1 min-w-0">
+              <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#F4BE38]">
+                {locale === 'fr'
+                  ? 'Alerte Réapprovisionnement'
+                  : 'Restock Alert'}
+              </p>
+              <p className="text-xs font-bold text-white mt-0.5 line-clamp-2">
+                {locale === 'fr'
+                  ? restockAlert.product.nameFr
+                  : restockAlert.product.nameEn}
+              </p>
+              <p className="text-[11px] text-[#E6DCF8] mt-1">
+                {locale === 'fr'
+                  ? `Notification prête pour ${restockAlert.email}`
+                  : `Alert ready for ${restockAlert.email}`}
+              </p>
+              <button
+                type="button"
+                onClick={() => {
+                  const target = restockAlert.product;
+                  setRestockAlert(null);
+                  handleSelectProduct(target);
+                }}
+                className="mt-2 px-3 py-1 rounded-full glass-pill-gold text-[11px] font-extrabold"
+              >
+                {locale === 'fr' ? 'Voir l’article' : 'View Item'}
+              </button>
+            </div>
+            <ActionIconTooltip
+              text={
+                locale === 'fr'
+                  ? 'Fermer cette alerte de réapprovisionnement.'
+                  : 'Dismiss this restock alert.'
+              }
+            >
+              <button
+                type="button"
+                onClick={() => setRestockAlert(null)}
+                aria-label={locale === 'fr' ? 'Fermer' : 'Close'}
+                className="w-7 h-7 rounded-lg ice-surface flex items-center justify-center text-[#1A1033]"
+              >
+                <X className="w-3.5 h-3.5" />
+              </button>
+            </ActionIconTooltip>
+          </div>
+        </div>
+      )}
+
       {activeScreen !== 'compare' && (
         <CompareBar
           locale={locale}
@@ -735,10 +894,25 @@ export default function App() {
         onOpenChange={setChatOpen}
         messages={chatMessages}
         onMessagesChange={setChatMessages}
+        activeScreen={activeScreen}
+        activeCategory={activeCategory}
         activeProduct={activeScreen === 'product' ? selectedProduct : null}
         comparedProducts={comparedProducts}
+        cart={cart}
+        appliedPromoCode={appliedPromoCode}
+        wishlistIds={wishlistIds}
+        waitlistIds={waitlistIds}
+        orders={orders}
+        userSession={userSession}
         queuedPrompt={queuedChatPrompt}
         onClearQueuedPrompt={() => setQueuedChatPrompt(null)}
+        onNavigate={navigateTo}
+        onSelectCategory={(slug) => handleSelectCategory(slug)}
+        onSelectProduct={handleSelectProduct}
+        onInspectOrder={(orderId) => {
+          setActiveOrderId(orderId);
+          navigateTo('tracking');
+        }}
         elevated={activeScreen === 'product'}
       />
 
@@ -773,6 +947,23 @@ export default function App() {
         locale={locale}
         onClose={() => setAuthModalOpen(false)}
         onAuthSuccess={(session) => setUserSession(session)}
+      />
+
+      <RestockWaitlistModal
+        product={waitlistProduct}
+        locale={locale}
+        defaultEmail={userSession?.email}
+        existingEntry={
+          waitlistProduct
+            ? waitlistEntries.find(
+                (entry) => entry.productId === waitlistProduct.id
+              )
+            : undefined
+        }
+        onClose={() => setWaitlistProduct(null)}
+        onJoinWaitlist={handleJoinWaitlist}
+        onLeaveWaitlist={handleLeaveWaitlist}
+        onSimulateRestockAlert={triggerRestockAlert}
       />
     </div>
   );
