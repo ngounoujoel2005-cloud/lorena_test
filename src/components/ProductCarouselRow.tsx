@@ -74,6 +74,7 @@ export function ProductCarouselRow({
           product={product}
           locale={locale}
           compact
+          disableKeyboardFocus={isDuplicate}
           isWishlisted={wishlistIds.includes(product.id)}
           isCompared={compareIds.includes(product.id)}
           isWaitlisted={waitlistIds.includes(product.id)}
@@ -111,7 +112,11 @@ export function ProductCarouselRow({
             <div className="hidden sm:flex items-center gap-1.5">
               <button
                 type="button"
-                aria-label="Précédent"
+                aria-label={
+                  locale === 'fr'
+                    ? `Défiler ${title} vers la gauche`
+                    : `Scroll ${title} left`
+                }
                 onClick={() => scrollBy(-400)}
                 className="glass-pill-frost w-8 h-8 rounded-full text-[#000000] flex items-center justify-center cursor-pointer"
               >
@@ -119,7 +124,11 @@ export function ProductCarouselRow({
               </button>
               <button
                 type="button"
-                aria-label="Suivant"
+                aria-label={
+                  locale === 'fr'
+                    ? `Défiler ${title} vers la droite`
+                    : `Scroll ${title} right`
+                }
                 onClick={() => scrollBy(400)}
                 className="glass-pill-cta w-8 h-8 rounded-full text-white flex items-center justify-center cursor-pointer"
               >
@@ -164,7 +173,11 @@ export function ProductCarouselRow({
               >
                 <button
                   type="button"
-                  aria-label="Précédent"
+                  aria-label={
+                    locale === 'fr'
+                      ? `Défiler ${title} vers la gauche`
+                      : `Scroll ${title} left`
+                  }
                   onClick={() => scrollBy(-420)}
                   className="glass-pill-frost w-8 h-8 rounded-full text-[#000000] flex items-center justify-center cursor-pointer"
                 >
@@ -181,7 +194,11 @@ export function ProductCarouselRow({
               >
                 <button
                   type="button"
-                  aria-label="Suivant"
+                  aria-label={
+                    locale === 'fr'
+                      ? `Défiler ${title} vers la droite`
+                      : `Scroll ${title} right`
+                  }
                   onClick={() => scrollBy(420)}
                   className="glass-pill-cta w-8 h-8 rounded-full text-white flex items-center justify-center cursor-pointer"
                 >

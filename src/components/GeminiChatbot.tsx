@@ -67,6 +67,7 @@ const VALID_SCREENS = new Set<AppScreen>([
   'tracking',
   'wishlist',
   'account',
+  'rewards',
   'help',
 ]);
 
@@ -238,6 +239,15 @@ export function GeminiChatbot({
       scrollEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }
   }, [isOpen, messages, isSending]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onOpenChange(false);
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onOpenChange]);
 
   const handleAppLink = (href: string) => {
     if (!href.startsWith('app://')) return;
@@ -432,14 +442,14 @@ export function GeminiChatbot({
       ? [
           { label: 'Catalogue', screen: 'category' },
           { label: 'Panier', screen: 'cart' },
-          { label: 'Suivi', screen: 'tracking' },
+          { label: 'Rewards', screen: 'rewards' },
           { label: 'Comparer', screen: 'compare' },
           { label: 'Aide', screen: 'help' },
         ]
       : [
           { label: 'Catalog', screen: 'category' },
           { label: 'Bag', screen: 'cart' },
-          { label: 'Tracking', screen: 'tracking' },
+          { label: 'Rewards', screen: 'rewards' },
           { label: 'Compare', screen: 'compare' },
           { label: 'Help', screen: 'help' },
         ];
@@ -468,6 +478,7 @@ export function GeminiChatbot({
             type="button"
             onClick={() => onOpenChange(!isOpen)}
             aria-expanded={isOpen}
+            aria-controls="lorena-ai-dialog"
             aria-label={
               isOpen
                 ? locale === 'fr'
@@ -509,6 +520,7 @@ export function GeminiChatbot({
       {/* Multi-turn Chat Dialog anchored directly ABOVE the Lorena IA button with z-index 100 */}
       {isOpen && (
         <aside
+          id="lorena-ai-dialog"
           aria-label="Lorena Assistant"
           className={`no-print ice-surface fixed right-4 left-4 sm:left-auto sm:w-[400px] h-[495px] z-[100] rounded-3xl flex flex-col shadow-2xl ${
             elevated
@@ -579,7 +591,7 @@ export function GeminiChatbot({
               >
                 <button
                   type="button"
-                  aria-label="Fermer"
+                  aria-label={locale === 'fr' ? 'Fermer l’assistant' : 'Close assistant'}
                   onClick={() => onOpenChange(false)}
                   className="w-8 h-8 rounded-full hover:bg-white/15 text-white/85 hover:text-white flex items-center justify-center cursor-pointer"
                 >
@@ -605,6 +617,7 @@ export function GeminiChatbot({
               >
                 <button
                   type="button"
+                  aria-pressed={modelMode === 'standard'}
                   onClick={() => setModelMode('standard')}
                   className={`px-3 py-1 rounded-full font-bold inline-flex items-center gap-1 cursor-pointer transition-all ${
                     modelMode === 'standard'
@@ -626,6 +639,7 @@ export function GeminiChatbot({
               >
                 <button
                   type="button"
+                  aria-pressed={modelMode === 'fast'}
                   onClick={() => setModelMode('fast')}
                   className={`px-3 py-1 rounded-full font-bold inline-flex items-center gap-1 cursor-pointer transition-all ${
                     modelMode === 'fast'
@@ -641,12 +655,16 @@ export function GeminiChatbot({
           </div>
 
           {/* Quick Page Navigation Strip */}
-          <div className="px-3 py-1.5 border-b border-white/70 bg-white/40 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0">
+          <nav
+            aria-label={locale === 'fr' ? 'Raccourcis de pages' : 'Quick page links'}
+            className="px-3 py-1.5 border-b border-white/70 bg-white/40 flex items-center gap-1.5 overflow-x-auto no-scrollbar shrink-0"
+          >
             <Compass className="w-3.5 h-3.5 text-[#5A5AA1] shrink-0" aria-hidden="true" />
             {quickPages.map((pg) => (
               <button
                 key={pg.screen}
                 type="button"
+                aria-current={activeScreen === pg.screen ? 'page' : undefined}
                 onClick={() => {
                   if (pg.screen === 'category') {
                     onSelectCategory('all');
@@ -663,7 +681,7 @@ export function GeminiChatbot({
                 {pg.label}
               </button>
             ))}
-          </div>
+          </nav>
 
           {/* Scrollable Message Thread */}
           <div className="flex-1 overflow-y-auto p-4 space-y-3">
@@ -733,7 +751,7 @@ export function GeminiChatbot({
             )}
 
             {errorMsg && (
-              <div className="p-3 rounded-2xl bg-[#ffdad6]/90 border border-[#ba1a1a]/30 text-[#93000a] text-xs font-medium flex items-start gap-2 backdrop-blur-md">
+              <div role="alert" className="p-3 rounded-2xl bg-[#ffdad6]/90 border border-[#ba1a1a]/30 text-[#93000a] text-xs font-medium flex items-start gap-2 backdrop-blur-md">
                 <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" aria-hidden="true" />
                 <span>{errorMsg}</span>
               </div>
@@ -751,6 +769,11 @@ export function GeminiChatbot({
               type="text"
               value={input}
               onChange={(e) => setInput(e.target.value)}
+              aria-label={
+                locale === 'fr'
+                  ? 'Message pour Lorena Assistant'
+                  : 'Message for Lorena Assistant'
+              }
               placeholder={
                 locale === 'fr'
                   ? 'Posez une question ou demandez un lien...'

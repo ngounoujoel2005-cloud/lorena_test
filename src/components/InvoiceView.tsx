@@ -315,6 +315,12 @@ export function InvoiceView({
               <button
                 key={order.id}
                 type="button"
+                aria-pressed={isSelected}
+                aria-label={
+                  locale === 'fr'
+                    ? `Sélectionner la facture #${order.id}`
+                    : `Select invoice #${order.id}`
+                }
                 onClick={() => handleSelectOrder(order)}
                 className={`min-h-[36px] px-3.5 py-1 rounded-full text-xs font-bold whitespace-nowrap shrink-0 cursor-pointer ${
                   isSelected
@@ -409,6 +415,10 @@ export function InvoiceView({
             <div className="space-y-2.5">
               <button
                 type="button"
+                aria-pressed={
+                  selectedOrder.paymentMethod === 'mtn_momo' ||
+                  selectedPayOption === 'mtn_momo'
+                }
                 onClick={() => handleApplyPaymentOption('mtn_momo')}
                 className={`w-full p-3.5 rounded-2xl text-left flex items-center justify-between gap-3 cursor-pointer transition-all ${
                   selectedOrder.paymentMethod === 'mtn_momo' ||
@@ -434,6 +444,10 @@ export function InvoiceView({
 
               <button
                 type="button"
+                aria-pressed={
+                  selectedOrder.paymentMethod === 'orange_money' ||
+                  selectedPayOption === 'orange_money'
+                }
                 onClick={() => handleApplyPaymentOption('orange_money')}
                 className={`w-full p-3.5 rounded-2xl text-left flex items-center justify-between gap-3 cursor-pointer transition-all ${
                   selectedOrder.paymentMethod === 'orange_money' ||
@@ -481,7 +495,10 @@ export function InvoiceView({
             </div>
 
             {paymentMessage && (
-              <div className="ice-surface-subtle p-3 rounded-2xl border border-[#5A5AA1]/40 text-xs font-semibold text-[#000000]">
+              <div
+                role="status"
+                className="ice-surface-subtle p-3 rounded-2xl border border-[#5A5AA1]/40 text-xs font-semibold text-[#000000]"
+              >
                 {paymentMessage}
               </div>
             )}

@@ -49,8 +49,17 @@ export function getPromoDiscount(subtotal: number, promoCode: string | null): nu
   if (normalized === 'LORENA10') {
     return Math.round(subtotal * 0.1);
   }
-  if (normalized === 'BIENVENUE') {
+  if (normalized === 'BIENVENUE' || normalized === 'REWARD5000') {
     return Math.min(5000, subtotal);
+  }
+  if (normalized === 'FREESHIP' || normalized === 'REWARD2500') {
+    return Math.min(2500, subtotal);
+  }
+  if (normalized === 'REWARD15000') {
+    return Math.min(15000, subtotal);
+  }
+  if (normalized === 'REWARD35000') {
+    return Math.min(35000, subtotal);
   }
   return 0;
 }
@@ -102,26 +111,50 @@ export function CartPageScreen({
       setPromoFeedback(null);
       return;
     }
-    if (cleaned === 'LORENA10' || cleaned === 'BIENVENUE') {
+    const validCodes: Record<string, { fr: string; en: string }> = {
+      LORENA10: {
+        fr: 'Code LORENA10 appliqué (-10 %).',
+        en: 'Code LORENA10 applied (-10%).',
+      },
+      BIENVENUE: {
+        fr: 'Code BIENVENUE appliqué (-5 000 XAF).',
+        en: 'Code BIENVENUE applied (-5,000 XAF).',
+      },
+      FREESHIP: {
+        fr: 'Code FREESHIP appliqué (-2 500 XAF livraison).',
+        en: 'Code FREESHIP applied (-2,500 XAF shipping).',
+      },
+      REWARD2500: {
+        fr: 'Bon Lorena Rewards appliqué (-2 500 XAF).',
+        en: 'Lorena Rewards voucher applied (-2,500 XAF).',
+      },
+      REWARD5000: {
+        fr: 'Bon Lorena Rewards appliqué (-5 000 XAF).',
+        en: 'Lorena Rewards voucher applied (-5,000 XAF).',
+      },
+      REWARD15000: {
+        fr: 'Bon Prestige appliqué (-15 000 XAF).',
+        en: 'Prestige voucher applied (-15,000 XAF).',
+      },
+      REWARD35000: {
+        fr: 'Bon Diamant appliqué (-35 000 XAF).',
+        en: 'Diamond voucher applied (-35,000 XAF).',
+      },
+    };
+
+    if (validCodes[cleaned]) {
       onApplyPromoCode(cleaned);
       setPromoFeedback({
         ok: true,
-        message:
-          cleaned === 'LORENA10'
-            ? locale === 'fr'
-              ? 'Code LORENA10 appliqué (-10 %).'
-              : 'Code LORENA10 applied (-10%).'
-            : locale === 'fr'
-            ? 'Code BIENVENUE appliqué (-5 000 XAF).'
-            : 'Code BIENVENUE applied (-5,000 XAF).',
+        message: locale === 'fr' ? validCodes[cleaned].fr : validCodes[cleaned].en,
       });
     } else {
       setPromoFeedback({
         ok: false,
         message:
           locale === 'fr'
-            ? 'Code invalide. Essayez LORENA10 ou BIENVENUE.'
-            : 'Invalid code. Try LORENA10 or BIENVENUE.',
+            ? 'Code invalide. Essayez LORENA10, BIENVENUE ou un code Lorena Rewards.'
+            : 'Invalid code. Try LORENA10, BIENVENUE, or a Lorena Rewards code.',
       });
     }
   };
@@ -268,7 +301,11 @@ export function CartPageScreen({
                     >
                       <button
                         type="button"
-                        aria-label={`Supprimer ${item.name}`}
+                        aria-label={
+                          locale === 'fr'
+                            ? `Supprimer ${item.name} du panier`
+                            : `Remove ${item.name} from cart`
+                        }
                         onClick={() => onRemoveItem(item.productId, item.variantId)}
                         className="p-2 text-[#3F3F56] hover:text-[#ba1a1a] cursor-pointer shrink-0"
                       >
@@ -285,7 +322,11 @@ export function CartPageScreen({
                       >
                         <button
                           type="button"
-                          aria-label="Diminuer"
+                          aria-label={
+                            locale === 'fr'
+                              ? `Diminuer la quantité de ${item.name}`
+                              : `Decrease quantity of ${item.name}`
+                          }
                           onClick={() =>
                             onUpdateQuantity(item.productId, item.variantId, -1)
                           }
@@ -303,7 +344,11 @@ export function CartPageScreen({
                       >
                         <button
                           type="button"
-                          aria-label="Augmenter"
+                          aria-label={
+                            locale === 'fr'
+                              ? `Augmenter la quantité de ${item.name}`
+                              : `Increase quantity of ${item.name}`
+                          }
                           onClick={() =>
                             onUpdateQuantity(item.productId, item.variantId, 1)
                           }
@@ -435,6 +480,7 @@ export function CartPageScreen({
                     type="text"
                     value={promoInput}
                     onChange={(e) => setPromoInput(e.target.value)}
+                    aria-label={locale === 'fr' ? 'Code promo' : 'Promo code'}
                     placeholder={
                       locale === 'fr' ? 'Entrez votre code' : 'Enter promo code'
                     }
@@ -449,6 +495,7 @@ export function CartPageScreen({
                 </div>
                 {promoFeedback && (
                   <p
+                    role={promoFeedback.ok ? 'status' : 'alert'}
                     className={`text-[11px] font-semibold ${
                       promoFeedback.ok ? 'text-[#5A5AA1]' : 'text-[#ba1a1a]'
                     }`}
@@ -552,6 +599,11 @@ export function CartPageScreen({
                     type="tel"
                     value={savePhone}
                     onChange={(e) => setSavePhone(e.target.value)}
+                    aria-label={
+                      locale === 'fr'
+                        ? 'Numéro WhatsApp ou SMS pour sauvegarder le panier'
+                        : 'WhatsApp or SMS number to save cart'
+                    }
                     placeholder="670123123"
                     className="min-h-[38px] flex-1 px-2.5 bg-transparent text-xs text-[#000000] tabular-nums focus:outline-none min-w-0"
                   />
@@ -564,7 +616,10 @@ export function CartPageScreen({
                 </button>
               </div>
               {savePhoneConfirmed && (
-                <p className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#5A5AA1]">
+                <p
+                  role="status"
+                  className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#5A5AA1]"
+                >
                   <CheckCircle2 className="w-3.5 h-3.5" aria-hidden="true" />
                   <span>
                     {locale === 'fr'

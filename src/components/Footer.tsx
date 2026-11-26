@@ -174,7 +174,7 @@ export function Footer({ locale, onNavigate }: FooterProps) {
                 </p>
               )}
               {emailStatus === 'error' && (
-                <p className="mt-2 px-2 text-xs font-medium text-[#F4BE38]">
+                <p role="alert" className="mt-2 px-2 text-xs font-medium text-[#F4BE38]">
                   {locale === 'fr'
                     ? 'Veuillez saisir une adresse e-mail valide et accepter les conditions.'
                     : 'Please enter a valid email address and accept the terms.'}
@@ -214,7 +214,11 @@ export function Footer({ locale, onNavigate }: FooterProps) {
                     setStatus('idle');
                   }}
                   placeholder="670123123"
-                  aria-label="Numéro WhatsApp ou SMS"
+                  aria-label={
+                    locale === 'fr'
+                      ? 'Numéro WhatsApp ou SMS'
+                      : 'WhatsApp or SMS phone number'
+                  }
                   className="flex-1 bg-transparent px-4 py-2 text-sm text-[#000000] placeholder:text-[#3F3F56]/70 focus:outline-none min-w-0 tabular-nums"
                 />
 
@@ -227,13 +231,13 @@ export function Footer({ locale, onNavigate }: FooterProps) {
               </div>
 
               {status === 'success' && (
-                <p className="mt-2 px-2 text-xs font-medium text-[#F4BE38] inline-flex items-center gap-1.5">
+                <p role="status" className="mt-2 px-2 text-xs font-medium text-[#F4BE38] inline-flex items-center gap-1.5">
                   <Check className="w-4 h-4 shrink-0" aria-hidden="true" />
                   <span>{t.newsletterSuccess}</span>
                 </p>
               )}
               {status === 'error' && (
-                <p className="mt-2 px-2 text-xs font-medium text-[#F4BE38]">
+                <p role="alert" className="mt-2 px-2 text-xs font-medium text-[#F4BE38]">
                   {t.newsletterError}
                 </p>
               )}
@@ -257,7 +261,7 @@ export function Footer({ locale, onNavigate }: FooterProps) {
 
         {/* 5-Column Links Grid */}
         <div className="px-4 sm:px-8 py-8 sm:py-10 grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6 sm:gap-8 text-sm">
-          <div>
+          <nav aria-label={t.footerCustomerService}>
             <h3 className="font-display text-xs font-bold uppercase tracking-wider text-[#F4BE38] mb-4">
               {t.footerCustomerService}
             </h3>
@@ -288,9 +292,9 @@ export function Footer({ locale, onNavigate }: FooterProps) {
                 </button>
               </li>
             </ul>
-          </div>
+          </nav>
 
-          <div>
+          <nav aria-label={t.footerNeedHelp}>
             <h3 className="font-display text-xs font-bold uppercase tracking-wider text-[#F4BE38] mb-4">
               {t.footerNeedHelp}
             </h3>
@@ -321,9 +325,9 @@ export function Footer({ locale, onNavigate }: FooterProps) {
                 </button>
               </li>
             </ul>
-          </div>
+          </nav>
 
-          <div>
+          <nav aria-label={t.footerMyAccount}>
             <h3 className="font-display text-xs font-bold uppercase tracking-wider text-[#F4BE38] mb-4">
               {t.footerMyAccount}
             </h3>
@@ -349,14 +353,19 @@ export function Footer({ locale, onNavigate }: FooterProps) {
                 </button>
               </li>
               <li>
+                <button type="button" onClick={() => onNavigate('rewards')} className="hover:text-[#F4BE38] cursor-pointer">
+                  Lorena Rewards
+                </button>
+              </li>
+              <li>
                 <button type="button" onClick={() => onNavigate('account')} className="hover:text-[#F4BE38] cursor-pointer">
                   {locale === 'fr' ? 'Mon compte' : 'My account'}
                 </button>
               </li>
             </ul>
-          </div>
+          </nav>
 
-          <div>
+          <nav aria-label={t.footerOurShop}>
             <h3 className="font-display text-xs font-bold uppercase tracking-wider text-[#F4BE38] mb-4">
               {t.footerOurShop}
             </h3>
@@ -377,7 +386,7 @@ export function Footer({ locale, onNavigate }: FooterProps) {
                 </button>
               </li>
             </ul>
-          </div>
+          </nav>
 
           {/* Socials & Direct Contact */}
           <div className="col-span-2 sm:col-span-1 space-y-4">
@@ -487,7 +496,7 @@ export function Footer({ locale, onNavigate }: FooterProps) {
               >
                 <button
                   type="button"
-                  aria-label="Haut de page"
+                  aria-label={locale === 'fr' ? 'Remonter en haut de la page' : 'Back to top'}
                   onClick={scrollToTop}
                   className="glass-pill-cta w-10 h-10 rounded-full text-white flex items-center justify-center cursor-pointer"
                 >

@@ -15,7 +15,7 @@ import {
   Utensils,
   X,
 } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { CATEGORIES_META } from '../data/catalog';
 import { CATEGORY_SUBMENUS } from '../data/helpAndCategories';
 import { CategorySlug, Locale } from '../types/store';
@@ -62,6 +62,18 @@ export function CategoryDrawer({
   onSelectCategory,
 }: CategoryDrawerProps) {
   const [drillSlug, setDrillSlug] = useState<CategorySlug | null>(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setDrillSlug(null);
+        onClose();
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -116,7 +128,7 @@ export function CategoryDrawer({
           >
             <button
               type="button"
-              aria-label="Fermer"
+              aria-label={locale === 'fr' ? 'Fermer les catégories' : 'Close categories'}
               onClick={() => {
                 setDrillSlug(null);
                 onClose();
@@ -131,7 +143,14 @@ export function CategoryDrawer({
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-3">
           {!drillSlug ? (
-            <nav aria-label="Rayons Lorena Market" className="space-y-1.5">
+            <nav
+              aria-label={
+                locale === 'fr'
+                  ? 'Rayons Lorena Market'
+                  : 'Lorena Market departments'
+              }
+              className="space-y-1.5"
+            >
               {CATEGORIES_META.map((cat) => {
                 const Icon = getCategoryIcon(cat.slug);
                 return (

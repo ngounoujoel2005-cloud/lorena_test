@@ -281,6 +281,7 @@ export function WarrantyScreen({
               <button
                 key={topic.id}
                 type="button"
+                aria-pressed={active}
                 onClick={() => {
                   setActiveTopicId(topic.id);
                   setFaqSearch('');
@@ -310,6 +311,7 @@ export function WarrantyScreen({
 
           <button
             type="button"
+            aria-pressed={isWarrantyTab}
             onClick={() => setActiveTopicId('garantie_lookup')}
             className={`w-full px-4 py-3.5 rounded-2xl flex items-center justify-between gap-3 text-left text-xs sm:text-sm font-bold transition-all cursor-pointer ${
               isWarrantyTab
@@ -392,6 +394,11 @@ export function WarrantyScreen({
                     type="search"
                     value={faqSearch}
                     onChange={(e) => setFaqSearch(e.target.value)}
+                    aria-label={
+                      locale === 'fr'
+                        ? 'Rechercher dans le centre d’aide'
+                        : 'Search help center questions'
+                    }
                     placeholder={
                       locale === 'fr'
                         ? 'Tapez des mots-clés comme « retour »'
@@ -416,6 +423,8 @@ export function WarrantyScreen({
                       <div key={item.id}>
                         <button
                           type="button"
+                          aria-expanded={isOpen}
+                          aria-controls={`help-faq-${item.id}`}
                           onClick={() =>
                             setOpenFaqId((prev) =>
                               prev === item.id ? null : item.id
@@ -447,7 +456,10 @@ export function WarrantyScreen({
                           </ActionIconTooltip>
                         </button>
                         {isOpen && (
-                          <div className="px-6 pb-5 text-sm text-[#3F3F56] leading-relaxed bg-white/30">
+                          <div
+                            id={`help-faq-${item.id}`}
+                            className="px-6 pb-5 text-sm text-[#3F3F56] leading-relaxed bg-white/30"
+                          >
                             {locale === 'fr' ? item.aFr : item.aEn}
                           </div>
                         )}
@@ -496,7 +508,11 @@ export function WarrantyScreen({
                     type="text"
                     value={serialQuery}
                     onChange={(e) => setSerialQuery(e.target.value)}
-                    aria-label="Numéro de garantie"
+                    aria-label={
+                      locale === 'fr'
+                        ? 'Numéro de série garantie ou commande'
+                        : 'Warranty serial or order ID'
+                    }
                     className="min-h-[44px] w-full pl-2.5 bg-transparent font-mono text-sm text-[#000000] focus:outline-none"
                   />
                 </div>
@@ -552,7 +568,10 @@ export function WarrantyScreen({
             )}
 
             {notFound && (
-              <div className="p-4 rounded-2xl bg-[#ffdad6]/90 border border-[#ba1a1a]/30 text-[#93000a] text-sm font-medium backdrop-blur-md">
+              <div
+                role="alert"
+                className="p-4 rounded-2xl bg-[#ffdad6]/90 border border-[#ba1a1a]/30 text-[#93000a] text-sm font-medium backdrop-blur-md"
+              >
                 {locale === 'fr'
                   ? `Aucun certificat trouvé pour « ${serialQuery} ».`
                   : `No warranty certificate matched "${serialQuery}".`}

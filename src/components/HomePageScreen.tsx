@@ -7,7 +7,7 @@ import {
   Ticket,
   Trash2,
 } from 'lucide-react';
-import { type RefObject, useEffect, useMemo, useRef, useState } from 'react';
+import { type KeyboardEvent, type RefObject, useEffect, useMemo, useRef, useState } from 'react';
 import {
   CATEGORIES_META,
   IMAGES,
@@ -227,6 +227,14 @@ export function HomePageScreen({
     }
   };
 
+  const handleCardKeyDown =
+    (action: () => void) => (e: KeyboardEvent<HTMLElement>) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        action();
+      }
+    };
+
   const renderAutoScrollingProducts = (
     items: Product[],
     prefix: string,
@@ -256,6 +264,7 @@ export function HomePageScreen({
                   product={product}
                   locale={locale}
                   compact
+                  disableKeyboardFocus={dupIdx === 1}
                   isWishlisted={wishlistIds.includes(product.id)}
                   isCompared={compareIds.includes(product.id)}
                   isWaitlisted={waitlistIds.includes(product.id)}
@@ -315,7 +324,11 @@ export function HomePageScreen({
             <div className="flex items-center gap-2">
               <button
                 type="button"
-                aria-label={locale === 'fr' ? 'Précédent' : 'Previous'}
+                aria-label={
+                  locale === 'fr'
+                    ? 'Défiler les offres VIP vers la gauche'
+                    : 'Scroll VIP offers left'
+                }
                 onClick={() => scrollVipPromoRow(-400)}
                 className="glass-pill-frost w-8 h-8 rounded-full text-[#000000] hidden sm:flex items-center justify-center cursor-pointer"
               >
@@ -323,7 +336,11 @@ export function HomePageScreen({
               </button>
               <button
                 type="button"
-                aria-label={locale === 'fr' ? 'Suivant' : 'Next'}
+                aria-label={
+                  locale === 'fr'
+                    ? 'Défiler les offres VIP vers la droite'
+                    : 'Scroll VIP offers right'
+                }
                 onClick={() => scrollVipPromoRow(400)}
                 className="glass-pill-cta w-8 h-8 rounded-full text-white hidden sm:flex items-center justify-center cursor-pointer"
               >
@@ -343,7 +360,17 @@ export function HomePageScreen({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3.5">
             {/* Card 1: Accessoires VIP / Prestige */}
             <div
+              role="button"
+              tabIndex={0}
+              aria-label={
+                locale === 'fr'
+                  ? 'Accessoires VIP — Collection Luxe & Prestige'
+                  : 'VIP Prestige — Luxury & Executive Gear'
+              }
               onClick={() => onSelectProduct(findProduct('watch-chronos-steel'))}
+              onKeyDown={handleCardKeyDown(() =>
+                onSelectProduct(findProduct('watch-chronos-steel'))
+              )}
               className="ice-obsidian relative rounded-3xl overflow-hidden text-white p-5 flex items-center justify-between gap-3 cursor-pointer group"
             >
               <div
@@ -380,7 +407,15 @@ export function HomePageScreen({
 
             {/* Card 2: Mes Offres & Ventes Flash */}
             <div
+              role="button"
+              tabIndex={0}
+              aria-label={
+                locale === 'fr'
+                  ? 'Mes Offres Flash — Jusqu’à -40% immédiat sur l’électronique'
+                  : 'Flash Deals — Up to -40% instant markdown on electronics'
+              }
               onClick={() => onSelectCategory('electronique')}
+              onKeyDown={handleCardKeyDown(() => onSelectCategory('electronique'))}
               className="ice-violet relative rounded-3xl overflow-hidden text-white p-5 flex items-center justify-between gap-3 cursor-pointer group"
             >
               <div className="relative z-10 space-y-2 min-w-0">
@@ -413,7 +448,15 @@ export function HomePageScreen({
 
             {/* Card 3: Good Deal & Lorena Loto */}
             <div
+              role="button"
+              tabIndex={0}
+              aria-label={
+                locale === 'fr'
+                  ? 'Good Deal & Lorena Loto — Code LORENA10 et tirage bonus'
+                  : 'Good Deal & Lorena Loto — Code LORENA10 and jackpot rewards'
+              }
               onClick={() => onSelectCategory('all')}
+              onKeyDown={handleCardKeyDown(() => onSelectCategory('all'))}
               className="ice-yellow relative rounded-3xl overflow-hidden text-[#000000] p-5 flex items-center justify-between gap-3 cursor-pointer group"
             >
               <div className="relative z-10 space-y-2 min-w-0">
@@ -515,6 +558,7 @@ export function HomePageScreen({
               <div className="mt-2.5 flex flex-wrap items-center gap-2">
                 <button
                   type="button"
+                  aria-pressed={bestOfferTab === 'new'}
                   onClick={() => setBestOfferTab('new')}
                   className={`min-h-[34px] px-4 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     bestOfferTab === 'new'
@@ -526,6 +570,7 @@ export function HomePageScreen({
                 </button>
                 <button
                   type="button"
+                  aria-pressed={bestOfferTab === 'clearance'}
                   onClick={() => setBestOfferTab('clearance')}
                   className={`min-h-[34px] px-4 py-1 rounded-full text-xs font-semibold transition-all cursor-pointer ${
                     bestOfferTab === 'clearance'
@@ -564,7 +609,11 @@ export function HomePageScreen({
                 >
                   <button
                     type="button"
-                    aria-label="Précédent"
+                    aria-label={
+                      locale === 'fr'
+                        ? 'Meilleures offres précédentes'
+                        : 'Previous best offers'
+                    }
                     onClick={() => scrollBestOffers(-450)}
                     className="glass-pill-frost w-8 h-8 rounded-full text-[#000000] flex items-center justify-center cursor-pointer"
                   >
@@ -581,7 +630,11 @@ export function HomePageScreen({
                 >
                   <button
                     type="button"
-                    aria-label="Suivant"
+                    aria-label={
+                      locale === 'fr'
+                        ? 'Meilleures offres suivantes'
+                        : 'Next best offers'
+                    }
                     onClick={() => scrollBestOffers(450)}
                     className="glass-pill-cta w-8 h-8 rounded-full text-white flex items-center justify-center cursor-pointer"
                   >
@@ -739,7 +792,11 @@ export function HomePageScreen({
               >
                 <button
                   type="button"
-                  aria-label={locale === 'fr' ? 'Précédent' : 'Previous'}
+                  aria-label={
+                    locale === 'fr'
+                      ? 'Recommandations précédentes'
+                      : 'Previous recommendations'
+                  }
                   onClick={() => scrollHistoryRow(-420)}
                   className="glass-pill-frost w-8 h-8 rounded-full text-[#000000] flex items-center justify-center cursor-pointer"
                 >
@@ -756,7 +813,11 @@ export function HomePageScreen({
               >
                 <button
                   type="button"
-                  aria-label={locale === 'fr' ? 'Suivant' : 'Next'}
+                  aria-label={
+                    locale === 'fr'
+                      ? 'Recommandations suivantes'
+                      : 'Next recommendations'
+                  }
                   onClick={() => scrollHistoryRow(420)}
                   className="glass-pill-cta w-8 h-8 rounded-full text-white flex items-center justify-center cursor-pointer"
                 >
@@ -812,7 +873,15 @@ export function HomePageScreen({
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 items-stretch">
           {/* Left Vertical Feature Poster */}
           <div
+            role="button"
+            tabIndex={0}
+            aria-label={
+              locale === 'fr'
+                ? 'Du bon son à partir de 14 990 FCFA — Explorer le rayon Électronique'
+                : 'Studio Sound starting from 14,990 FCFA — Browse Electronics'
+            }
             onClick={() => onSelectCategory('electronique')}
+            onKeyDown={handleCardKeyDown(() => onSelectCategory('electronique'))}
             className="ice-obsidian lg:col-span-3 rounded-3xl overflow-hidden text-white p-5 flex flex-col justify-between min-h-[280px] cursor-pointer group"
           >
             <div>
@@ -828,7 +897,7 @@ export function HomePageScreen({
             </div>
             <ActionIconTooltip
               className="block w-full my-4"
-              focusable
+              focusable={false}
               text={
                 locale === 'fr'
                   ? 'Illustration Audio Hi-Fi — cliquez pour explorer le rayon Électronique'
@@ -900,7 +969,17 @@ export function HomePageScreen({
 
       <section className="max-w-[1360px] mx-auto px-3 sm:px-4">
         <div
+          role="button"
+          tabIndex={0}
+          aria-label={
+            locale === 'fr'
+              ? 'Équipement cuisine inox 1.8L à 14 500 Fcfa — Voir l’offre'
+              : 'Stainless kitchen gear 1.8L at 14,500 Fcfa — Shop deal'
+          }
           onClick={() => onSelectProduct(findProduct('kettle-winning-18'))}
+          onKeyDown={handleCardKeyDown(() =>
+            onSelectProduct(findProduct('kettle-winning-18'))
+          )}
           className="ice-obsidian rounded-3xl overflow-hidden text-white px-4 sm:px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-5 cursor-pointer"
         >
           <div className="ice-product-trap w-28 h-24 rounded-2xl p-2 shrink-0 flex items-center justify-center">
@@ -957,7 +1036,17 @@ export function HomePageScreen({
       <section className="max-w-[1360px] mx-auto px-3 sm:px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div
+            role="button"
+            tabIndex={0}
+            aria-label={
+              locale === 'fr'
+                ? 'Blenders & Cuisine de 17 500 F à 57 000 F — Achetez'
+                : 'Blenders & Kitchen 17,500 F to 57,000 F — Buy now'
+            }
             onClick={() => onSelectCategory('petit-electromenager')}
+            onKeyDown={handleCardKeyDown(() =>
+              onSelectCategory('petit-electromenager')
+            )}
             className="ice-violet rounded-3xl text-white p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer"
           >
             <div className="min-w-0">
@@ -981,7 +1070,15 @@ export function HomePageScreen({
           </div>
 
           <div
+            role="button"
+            tabIndex={0}
+            aria-label={
+              locale === 'fr'
+                ? 'Smart TV 4K LG, Hisense et Cosmic de 62 500 F à 279 000 F — Achetez'
+                : 'Smart TV 4K LG, Hisense & Cosmic 62,500 F to 279,000 F — Buy now'
+            }
             onClick={() => onSelectCategory('electronique')}
+            onKeyDown={handleCardKeyDown(() => onSelectCategory('electronique'))}
             className="ice-obsidian rounded-3xl text-white p-4 sm:p-5 flex items-center justify-between gap-4 cursor-pointer"
           >
             <div className="min-w-0">
@@ -1023,7 +1120,17 @@ export function HomePageScreen({
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
           <div
+            role="button"
+            tabIndex={0}
+            aria-label={
+              locale === 'fr'
+                ? 'High-Tech à prix doux — Smartphones et tablettes'
+                : 'High-Tech at smart prices — Smartphones & tablets'
+            }
             onClick={() => onSelectCategory('telephones-tablettes')}
+            onKeyDown={handleCardKeyDown(() =>
+              onSelectCategory('telephones-tablettes')
+            )}
             className="ice-obsidian lg:col-span-3 rounded-3xl overflow-hidden text-white p-5 flex flex-col justify-between min-h-[280px] cursor-pointer"
           >
             <div className="ice-product-trap h-36 sm:h-40 rounded-2xl p-3 flex items-center justify-center">
@@ -1072,7 +1179,15 @@ export function HomePageScreen({
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-3.5 items-stretch">
           <div
+            role="button"
+            tabIndex={0}
+            aria-label={
+              locale === 'fr'
+                ? 'Beauté & Soins — Soins hydratants et bien-être'
+                : 'Beauty & Care — Skincare & wellness'
+            }
             onClick={() => onSelectCategory('sante-beaute')}
+            onKeyDown={handleCardKeyDown(() => onSelectCategory('sante-beaute'))}
             className="ice-violet lg:col-span-3 rounded-3xl overflow-hidden text-white p-5 flex flex-col justify-between min-h-[280px] cursor-pointer"
           >
             <div className="ice-product-trap h-36 sm:h-40 rounded-2xl p-3 flex items-center justify-center">
@@ -1125,7 +1240,17 @@ export function HomePageScreen({
       <section className="max-w-[1360px] mx-auto px-3 sm:px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div
+            role="button"
+            tabIndex={0}
+            aria-label={
+              locale === 'fr'
+                ? 'Climatiseur Split à 157 900 Fcfa — Dites adieu à la chaleur'
+                : 'Split AC unit at 157,900 Fcfa — Say goodbye to heat'
+            }
             onClick={() => onSelectProduct(findProduct('ac-icona-125'))}
+            onKeyDown={handleCardKeyDown(() =>
+              onSelectProduct(findProduct('ac-icona-125'))
+            )}
             className="ice-violet rounded-3xl p-4 sm:p-6 flex items-center justify-between gap-4 cursor-pointer"
           >
             <div className="text-white min-w-0">
@@ -1139,7 +1264,7 @@ export function HomePageScreen({
               </span>
             </div>
             <ActionIconTooltip
-              focusable
+              focusable={false}
               text={
                 locale === 'fr'
                   ? 'Illustration Climatiseur Split — cliquez pour consulter la fiche produit'
@@ -1157,7 +1282,17 @@ export function HomePageScreen({
           </div>
 
           <div
+            role="button"
+            tabIndex={0}
+            aria-label={
+              locale === 'fr'
+                ? 'Chaise ergonomique d’étude à partir de 55 000 Fcfa — Voir le produit'
+                : 'Ergonomic study chair starting from 55,000 Fcfa — View product'
+            }
             onClick={() => onSelectProduct(findProduct('chair-ergo-study'))}
+            onKeyDown={handleCardKeyDown(() =>
+              onSelectProduct(findProduct('chair-ergo-study'))
+            )}
             className="ice-yellow rounded-3xl p-4 sm:p-6 flex items-center justify-between gap-4 cursor-pointer"
           >
             <div className="text-[#000000] min-w-0">
@@ -1171,7 +1306,7 @@ export function HomePageScreen({
               </span>
             </div>
             <ActionIconTooltip
-              focusable
+              focusable={false}
               text={
                 locale === 'fr'
                   ? 'Illustration Chaise Ergonomique — cliquez pour consulter la fiche produit'

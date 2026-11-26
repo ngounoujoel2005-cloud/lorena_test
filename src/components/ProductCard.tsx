@@ -18,6 +18,7 @@ interface ProductCardProps {
   onToggleCompare?: (productId: string) => void;
   onNotifyMe?: (product: Product) => void;
   compact?: boolean;
+  disableKeyboardFocus?: boolean;
 }
 
 export function ProductCard({
@@ -33,10 +34,12 @@ export function ProductCard({
   onToggleCompare,
   onNotifyMe,
   compact = false,
+  disableKeyboardFocus = false,
 }: ProductCardProps) {
   const t = TRANSLATIONS[locale];
   const title = locale === 'fr' ? product.nameFr : product.nameEn;
   const isOutOfStock = product.stockQty <= 0;
+  const tabIdx = disableKeyboardFocus ? -1 : undefined;
 
   return (
     <article
@@ -76,8 +79,12 @@ export function ProductCard({
           >
             <button
               type="button"
+              tabIndex={tabIdx}
+              aria-label={
+                locale === 'fr' ? `Voir ${title}` : `View ${title}`
+              }
               onClick={() => onSelectProduct(product)}
-              className="w-full h-full cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5A5AA1] rounded-xl"
+              className="w-full h-full cursor-pointer rounded-xl"
             >
               <ProductImage
                 src={product.image}
@@ -104,7 +111,17 @@ export function ProductCard({
           >
             <button
               type="button"
-              aria-label={isWishlisted ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+              tabIndex={tabIdx}
+              aria-pressed={isWishlisted}
+              aria-label={
+                isWishlisted
+                  ? locale === 'fr'
+                    ? `Retirer ${title} des favoris`
+                    : `Remove ${title} from favorites`
+                  : locale === 'fr'
+                  ? `Ajouter ${title} aux favoris`
+                  : `Add ${title} to favorites`
+              }
               onClick={(e) => {
                 e.stopPropagation();
                 onToggleWishlist(product.id);
@@ -138,14 +155,16 @@ export function ProductCard({
             >
               <button
                 type="button"
+                tabIndex={tabIdx}
+                aria-pressed={isCompared}
                 aria-label={
                   isCompared
                     ? locale === 'fr'
-                      ? 'Retirer du comparatif'
-                      : 'Remove from comparison'
+                      ? `Retirer ${title} du comparatif`
+                      : `Remove ${title} from comparison`
                     : locale === 'fr'
-                    ? 'Ajouter au comparatif'
-                    : 'Add to comparison'
+                    ? `Ajouter ${title} au comparatif`
+                    : `Add ${title} to comparison`
                 }
                 onClick={(e) => {
                   e.stopPropagation();
@@ -167,7 +186,7 @@ export function ProductCard({
         {product.badgeType === 'second_hand' && (
           <div className="absolute bottom-2 left-4 z-20">
             <ActionIconTooltip
-              focusable
+              focusable={!disableKeyboardFocus}
               placement="right"
               text={
                 locale === 'fr'
@@ -188,6 +207,7 @@ export function ProductCard({
       <div className="px-3.5 pb-3.5 pt-2.5 flex flex-col flex-1">
         <button
           type="button"
+          tabIndex={tabIdx}
           onClick={() => onSelectProduct(product)}
           className="text-left cursor-pointer"
         >
@@ -214,11 +234,13 @@ export function ProductCard({
             {product.swatches.map((swatch) => (
               <ActionIconTooltip
                 key={swatch.name}
-                focusable
+                focusable={!disableKeyboardFocus}
                 placement="top"
                 text={`${locale === 'fr' ? 'Coloris disponible :' : 'Available finish:'} ${swatch.name}`}
               >
                 <span
+                  role="img"
+                  aria-label={swatch.name}
                   className="w-4 h-4 rounded-full border border-white shadow-sm block"
                   style={{ backgroundColor: swatch.hex }}
                 />
@@ -245,6 +267,16 @@ export function ProductCard({
             >
               <button
                 type="button"
+                tabIndex={tabIdx}
+                aria-label={
+                  isWaitlisted
+                    ? locale === 'fr'
+                      ? `Liste d’attente — ${title}`
+                      : `On waitlist — ${title}`
+                    : locale === 'fr'
+                    ? `M’alerter du retour en stock — ${title}`
+                    : `Notify me when restocked — ${title}`
+                }
                 onClick={() =>
                   onNotifyMe ? onNotifyMe(product) : onSelectProduct(product)
                 }
@@ -287,6 +319,8 @@ export function ProductCard({
             >
               <button
                 type="button"
+                tabIndex={tabIdx}
+                aria-label={`${t.buyBtn} — ${title}`}
                 onClick={() => onQuickAdd(product)}
                 className={`w-full min-h-[38px] px-3 py-2 rounded-full text-xs font-bold tracking-wide inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                   justAdded

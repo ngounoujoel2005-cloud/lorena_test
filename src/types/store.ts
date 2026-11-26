@@ -10,6 +10,7 @@ export type AppScreen =
   | 'tracking'
   | 'wishlist'
   | 'account'
+  | 'rewards'
   | 'help'
   | 'compare';
 
@@ -174,4 +175,54 @@ export interface WaitlistEntry {
   productId: string;
   email: string;
   createdAt: string;
+}
+
+export type RewardCategory = 'voucher' | 'shipping' | 'vip';
+
+export interface RewardCatalogItem {
+  id: string;
+  category: RewardCategory;
+  titleFr: string;
+  titleEn: string;
+  descriptionFr: string;
+  descriptionEn: string;
+  badgeFr: string;
+  badgeEn: string;
+  pointsCost: number;
+  promoCode?: string;
+  valueLabelFr: string;
+  valueLabelEn: string;
+}
+
+export interface RedeemedReward {
+  redemptionId: string;
+  rewardId: string;
+  titleFr: string;
+  titleEn: string;
+  pointsCost: number;
+  promoCode?: string;
+  redeemedAt: string;
+}
+
+export interface LoyaltyBonusEvent {
+  id: string;
+  type: 'signup' | 'checkin' | 'wishlist' | 'review';
+  titleFr: string;
+  titleEn: string;
+  points: number;
+  createdAt: string;
+}
+
+export interface PointActionEntry {
+  id: string;
+  kind: 'earn' | 'redeem';
+  source: 'order' | 'signup' | 'checkin' | 'wishlist' | 'review' | 'reward';
+  titleFr: string;
+  titleEn: string;
+  subtitleFr: string;
+  subtitleEn: string;
+  pointsDelta: number;
+  createdAt: string;
+  orderId?: string;
+  promoCode?: string;
 }

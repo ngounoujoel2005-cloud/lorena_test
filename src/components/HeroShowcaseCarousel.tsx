@@ -6,7 +6,7 @@ import {
   ShoppingCart,
   Sparkles,
 } from 'lucide-react';
-import { useEffect, useRef, useState } from 'react';
+import { KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { IMAGES, PRODUCTS } from '../data/catalog';
 import { CategorySlug, Locale, Product } from '../types/store';
 import { ActionIconTooltip } from './ActionIconTooltip';
@@ -46,6 +46,13 @@ export function HeroShowcaseCarousel({
     }
   };
 
+  const handleCardKeyDown = (action: () => void) => (e: KeyboardEvent<HTMLElement>) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      action();
+    }
+  };
+
   const renderDeck = (deckKey: string, isDuplicate = false) => (
     <div
       aria-hidden={isDuplicate}
@@ -54,7 +61,17 @@ export function HeroShowcaseCarousel({
       {/* SLIDE 1: Kinetic Brand Montage (modeled after video_animation_menu) */}
       <div
         key={`${deckKey}-montage`}
+        role={isDuplicate ? undefined : 'button'}
+        tabIndex={isDuplicate ? -1 : 0}
+        aria-label={
+          isDuplicate
+            ? undefined
+            : locale === 'fr'
+            ? 'Vitrine animée Lorena Market — Explorer la boutique'
+            : 'Lorena Market Showcase — Explore Store'
+        }
         onClick={() => onSelectCategory('all')}
+        onKeyDown={isDuplicate ? undefined : handleCardKeyDown(() => onSelectCategory('all'))}
         className="ice-obsidian relative w-[275px] sm:w-[340px] lg:w-[360px] min-h-[320px] sm:min-h-[340px] rounded-3xl overflow-hidden text-white p-5 sm:p-6 flex flex-col justify-between cursor-pointer group shrink-0"
       >
         {/* Ambient Animated Light Sweep & Glows */}
@@ -174,7 +191,17 @@ export function HeroShowcaseCarousel({
       {/* SLIDE 2: Rotating Product Showcase (photo_lorena_produit rotating inside crystal ice sphere) */}
       <div
         key={`${deckKey}-rotating`}
+        role={isDuplicate ? undefined : 'button'}
+        tabIndex={isDuplicate ? -1 : 0}
+        aria-label={
+          isDuplicate
+            ? undefined
+            : locale === 'fr'
+            ? 'Collection Lorena (-35%) — Voir Mode et Tech'
+            : 'Lorena Collection (-35%) — Shop Style and Tech'
+        }
         onClick={() => onSelectCategory('fashion')}
+        onKeyDown={isDuplicate ? undefined : handleCardKeyDown(() => onSelectCategory('fashion'))}
         className="ice-yellow relative w-[275px] sm:w-[330px] lg:w-[350px] min-h-[320px] sm:min-h-[340px] rounded-3xl overflow-hidden text-[#000000] p-5 flex flex-col justify-between cursor-pointer group shrink-0"
       >
         <div className="flex items-center justify-between gap-2 z-10">
@@ -238,7 +265,21 @@ export function HeroShowcaseCarousel({
       {/* SLIDE 3: Ergonomic Comfort Chair (Violet Frosted Ice) */}
       <div
         key={`${deckKey}-chair`}
+        role={isDuplicate ? undefined : 'button'}
+        tabIndex={isDuplicate ? -1 : 0}
+        aria-label={
+          isDuplicate
+            ? undefined
+            : locale === 'fr'
+            ? 'Chaise ergonomique bureau à partir de 55 000 Fcfa — Voir l’offre'
+            : 'Ergonomic office chair from 55,000 Fcfa — View offer'
+        }
         onClick={() => onSelectProduct(findProduct('chair-ergo-study'))}
+        onKeyDown={
+          isDuplicate
+            ? undefined
+            : handleCardKeyDown(() => onSelectProduct(findProduct('chair-ergo-study')))
+        }
         className="ice-violet w-[255px] sm:w-[290px] min-h-[320px] sm:min-h-[340px] rounded-3xl overflow-hidden text-white p-5 flex flex-col justify-between cursor-pointer group shrink-0"
       >
         <div>
@@ -291,7 +332,21 @@ export function HeroShowcaseCarousel({
       {/* SLIDE 4: Freshness Refrigerators (Clear Frosted Crystal Ice) */}
       <div
         key={`${deckKey}-fridge`}
+        role={isDuplicate ? undefined : 'button'}
+        tabIndex={isDuplicate ? -1 : 0}
+        aria-label={
+          isDuplicate
+            ? undefined
+            : locale === 'fr'
+            ? 'Réfrigérateurs Lorena — Découvrir le gros électroménager'
+            : 'Lorena Refrigerators — Discover home appliances'
+        }
         onClick={() => onSelectCategory('gros-electromenager')}
+        onKeyDown={
+          isDuplicate
+            ? undefined
+            : handleCardKeyDown(() => onSelectCategory('gros-electromenager'))
+        }
         className="ice-surface w-[235px] sm:w-[260px] min-h-[320px] sm:min-h-[340px] rounded-3xl overflow-hidden p-4 flex flex-col justify-between cursor-pointer group shrink-0"
       >
         <div>
@@ -329,7 +384,21 @@ export function HeroShowcaseCarousel({
       {/* SLIDE 5: Future Smartphones Pro 5G (Obsidian Crystal Ice + Blue Accent) */}
       <div
         key={`${deckKey}-phone`}
+        role={isDuplicate ? undefined : 'button'}
+        tabIndex={isDuplicate ? -1 : 0}
+        aria-label={
+          isDuplicate
+            ? undefined
+            : locale === 'fr'
+            ? 'Smartphone Pro 5G — Acheter maintenant'
+            : 'Pro 5G Smartphone — Shop now'
+        }
         onClick={() => onSelectProduct(findProduct('titan-x5-pro'))}
+        onKeyDown={
+          isDuplicate
+            ? undefined
+            : handleCardKeyDown(() => onSelectProduct(findProduct('titan-x5-pro')))
+        }
         className="ice-obsidian w-[255px] sm:w-[295px] min-h-[320px] sm:min-h-[340px] rounded-3xl overflow-hidden text-white p-5 flex flex-col justify-between cursor-pointer group shrink-0"
       >
         <div>
@@ -372,7 +441,17 @@ export function HeroShowcaseCarousel({
         className="w-[230px] sm:w-[250px] min-h-[320px] sm:min-h-[340px] flex flex-col gap-3.5 shrink-0"
       >
         <div
+          role={isDuplicate ? undefined : 'button'}
+          tabIndex={isDuplicate ? -1 : 0}
+          aria-label={
+            isDuplicate
+              ? undefined
+              : locale === 'fr'
+              ? 'Logistique Nationale Cameroun — Explorer la boutique'
+              : 'Nationwide Cameroon Logistics — Explore store'
+          }
           onClick={() => onSelectCategory('all')}
+          onKeyDown={isDuplicate ? undefined : handleCardKeyDown(() => onSelectCategory('all'))}
           className="ice-violet flex-1 rounded-3xl text-white p-4 flex flex-col justify-center cursor-pointer hover:brightness-105 transition-all"
         >
           <span className="text-[10px] font-bold uppercase tracking-wider text-[#F4BE38]">
@@ -386,7 +465,21 @@ export function HeroShowcaseCarousel({
         </div>
 
         <div
+          role={isDuplicate ? undefined : 'button'}
+          tabIndex={isDuplicate ? -1 : 0}
+          aria-label={
+            isDuplicate
+              ? undefined
+              : locale === 'fr'
+              ? 'Bouilloire Inox 1.8L à 14 500 Fcfa — Acheter'
+              : 'Steel Kettle 1.8L at 14,500 Fcfa — Buy now'
+          }
           onClick={() => onSelectProduct(findProduct('kettle-winning-18'))}
+          onKeyDown={
+            isDuplicate
+              ? undefined
+              : handleCardKeyDown(() => onSelectProduct(findProduct('kettle-winning-18')))
+          }
           className="ice-surface flex-1 rounded-3xl p-3.5 flex items-center gap-3 cursor-pointer hover:border-[#5A5AA1] transition-all"
         >
           <div className="ice-product-trap w-16 h-16 rounded-2xl p-1.5 shrink-0 flex items-center justify-center">
@@ -413,7 +506,15 @@ export function HeroShowcaseCarousel({
   );
 
   return (
-    <section className="w-full pt-4 sm:pt-5">
+    <section
+      aria-roledescription="carousel"
+      aria-label={
+        locale === 'fr'
+          ? 'Vitrine animée Lorena Market'
+          : 'Lorena Market Live Showcase'
+      }
+      className="w-full pt-4 sm:pt-5"
+    >
       {/* Carousel Header & Liquid Glass Controls */}
       <div className="max-w-[1360px] mx-auto px-3 sm:px-4 pb-3 flex flex-wrap items-center justify-between gap-2">
         <div className="flex flex-wrap items-center gap-2">
@@ -443,7 +544,16 @@ export function HeroShowcaseCarousel({
             <button
               type="button"
               onClick={() => setIsPlaying((p) => !p)}
-              aria-label={isPlaying ? 'Pause' : 'Play'}
+              aria-pressed={!isPlaying}
+              aria-label={
+                isPlaying
+                  ? locale === 'fr'
+                    ? 'Mettre en pause le défilement du carrousel'
+                    : 'Pause carousel scrolling'
+                  : locale === 'fr'
+                  ? 'Relancer le défilement du carrousel'
+                  : 'Resume carousel scrolling'
+              }
               className="glass-pill-frost min-h-[34px] px-3 py-1 rounded-full text-xs font-bold text-[#000000] inline-flex items-center gap-1.5 cursor-pointer"
             >
               {isPlaying ? (

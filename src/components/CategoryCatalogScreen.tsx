@@ -239,7 +239,7 @@ export function CategoryCatalogScreen({
             onChange={(e) =>
               setSortBy(e.target.value as 'featured' | 'price_asc' | 'price_desc')
             }
-            aria-label="Trier les produits"
+            aria-label={locale === 'fr' ? 'Trier les produits' : 'Sort products'}
             className="glass-input-recessed min-h-[40px] px-4 rounded-full text-xs font-bold text-[#000000] cursor-pointer focus:outline-none"
           >
             <option value="featured">
@@ -305,6 +305,11 @@ export function CategoryCatalogScreen({
                   <button
                     type="button"
                     onClick={() => handleToggleBrand(brand)}
+                    aria-label={
+                      locale === 'fr'
+                        ? `Retirer le filtre marque ${brand}`
+                        : `Remove ${brand} brand filter`
+                    }
                     className="glass-pill-cta px-3 py-1 rounded-full text-white text-xs font-semibold inline-flex items-center gap-1 cursor-pointer"
                   >
                     <span>{brand}</span>
@@ -326,6 +331,11 @@ export function CategoryCatalogScreen({
                   <button
                     type="button"
                     onClick={() => handleToggleWarranty(months)}
+                    aria-label={
+                      locale === 'fr'
+                        ? `Retirer le filtre garantie ${months} mois`
+                        : `Remove ${months}-month warranty filter`
+                    }
                     className="glass-pill-black px-3 py-1 rounded-full text-[#F4BE38] text-xs font-semibold inline-flex items-center gap-1 cursor-pointer"
                   >
                     <span>
@@ -349,6 +359,11 @@ export function CategoryCatalogScreen({
                   <button
                     type="button"
                     onClick={() => handleSelectPricePreset(null, null)}
+                    aria-label={
+                      locale === 'fr'
+                        ? 'Effacer le filtre de prix'
+                        : 'Clear price range filter'
+                    }
                     className="glass-pill-gold px-3 py-1 rounded-full text-[#000000] text-xs font-extrabold inline-flex items-center gap-1 cursor-pointer tabular-nums"
                   >
                     <span>
@@ -372,6 +387,11 @@ export function CategoryCatalogScreen({
                   <button
                     type="button"
                     onClick={() => setOnlyInStock(false)}
+                    aria-label={
+                      locale === 'fr'
+                        ? 'Retirer le filtre en stock uniquement'
+                        : 'Clear in-stock only filter'
+                    }
                     className="glass-pill-blue px-3 py-1 rounded-full text-white text-xs font-semibold inline-flex items-center gap-1 cursor-pointer"
                   >
                     <span>{locale === 'fr' ? 'En stock' : 'In stock'}</span>

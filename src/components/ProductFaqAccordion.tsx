@@ -87,6 +87,7 @@ export function ProductFaqAccordion({
 
         <button
           type="button"
+          aria-pressed={allExpanded}
           onClick={toggleAll}
           className="glass-pill-frost min-h-[34px] px-3.5 py-1 rounded-full text-xs font-bold text-[#000000] cursor-pointer"
         >
@@ -109,6 +110,7 @@ export function ProductFaqAccordion({
               <button
                 type="button"
                 aria-expanded={isOpen}
+                aria-controls={`faq-panel-${faq.id}`}
                 onClick={() => toggleItem(faq.id)}
                 className="w-full px-6 py-4 flex items-center justify-between gap-4 text-left hover:bg-white/35 transition-colors cursor-pointer"
               >
@@ -120,7 +122,6 @@ export function ProductFaqAccordion({
                         : `Topic: ${faq.topicLabel} — click row to read answer`
                     }
                     placement="right"
-                    focusable
                   >
                     <span className="glass-pill-gold inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[#000000] text-[11px] font-extrabold w-fit shrink-0">
                       <TopicIcon className="w-3.5 h-3.5 text-[#5A5AA1]" aria-hidden="true" />
@@ -153,7 +154,7 @@ export function ProductFaqAccordion({
               </button>
 
               {isOpen && (
-                <div className="px-6 pb-5 pt-0.5 sm:pl-10">
+                <div id={`faq-panel-${faq.id}`} className="px-6 pb-5 pt-0.5 sm:pl-10">
                   <p className="text-sm text-[#3F3F56] leading-relaxed border-l-2 border-[#5A5AA1] pl-4">
                     {faq.answer}
                   </p>

@@ -86,7 +86,11 @@ export function CompareBar({
                 >
                   <button
                     type="button"
-                    aria-label="Retirer du comparatif"
+                    aria-label={
+                      locale === 'fr'
+                        ? `Retirer ${product.nameFr} du comparatif`
+                        : `Remove ${product.nameEn} from comparison`
+                    }
                     onClick={() => onRemoveCompare(product.id)}
                     className="p-0.5 text-white/65 hover:text-white cursor-pointer shrink-0"
                   >

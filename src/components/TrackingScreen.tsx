@@ -271,6 +271,12 @@ export function TrackingScreen({
                   <button
                     key={order.id}
                     type="button"
+                    aria-pressed={isSelected}
+                    aria-label={
+                      locale === 'fr'
+                        ? `Afficher la commande #${order.id} (${badge})`
+                        : `View order #${order.id} (${badge})`
+                    }
                     onClick={() => onSelectOrder(order.id)}
                     className={`min-h-[36px] px-3.5 py-1 rounded-full text-xs font-bold whitespace-nowrap shrink-0 inline-flex items-center gap-1.5 cursor-pointer ${
                       isSelected
@@ -297,6 +303,7 @@ export function TrackingScreen({
               <button
                 key={tab.id}
                 type="button"
+                aria-pressed={activeView === tab.id}
                 onClick={() => setActiveView(tab.id)}
                 className={`px-3.5 py-1.5 rounded-full text-xs font-bold cursor-pointer transition-all ${
                   activeView === tab.id
@@ -312,7 +319,10 @@ export function TrackingScreen({
       )}
 
       {lookupError && (
-        <div className="no-print p-3.5 rounded-2xl bg-[#ffdad6]/90 border border-[#ba1a1a]/30 text-[#93000a] text-sm font-medium backdrop-blur-md">
+        <div
+          role="alert"
+          className="no-print p-3.5 rounded-2xl bg-[#ffdad6]/90 border border-[#ba1a1a]/30 text-[#93000a] text-sm font-medium backdrop-blur-md"
+        >
           {lookupError}
         </div>
       )}
@@ -401,13 +411,18 @@ export function TrackingScreen({
                             >
                               <button
                                 type="button"
+                                aria-pressed={isCurrent}
                                 onClick={() =>
                                   onUpdateOrderStage?.(
                                     selectedOrder.id,
                                     index as 0 | 1 | 2 | 3
                                   )
                                 }
-                                aria-label={`${step.title}`}
+                                aria-label={
+                                  locale === 'fr'
+                                    ? `Étape ${index + 1} sur ${steps.length} : ${step.title}`
+                                    : `Step ${index + 1} of ${steps.length}: ${step.title}`
+                                }
                                 className={`w-11 h-11 rounded-full flex items-center justify-center transition-all ${
                                   onUpdateOrderStage ? 'cursor-pointer' : 'cursor-default'
                                 } ${
@@ -504,6 +519,7 @@ export function TrackingScreen({
                           <button
                             key={step.title}
                             type="button"
+                            aria-pressed={selectedOrder.stageIndex === idx}
                             onClick={() =>
                               onUpdateOrderStage(selectedOrder.id, idx as 0 | 1 | 2 | 3)
                             }

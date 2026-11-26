@@ -41,6 +41,51 @@
   h1, h2, h3, h4, .font-display {
     font-family: var(--font-display);
   }
+
+  a:focus-visible,
+  button:focus-visible,
+  [role="button"]:focus-visible,
+  [role="menuitem"]:focus-visible,
+  [role="option"]:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  input[type="checkbox"]:focus-visible,
+  input[type="radio"]:focus-visible,
+  input:not([type="search"]):focus-visible,
+  [tabindex]:not([tabindex="-1"]):focus-visible {
+    outline: 2.5px solid #474789;
+    outline-offset: 2px;
+  }
+
+  .ice-obsidian:focus-visible,
+  .ice-obsidian :focus-visible,
+  .ice-violet:focus-visible,
+  .ice-violet :focus-visible,
+  .glass-pill-black:focus-visible,
+  .glass-pill-cta:focus-visible,
+  .glass-pill-blue:focus-visible {
+    outline: 2.5px solid #F4BE38;
+    outline-offset: 2px;
+  }
+
+  .ice-surface[role="button"]:focus-visible,
+  .ice-surface-subtle[role="button"]:focus-visible,
+  .ice-yellow[role="button"]:focus-visible {
+    outline: 3px solid #474789;
+    outline-offset: 3px;
+    box-shadow:
+      0 0 0 5px rgba(255, 255, 255, 0.85),
+      0 14px 32px -10px rgba(64, 47, 6, 0.25);
+  }
+
+  .ice-obsidian[role="button"]:focus-visible,
+  .ice-violet[role="button"]:focus-visible {
+    outline: 3px solid #F4BE38;
+    outline-offset: 3px;
+    box-shadow:
+      0 0 0 5px rgba(244, 190, 56, 0.35),
+      0 18px 36px -10px rgba(0, 0, 0, 0.45);
+  }
 }
 
 .no-scrollbar::-webkit-scrollbar {

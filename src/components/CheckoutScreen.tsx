@@ -529,6 +529,7 @@ export function CheckoutScreen({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <button
                 type="button"
+                aria-pressed={paymentMethod === 'mtn_momo'}
                 onClick={() => setPaymentMethod('mtn_momo')}
                 className={`min-h-[80px] p-3.5 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between ${
                   paymentMethod === 'mtn_momo'
@@ -546,6 +547,7 @@ export function CheckoutScreen({
 
               <button
                 type="button"
+                aria-pressed={paymentMethod === 'orange_money'}
                 onClick={() => setPaymentMethod('orange_money')}
                 className={`min-h-[80px] p-3.5 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between ${
                   paymentMethod === 'orange_money'
@@ -563,6 +565,7 @@ export function CheckoutScreen({
 
               <button
                 type="button"
+                aria-pressed={paymentMethod === 'cod'}
                 onClick={() => setPaymentMethod('cod')}
                 className={`min-h-[80px] p-3.5 rounded-2xl text-left transition-all cursor-pointer flex flex-col justify-between ${
                   paymentMethod === 'cod'
@@ -605,7 +608,11 @@ export function CheckoutScreen({
                     value={momoNumber}
                     onChange={(e) => setMomoNumber(e.target.value)}
                     placeholder="+237 6XX XXX XXX"
-                    aria-label="Numéro Mobile Money"
+                    aria-label={
+                      locale === 'fr'
+                        ? 'Numéro Mobile Money'
+                        : 'Mobile Money wallet number'
+                    }
                     className="glass-input-recessed min-h-[44px] w-full px-4 rounded-full text-sm text-[#000000] tabular-nums focus:outline-none"
                   />
                 )}
@@ -613,7 +620,10 @@ export function CheckoutScreen({
             )}
 
             {formError && (
-              <div className="p-3 rounded-2xl bg-[#ffdad6]/90 border border-white text-[#93000a] text-sm font-semibold">
+              <div
+                role="alert"
+                className="p-3 rounded-2xl bg-[#ffdad6]/90 border border-white text-[#93000a] text-sm font-semibold"
+              >
                 {formError}
               </div>
             )}

@@ -260,6 +260,11 @@ export function CompareScreen({
           <div className="max-w-sm mx-auto">
             <select
               defaultValue=""
+              aria-label={
+                locale === 'fr'
+                  ? 'Sélectionner un produit à comparer'
+                  : 'Select a product to compare'
+              }
               onChange={(e) => {
                 if (e.target.value) onAddCompare(e.target.value);
               }}
@@ -325,7 +330,11 @@ export function CompareScreen({
                           >
                             <button
                               type="button"
-                              aria-label={`Retirer ${name}`}
+                              aria-label={
+                                locale === 'fr'
+                                  ? `Retirer ${name} du comparatif`
+                                  : `Remove ${name} from comparison`
+                              }
                               onClick={() => onRemoveCompare(product.id)}
                               className="glass-pill-frost w-7 h-7 rounded-full text-[#3F3F56] hover:text-[#ba1a1a] flex items-center justify-center cursor-pointer"
                             >
@@ -336,6 +345,9 @@ export function CompareScreen({
 
                         <button
                           type="button"
+                          aria-label={
+                            locale === 'fr' ? `Voir ${name}` : `View ${name}`
+                          }
                           onClick={() => onSelectProduct(product)}
                           className="w-full h-36 rounded-2xl ice-product-trap p-3 mb-3 flex items-center justify-center cursor-pointer"
                         >
@@ -495,7 +507,11 @@ export function CompareScreen({
                           onChange={(e) => {
                             if (e.target.value) onAddCompare(e.target.value);
                           }}
-                          aria-label="Ajouter un produit au comparatif"
+                          aria-label={
+                            locale === 'fr'
+                              ? 'Ajouter un produit au comparatif'
+                              : 'Add a product to comparison'
+                          }
                           className="glass-input-recessed min-h-[38px] w-full px-3 rounded-full text-xs text-[#000000] font-medium cursor-pointer focus:outline-none"
                         >
                           <option value="" disabled>

@@ -38,6 +38,15 @@ export function RestockWaitlistModal({
     setJustSubmitted(false);
   }, [product?.id, existingEntry?.email, defaultEmail]);
 
+  useEffect(() => {
+    if (!product) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [product, onClose]);
+
   if (!product) return null;
 
   const title = locale === 'fr' ? product.nameFr : product.nameEn;
@@ -258,7 +267,7 @@ export function RestockWaitlistModal({
                 />
               </div>
               {error && (
-                <p className="text-xs font-semibold text-[#ba1a1a] pl-2">
+                <p role="alert" className="text-xs font-semibold text-[#ba1a1a] pl-2">
                   {error}
                 </p>
               )}

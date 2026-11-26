@@ -13,10 +13,19 @@ import {
 import { useState } from 'react';
 import { PRODUCTS } from '../data/catalog';
 import { TRANSLATIONS } from '../i18n/translations';
-import { Locale, OrderRecord, Product, UserSession } from '../types/store';
+import {
+  Locale,
+  LoyaltyBonusEvent,
+  OrderRecord,
+  Product,
+  RedeemedReward,
+  UserSession,
+} from '../types/store';
 import { exportOrdersToCsv } from '../utils/exportOrdersCsv';
 import { formatOrderDate, formatXAF } from '../utils/format';
+import { calculateOrderPoints } from '../utils/loyalty';
 import { ActionIconTooltip } from './ActionIconTooltip';
+import { LorenaLoyaltyCard } from './LorenaLoyaltyCard';
 import { ProductCard } from './ProductCard';
 
 interface WishlistAccountScreenProps {
@@ -26,6 +35,8 @@ interface WishlistAccountScreenProps {
   compareIds?: string[];
   waitlistIds?: string[];
   orders: OrderRecord[];
+  bonusEvents?: LoyaltyBonusEvent[];
+  redeemedRewards?: RedeemedReward[];
   userSession: UserSession | null;
   recentlyAddedId: string | null;
   onBackHome: () => void;
@@ -36,6 +47,7 @@ interface WishlistAccountScreenProps {
   onNotifyMe?: (product: Product) => void;
   onInspectOrder: (orderId: string) => void;
   onOpenInvoice?: (orderId: string) => void;
+  onOpenRewards?: () => void;
   onOpenAuth: (mode: 'login' | 'register') => void;
   onLogout: () => void;
 }
@@ -47,6 +59,8 @@ export function WishlistAccountScreen({
   compareIds = [],
   waitlistIds = [],
   orders,
+  bonusEvents = [],
+  redeemedRewards = [],
   userSession,
   recentlyAddedId,
   onBackHome,
@@ -57,6 +71,7 @@ export function WishlistAccountScreen({
   onNotifyMe,
   onInspectOrder,
   onOpenInvoice,
+  onOpenRewards,
   onOpenAuth,
   onLogout,
 }: WishlistAccountScreenProps) {
@@ -72,8 +87,8 @@ export function WishlistAccountScreen({
   };
 
   return (
-    <div className="max-w-[1360px] mx-auto px-4 py-8 pb-16 space-y-8">
-      <div className="ice-surface rounded-3xl p-6 flex flex-wrap items-end justify-between gap-4">
+    <div className="max-w-[1360px] mx-auto px-3 sm:px-4 py-6 sm:py-8 pb-16 space-y-6 sm:space-y-8">
+      <div className="ice-surface rounded-3xl p-4 sm:p-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <ActionIconTooltip
             text={
@@ -287,8 +302,18 @@ export function WishlistAccountScreen({
             </div>
           </div>
 
-          {/* Order History */}
-          <div className="lg:col-span-8 ice-surface rounded-3xl p-6 space-y-4">
+          {/* Right Column: Lorena Loyalty + Order History */}
+          <div className="lg:col-span-8 space-y-6">
+            <LorenaLoyaltyCard
+              locale={locale}
+              orders={orders}
+              bonusEvents={bonusEvents}
+              redeemedRewards={redeemedRewards}
+              onInspectOrder={onInspectOrder}
+              onOpenRewards={onOpenRewards}
+            />
+
+            <div className="ice-surface rounded-3xl p-5 sm:p-6 space-y-4">
             <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-white/75">
               <div className="flex items-center gap-2">
                 <ActionIconTooltip
@@ -364,9 +389,14 @@ export function WishlistAccountScreen({
                   </div>
 
                   <div className="flex flex-wrap items-center gap-2.5">
-                    <span className="font-display font-extrabold text-base text-[#000000] tabular-nums mr-1">
-                      {formatXAF(order.total)}
-                    </span>
+                    <div className="text-right mr-1">
+                      <span className="block font-display font-extrabold text-base text-[#000000] tabular-nums">
+                        {formatXAF(order.total)}
+                      </span>
+                      <span className="block text-[11px] font-mono font-bold text-[#5A5AA1] tabular-nums">
+                        +{calculateOrderPoints(order.total)} pts Loyalty
+                      </span>
+                    </div>
                     {onOpenInvoice && (
                       <ActionIconTooltip
                         text={
@@ -379,6 +409,11 @@ export function WishlistAccountScreen({
                         <button
                           type="button"
                           onClick={() => onOpenInvoice(order.id)}
+                          aria-label={
+                            locale === 'fr'
+                              ? `Facture PDF de la commande #${order.id}`
+                              : `PDF invoice for order #${order.id}`
+                          }
                           className="glass-pill-black min-h-[38px] px-3.5 py-1.5 rounded-full text-[#F4BE38] text-xs font-bold inline-flex items-center gap-1.5 cursor-pointer"
                         >
                           <FileText className="w-3.5 h-3.5" aria-hidden="true" />
@@ -389,6 +424,11 @@ export function WishlistAccountScreen({
                     <button
                       type="button"
                       onClick={() => onInspectOrder(order.id)}
+                      aria-label={
+                        locale === 'fr'
+                          ? `Suivre la commande #${order.id}`
+                          : `Track order #${order.id}`
+                      }
                       className="glass-pill-cta min-h-[38px] px-4 py-1.5 rounded-full text-white text-xs font-bold cursor-pointer"
                     >
                       {locale === 'fr' ? 'Suivre' : 'Track'}
@@ -396,6 +436,7 @@ export function WishlistAccountScreen({
                   </div>
                 </div>
               ))}
+            </div>
             </div>
           </div>
         </div>

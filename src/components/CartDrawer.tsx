@@ -1,4 +1,5 @@
 import { ArrowRight, Minus, Plus, ShieldCheck, ShoppingBag, Trash2, X } from 'lucide-react';
+import { useEffect } from 'react';
 import { FREE_DELIVERY_THRESHOLD } from '../data/catalog';
 import { TRANSLATIONS } from '../i18n/translations';
 import { CartItem, Locale } from '../types/store';
@@ -27,6 +28,15 @@ export function CartDrawer({
   onOpenFullCart,
   onProceedToCheckout,
 }: CartDrawerProps) {
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
+
   if (!isOpen) return null;
   const t = TRANSLATIONS[locale];
 
@@ -76,7 +86,7 @@ export function CartDrawer({
           >
             <button
               type="button"
-              aria-label="Fermer le panier"
+              aria-label={locale === 'fr' ? 'Fermer le panier' : 'Close cart'}
               onClick={onClose}
               className="min-h-[40px] min-w-[40px] inline-flex items-center justify-center rounded-full hover:bg-white/15 text-white cursor-pointer"
             >
@@ -167,7 +177,11 @@ export function CartDrawer({
                     >
                       <button
                         type="button"
-                        aria-label={`Supprimer ${item.name}`}
+                        aria-label={
+                          locale === 'fr'
+                            ? `Supprimer ${item.name} du panier`
+                            : `Remove ${item.name} from cart`
+                        }
                         onClick={() => onRemoveItem(item.productId, item.variantId)}
                         className="p-1.5 text-[#3F3F56] hover:text-[#ba1a1a] cursor-pointer"
                       >
@@ -184,7 +198,11 @@ export function CartDrawer({
                       >
                         <button
                           type="button"
-                          aria-label="Diminuer la quantité"
+                          aria-label={
+                            locale === 'fr'
+                              ? `Diminuer la quantité pour ${item.name}`
+                              : `Decrease quantity for ${item.name}`
+                          }
                           onClick={() =>
                             onUpdateQuantity(item.productId, item.variantId, -1)
                           }
@@ -202,7 +220,11 @@ export function CartDrawer({
                       >
                         <button
                           type="button"
-                          aria-label="Augmenter la quantité"
+                          aria-label={
+                            locale === 'fr'
+                              ? `Augmenter la quantité pour ${item.name}`
+                              : `Increase quantity for ${item.name}`
+                          }
                           onClick={() =>
                             onUpdateQuantity(item.productId, item.variantId, 1)
                           }

@@ -10,7 +10,7 @@ import {
   User,
   X,
 } from 'lucide-react';
-import { FormEvent, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 import { Locale, UserSession } from '../types/store';
 import { ActionIconTooltip } from './ActionIconTooltip';
 
@@ -40,6 +40,15 @@ export function AuthModal({
   const [logoFailed, setLogoFailed] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [resetSent, setResetSent] = useState(false);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onClose();
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
@@ -194,7 +203,7 @@ export function AuthModal({
             <button
               type="button"
               onClick={onClose}
-              aria-label="Fermer"
+              aria-label={locale === 'fr' ? 'Fermer' : 'Close'}
               className="glass-pill-frost w-9 h-9 rounded-full text-[#000000] flex items-center justify-center cursor-pointer"
             >
               <X className="w-4 h-4" aria-hidden="true" />
@@ -254,6 +263,7 @@ export function AuthModal({
                   value={fullName}
                   onChange={(e) => setFullName(e.target.value)}
                   placeholder={locale === 'fr' ? 'Nom complet' : 'Full name'}
+                  aria-label={locale === 'fr' ? 'Nom complet' : 'Full name'}
                   className="min-h-[46px] flex-1 px-3 bg-transparent text-sm text-[#000000] placeholder:text-[#6C757D] focus:outline-none"
                 />
               </div>
@@ -345,7 +355,16 @@ export function AuthModal({
                 >
                   <button
                     type="button"
-                    aria-label={showPassword ? 'Masquer' : 'Afficher'}
+                    aria-pressed={showPassword}
+                    aria-label={
+                      showPassword
+                        ? locale === 'fr'
+                          ? 'Masquer le mot de passe'
+                          : 'Hide password'
+                        : locale === 'fr'
+                        ? 'Afficher le mot de passe'
+                        : 'Show password'
+                    }
                     onClick={() => setShowPassword((v) => !v)}
                     className="p-1.5 text-[#6C757D] hover:text-[#000000] cursor-pointer"
                   >
@@ -364,6 +383,7 @@ export function AuthModal({
               <div className="flex items-center justify-between px-1 text-xs">
                 <button
                   type="button"
+                  aria-pressed={rememberMe}
                   onClick={() => setRememberMe((r) => !r)}
                   className="inline-flex items-center gap-2 font-medium text-[#1F2442] cursor-pointer"
                 >
@@ -398,13 +418,13 @@ export function AuthModal({
             )}
 
             {error && (
-              <div className="p-3 rounded-2xl bg-[#ffdad6] text-[#93000a] text-xs font-medium text-center">
+              <div role="alert" className="p-3 rounded-2xl bg-[#ffdad6] text-[#93000a] text-xs font-medium text-center">
                 {error}
               </div>
             )}
 
             {resetSent && (
-              <div className="p-3 rounded-2xl bg-white/85 border border-[#5A5AA1]/30 text-[#000000] text-xs font-medium text-center">
+              <div role="status" className="p-3 rounded-2xl bg-white/85 border border-[#5A5AA1]/30 text-[#000000] text-xs font-medium text-center">
                 {locale === 'fr'
                   ? 'Un code de réinitialisation vient d’être envoyé.'
                   : 'A reset code has been sent via SMS/email.'}
@@ -477,7 +497,11 @@ export function AuthModal({
                   <button
                     type="button"
                     onClick={handleGoogleContinue}
-                    aria-label="Continuer avec Google"
+                    aria-label={
+                      locale === 'fr'
+                        ? 'Continuer avec Google'
+                        : 'Continue with Google'
+                    }
                     className="glass-pill-frost w-14 h-12 rounded-2xl flex items-center justify-center font-display font-extrabold text-base text-[#5A5AA1] cursor-pointer"
                   >
                     G
@@ -493,6 +517,7 @@ export function AuthModal({
                 >
                   <button
                     type="button"
+                    aria-pressed={method === 'phone'}
                     onClick={() => {
                       setMethod('phone');
                       setError(null);
@@ -517,6 +542,7 @@ export function AuthModal({
                 >
                   <button
                     type="button"
+                    aria-pressed={method === 'email'}
                     onClick={() => {
                       setMethod('email');
                       setError(null);

@@ -182,8 +182,11 @@ export function DailySpecialsSection({
                     >
                       <button
                         type="button"
+                        aria-label={
+                          locale === 'fr' ? `Voir ${title}` : `View ${title}`
+                        }
                         onClick={() => onSelectProduct(product)}
-                        className="w-full h-full cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5A5AA1] rounded-xl"
+                        className="w-full h-full cursor-pointer rounded-xl"
                       >
                         <ProductImage
                           src={product.image}
@@ -210,14 +213,15 @@ export function DailySpecialsSection({
                     >
                       <button
                         type="button"
+                        aria-pressed={isWishlisted}
                         aria-label={
                           isWishlisted
                             ? locale === 'fr'
-                              ? 'Retirer des favoris'
-                              : 'Remove from favorites'
+                              ? `Retirer ${title} des favoris`
+                              : `Remove ${title} from favorites`
                             : locale === 'fr'
-                            ? 'Liker ce produit'
-                            : 'Like this product'
+                            ? `Ajouter ${title} aux favoris`
+                            : `Add ${title} to favorites`
                         }
                         onClick={(e) => {
                           e.stopPropagation();
@@ -252,14 +256,15 @@ export function DailySpecialsSection({
                       >
                         <button
                           type="button"
+                          aria-pressed={isCompared}
                           aria-label={
                             isCompared
                               ? locale === 'fr'
-                                ? 'Retirer du comparatif'
-                                : 'Remove from comparison'
+                                ? `Retirer ${title} du comparatif`
+                                : `Remove ${title} from comparison`
                               : locale === 'fr'
-                              ? 'Sélectionner pour comparer'
-                              : 'Select to compare'
+                              ? `Ajouter ${title} au comparatif`
+                              : `Add ${title} to comparison`
                           }
                           onClick={(e) => {
                             e.stopPropagation();
@@ -338,6 +343,11 @@ export function DailySpecialsSection({
                     >
                       <button
                         type="button"
+                        aria-label={
+                          locale === 'fr'
+                            ? `Ajouter ${title} au panier`
+                            : `Add ${title} to cart`
+                        }
                         onClick={() => onQuickAdd(product)}
                         className={`w-full min-h-[40px] px-3.5 py-2 rounded-full text-xs font-extrabold tracking-wide inline-flex items-center justify-center gap-1.5 transition-all cursor-pointer ${
                           justAdded

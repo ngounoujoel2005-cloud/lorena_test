@@ -19,6 +19,7 @@ import { Footer } from './components/Footer';
 import { GeminiChatbot } from './components/GeminiChatbot';
 import { HomePageScreen } from './components/HomePageScreen';
 import { InvoiceView } from './components/InvoiceView';
+import { LorenaRewardsScreen } from './components/LorenaRewardsScreen';
 import { Navbar } from './components/Navbar';
 import { ProductDetailScreen } from './components/ProductDetailScreen';
 import { RestockWaitlistModal } from './components/RestockWaitlistModal';
@@ -33,13 +34,17 @@ import {
   CategorySlug,
   ChatMessage,
   Locale,
+  LoyaltyBonusEvent,
   OrderRecord,
   PaymentMethod,
   Product,
   ProductReview,
+  RedeemedReward,
+  RewardCatalogItem,
   UserSession,
   WaitlistEntry,
 } from './types/store';
+import { computeLoyaltySummary } from './utils/loyalty';
 
 const CART_STORAGE_KEY = 'lorena_market_cart_v1';
 const ORDERS_STORAGE_KEY = 'lorena_market_orders_v1';
@@ -51,6 +56,8 @@ const REVIEWS_STORAGE_KEY = 'lorena_market_reviews_v1';
 const SESSION_STORAGE_KEY = 'lorena_market_session_v1';
 const HISTORY_STORAGE_KEY = 'lorena_market_history_v1';
 const WAITLIST_STORAGE_KEY = 'lorena_market_waitlist_v1';
+const LOYALTY_BONUS_STORAGE_KEY = 'lorena_market_loyalty_bonus_v1';
+const REDEEMED_REWARDS_STORAGE_KEY = 'lorena_market_redeemed_rewards_v1';
 
 const DEFAULT_CART: CartItem[] = [
   {
@@ -211,6 +218,34 @@ export default function App() {
     return [];
   });
 
+  const [loyaltyBonusEvents, setLoyaltyBonusEvents] = useState<
+    LoyaltyBonusEvent[]
+  >(() => {
+    try {
+      const saved = localStorage.getItem(LOYALTY_BONUS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {
+      // Ignore
+    }
+    return [];
+  });
+
+  const [redeemedRewards, setRedeemedRewards] = useState<RedeemedReward[]>(() => {
+    try {
+      const saved = localStorage.getItem(REDEEMED_REWARDS_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch {
+      // Ignore
+    }
+    return [];
+  });
+
   const [waitlistProduct, setWaitlistProduct] = useState<Product | null>(null);
   const [restockAlert, setRestockAlert] = useState<{
     product: Product;
@@ -302,6 +337,64 @@ export default function App() {
       // Ignore
     }
   }, [waitlistEntries]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        LOYALTY_BONUS_STORAGE_KEY,
+        JSON.stringify(loyaltyBonusEvents)
+      );
+    } catch {
+      // Ignore
+    }
+  }, [loyaltyBonusEvents]);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(
+        REDEEMED_REWARDS_STORAGE_KEY,
+        JSON.stringify(redeemedRewards)
+      );
+    } catch {
+      // Ignore
+    }
+  }, [redeemedRewards]);
+
+  useEffect(() => {
+    if (!userSession) return;
+    setLoyaltyBonusEvents((prev) => {
+      if (prev.some((ev) => ev.id === 'signup-bonus')) return prev;
+      return [
+        {
+          id: 'signup-bonus',
+          type: 'signup',
+          titleFr: 'Bonus compte vérifié Lorena',
+          titleEn: 'Verified Lorena Account Bonus',
+          points: 25,
+          createdAt: new Date().toISOString(),
+        },
+        ...prev,
+      ];
+    });
+  }, [userSession]);
+
+  useEffect(() => {
+    if (wishlistIds.length < 2) return;
+    setLoyaltyBonusEvents((prev) => {
+      if (prev.some((ev) => ev.id === 'wishlist-collector')) return prev;
+      return [
+        {
+          id: 'wishlist-collector',
+          type: 'wishlist',
+          titleFr: 'Bonus Collectionneur (2+ favoris)',
+          titleEn: 'Wishlist Collector Bonus (2+ items)',
+          points: 15,
+          createdAt: new Date().toISOString(),
+        },
+        ...prev,
+      ];
+    });
+  }, [wishlistIds.length]);
 
   useEffect(() => {
     return () => {
@@ -519,6 +612,22 @@ export default function App() {
       helpfulCount: 0,
     };
     setReviews((prev) => [newReview, ...prev]);
+
+    const reviewBonusId = `review-${input.productId}`;
+    setLoyaltyBonusEvents((prev) => {
+      if (prev.some((ev) => ev.id === reviewBonusId)) return prev;
+      return [
+        {
+          id: reviewBonusId,
+          type: 'review',
+          titleFr: 'Avis produit publié',
+          titleEn: 'Product review submitted',
+          points: 20,
+          createdAt: new Date().toISOString(),
+        },
+        ...prev,
+      ];
+    });
   };
 
   const handleMarkReviewHelpful = (reviewId: string) => {
@@ -570,6 +679,54 @@ export default function App() {
     );
   };
 
+  const todayCheckinKey = `checkin-${new Date().toISOString().slice(0, 10)}`;
+  const canClaimDailyCheckin = !loyaltyBonusEvents.some(
+    (ev) => ev.id === todayCheckinKey
+  );
+
+  const handleClaimDailyCheckin = () => {
+    setLoyaltyBonusEvents((prev) => {
+      if (prev.some((ev) => ev.id === todayCheckinKey)) return prev;
+      return [
+        {
+          id: todayCheckinKey,
+          type: 'checkin',
+          titleFr: 'Check-in quotidien Lorena',
+          titleEn: 'Daily Lorena Check-in',
+          points: 10,
+          createdAt: new Date().toISOString(),
+        },
+        ...prev,
+      ];
+    });
+  };
+
+  const handleRedeemReward = (reward: RewardCatalogItem) => {
+    const summary = computeLoyaltySummary(
+      orders,
+      loyaltyBonusEvents,
+      redeemedRewards
+    );
+    if (summary.availablePoints < reward.pointsCost) return;
+    setRedeemedRewards((prev) => [
+      {
+        redemptionId: `red-${Date.now()}`,
+        rewardId: reward.id,
+        titleFr: reward.titleFr,
+        titleEn: reward.titleEn,
+        pointsCost: reward.pointsCost,
+        promoCode: reward.promoCode,
+        redeemedAt: new Date().toISOString(),
+      },
+      ...prev,
+    ]);
+  };
+
+  const handleApplyPromoToCart = (promoCode: string) => {
+    setAppliedPromoCode(promoCode);
+    navigateTo('cart');
+  };
+
   const waitlistIds = waitlistEntries.map((entry) => entry.productId);
   const totalBagCount = cart.reduce((sum, item) => sum + item.quantity, 0);
   const comparedProducts = compareIds
@@ -578,6 +735,14 @@ export default function App() {
 
   return (
     <div className="min-h-screen flex flex-col lorena-ice-canvas text-[#000000]">
+      <a
+        href="#main-content"
+        className="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-[120] glass-pill-black text-[#F4BE38] px-4 py-2 rounded-full text-xs font-extrabold shadow-xl"
+      >
+        {locale === 'fr'
+          ? 'Aller au contenu principal'
+          : 'Skip to main content'}
+      </a>
       <Navbar
         locale={locale}
         activeScreen={activeScreen}
@@ -599,7 +764,7 @@ export default function App() {
         onLogout={() => setUserSession(null)}
       />
 
-      <main className="flex-1">
+      <main id="main-content" tabIndex={-1} className="flex-1 focus:outline-none">
         {activeScreen === 'home' && (
           <HomePageScreen
             locale={locale}
@@ -759,6 +924,8 @@ export default function App() {
             compareIds={compareIds}
             waitlistIds={waitlistIds}
             orders={orders}
+            bonusEvents={loyaltyBonusEvents}
+            redeemedRewards={redeemedRewards}
             userSession={userSession}
             recentlyAddedId={recentlyAddedId}
             onBackHome={() => navigateTo('home')}
@@ -775,8 +942,33 @@ export default function App() {
               setActiveOrderId(orderId);
               navigateTo('invoice');
             }}
+            onOpenRewards={() => navigateTo('rewards')}
             onOpenAuth={handleOpenAuth}
             onLogout={() => setUserSession(null)}
+          />
+        )}
+
+        {activeScreen === 'rewards' && (
+          <LorenaRewardsScreen
+            locale={locale}
+            orders={orders}
+            bonusEvents={loyaltyBonusEvents}
+            redeemedRewards={redeemedRewards}
+            userSession={userSession}
+            wishlistCount={wishlistIds.length}
+            appliedPromoCode={appliedPromoCode}
+            canClaimDailyCheckin={canClaimDailyCheckin}
+            onClaimDailyCheckin={handleClaimDailyCheckin}
+            onRedeemReward={handleRedeemReward}
+            onApplyPromoToCart={handleApplyPromoToCart}
+            onInspectOrder={(orderId) => {
+              setActiveOrderId(orderId);
+              navigateTo('tracking');
+            }}
+            onOpenAuth={() => handleOpenAuth('register')}
+            onOpenAccount={() => navigateTo('account')}
+            onBrowseCatalog={() => handleSelectCategory('all')}
+            onBackHome={() => navigateTo('home')}
           />
         )}
 

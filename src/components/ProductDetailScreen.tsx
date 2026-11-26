@@ -25,7 +25,7 @@ import {
   Zap,
   ZoomIn,
 } from 'lucide-react';
-import { FormEvent, MouseEvent, useMemo, useState } from 'react';
+import { FormEvent, MouseEvent, useEffect, useMemo, useState } from 'react';
 import { CATEGORIES_META, LOGISTICS_REGIONS, PRODUCTS } from '../data/catalog';
 import { TRANSLATIONS } from '../i18n/translations';
 import { Locale, Product, ProductReview } from '../types/store';
@@ -122,6 +122,22 @@ export function ProductDetailScreen({
     row: 2,
     col: 2,
   });
+
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        if (shareMenuOpen) setShareMenuOpen(false);
+        if (reportOpen) setReportOpen(false);
+        if (whatsappTipOpen) setWhatsappTipOpen(false);
+        if (zoomPinned || isZoomActive) {
+          setZoomPinned(false);
+          setIsZoomActive(false);
+        }
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isZoomActive, reportOpen, shareMenuOpen, whatsappTipOpen, zoomPinned]);
 
   const selectedVariant =
     product.variants.find((v) => v.id === selectedVariantId) ?? product.variants[0];
@@ -281,7 +297,10 @@ export function ProductDetailScreen({
   return (
     <div className="max-w-[1360px] mx-auto px-4 py-6 pb-28 space-y-10">
       {/* Breadcrumb Encased in Frosted Ice */}
-      <nav className="ice-surface rounded-full px-4 py-2 w-fit flex flex-wrap items-center gap-2 text-xs text-[#3F3F56]">
+      <nav
+        aria-label={locale === 'fr' ? 'Fil d’Ariane' : 'Breadcrumb'}
+        className="ice-surface rounded-full px-4 py-2 w-fit flex flex-wrap items-center gap-2 text-xs text-[#3F3F56]"
+      >
         <ActionIconTooltip
           text={
             locale === 'fr'
@@ -325,6 +344,7 @@ export function ProductDetailScreen({
             onClick={() => setZoomPinned((p) => !p)}
             role="button"
             tabIndex={0}
+            aria-pressed={zoomPinned}
             onKeyDown={(e) => {
               if (e.key === 'Enter' || e.key === ' ') {
                 e.preventDefault();
@@ -405,7 +425,18 @@ export function ProductDetailScreen({
                 <button
                   type="button"
                   onClick={() => setActiveThumbIndex(idx)}
-                  aria-label={frame.labelFr}
+                  aria-pressed={activeThumbIndex === idx}
+                  aria-label={
+                    locale === 'fr'
+                      ? `${title} — ${frame.labelFr}`
+                      : `${title} — ${
+                          idx === 0
+                            ? 'Front view'
+                            : idx === 1
+                            ? 'Studio angle'
+                            : 'Close-up detail'
+                        }`
+                  }
                   className={`ice-product-trap w-full aspect-square rounded-2xl p-2 cursor-pointer transition-all ${
                     activeThumbIndex === idx
                       ? 'border-[#5A5AA1] ring-2 ring-[#5A5AA1]/35'
@@ -432,6 +463,8 @@ export function ProductDetailScreen({
           >
             <button
               type="button"
+              aria-expanded={reportOpen}
+              aria-controls="product-report-form"
               onClick={() => setReportOpen((o) => !o)}
               className="glass-pill-frost px-3 py-1.5 rounded-full inline-flex items-center gap-1.5 text-xs font-bold text-[#ba1a1a] cursor-pointer"
             >
@@ -446,6 +479,7 @@ export function ProductDetailScreen({
 
           {reportOpen && (
             <form
+              id="product-report-form"
               onSubmit={handleSubmitReport}
               className="ice-surface p-4 rounded-2xl space-y-2.5"
             >
@@ -453,6 +487,11 @@ export function ProductDetailScreen({
                 rows={2}
                 value={reportText}
                 onChange={(e) => setReportText(e.target.value)}
+                aria-label={
+                  locale === 'fr'
+                    ? 'Préciser l’erreur constatée sur le produit'
+                    : 'Describe the incorrect product details'
+                }
                 placeholder={
                   locale === 'fr'
                     ? 'Précisez l’erreur constatée (prix, photo, fiche technique)...'
@@ -462,7 +501,7 @@ export function ProductDetailScreen({
               />
               <div className="flex items-center justify-between gap-2">
                 {reportSent ? (
-                  <span className="text-[11px] font-bold text-[#5A5AA1]">
+                  <span role="status" className="text-[11px] font-bold text-[#5A5AA1]">
                     {locale === 'fr'
                       ? 'Merci, signalement envoyé !'
                       : 'Thank you, report submitted!'}
@@ -505,14 +544,15 @@ export function ProductDetailScreen({
                 >
                   <button
                     type="button"
+                    aria-pressed={compareIds.includes(product.id)}
                     aria-label={
                       compareIds.includes(product.id)
                         ? locale === 'fr'
-                          ? 'Retirer du comparatif'
-                          : 'Remove from comparison'
+                          ? `Retirer ${title} du comparatif`
+                          : `Remove ${title} from comparison`
                         : locale === 'fr'
-                        ? 'Comparer ce produit'
-                        : 'Compare this product'
+                        ? `Comparer ${title}`
+                        : `Compare ${title}`
                     }
                     onClick={() => onToggleCompare(product.id)}
                     className={`w-9 h-9 rounded-full flex items-center justify-center cursor-pointer transition-all ${
@@ -539,7 +579,16 @@ export function ProductDetailScreen({
               >
                 <button
                   type="button"
-                  aria-label="Favoris"
+                  aria-pressed={isWishlisted}
+                  aria-label={
+                    isWishlisted
+                      ? locale === 'fr'
+                        ? `Retirer ${title} des favoris`
+                        : `Remove ${title} from wishlist`
+                      : locale === 'fr'
+                      ? `Ajouter ${title} aux favoris`
+                      : `Add ${title} to wishlist`
+                  }
                   onClick={() => onToggleWishlist(product.id)}
                   className={`w-9 h-9 rounded-full flex items-center justify-center cursor-pointer ${
                     isWishlisted
@@ -572,6 +621,8 @@ export function ProductDetailScreen({
               >
                 <button
                   type="button"
+                  aria-expanded={shareMenuOpen}
+                  aria-controls="product-share-menu"
                   aria-label={locale === 'fr' ? 'Partager ce produit' : 'Share this product'}
                   onClick={() => void handleShare()}
                   className={`min-h-[36px] px-3 rounded-full inline-flex items-center gap-1.5 text-xs font-bold cursor-pointer whitespace-nowrap transition-all ${
@@ -604,7 +655,10 @@ export function ProductDetailScreen({
           </div>
 
           {shareMenuOpen && (
-            <div className="ice-surface-subtle rounded-2xl p-3.5 space-y-2.5 border border-white/85">
+            <div
+              id="product-share-menu"
+              className="ice-surface-subtle rounded-2xl p-3.5 space-y-2.5 border border-white/85"
+            >
               <div className="flex items-center justify-between gap-2">
                 <p className="text-[11px] font-extrabold uppercase tracking-wider text-[#5A5AA1]">
                   {locale === 'fr'
@@ -743,6 +797,7 @@ export function ProductDetailScreen({
                     <button
                       key={variant.id}
                       type="button"
+                      aria-pressed={isSelected}
                       onClick={() => setSelectedVariantId(variant.id)}
                       className={`min-h-[38px] px-4 py-1.5 rounded-full text-xs font-bold cursor-pointer ${
                         isSelected
@@ -774,7 +829,11 @@ export function ProductDetailScreen({
                 >
                   <button
                     type="button"
-                    aria-label="Diminuer"
+                    aria-label={
+                      locale === 'fr'
+                        ? `Diminuer la quantité de ${title}`
+                        : `Decrease quantity of ${title}`
+                    }
                     disabled={isOutOfStock}
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                     className="w-9 h-9 rounded-l-full inline-flex items-center justify-center text-[#000000] hover:bg-white/60 cursor-pointer disabled:opacity-40"
@@ -791,7 +850,11 @@ export function ProductDetailScreen({
                 >
                   <button
                     type="button"
-                    aria-label="Augmenter"
+                    aria-label={
+                      locale === 'fr'
+                        ? `Augmenter la quantité de ${title}`
+                        : `Increase quantity of ${title}`
+                    }
                     disabled={isOutOfStock}
                     onClick={() =>
                       setQuantity((q) => Math.min(product.stockQty || 1, q + 1))
@@ -936,6 +999,8 @@ export function ProductDetailScreen({
                 >
                   <button
                     type="button"
+                    aria-expanded={whatsappTipOpen}
+                    aria-controls="product-whatsapp-tip"
                     onClick={() => setWhatsappTipOpen((o) => !o)}
                     className="glass-pill-cta px-3.5 py-1.5 rounded-full text-white text-xs font-bold shrink-0 cursor-pointer"
                   >
@@ -945,7 +1010,10 @@ export function ProductDetailScreen({
               </div>
 
               {whatsappTipOpen && (
-                <p className="text-[11px] text-[#000000] pt-2 border-t border-white/75">
+                <p
+                  id="product-whatsapp-tip"
+                  className="text-[11px] text-[#000000] pt-2 border-t border-white/75"
+                >
                   {locale === 'fr'
                     ? `Référence à indiquer au +237 693 71 25 25 : « ${product.sku} (${quantity}x) »`
                     : `Share SKU "${product.sku} (${quantity}x)" on WhatsApp +237 693 71 25 25.`}
@@ -1076,7 +1144,7 @@ export function ProductDetailScreen({
                   setEstimatorCity(newCity.name);
                   setEstimatorQuarter(newCity.quarters[0].name);
                 }}
-                aria-label="Ville de livraison"
+                aria-label={locale === 'fr' ? 'Ville de livraison' : 'Delivery city'}
                 className="glass-input-recessed min-h-[40px] w-full px-3.5 rounded-full text-xs font-bold text-[#000000] cursor-pointer focus:outline-none"
               >
                 {allCities.map((c) => (
@@ -1089,7 +1157,7 @@ export function ProductDetailScreen({
               <select
                 value={activeQuarter.name}
                 onChange={(e) => setEstimatorQuarter(e.target.value)}
-                aria-label="Quartier de livraison"
+                aria-label={locale === 'fr' ? 'Quartier de livraison' : 'Delivery quarter'}
                 className="glass-input-recessed min-h-[40px] w-full px-3.5 rounded-full text-xs font-bold text-[#000000] cursor-pointer focus:outline-none"
               >
                 {activeCity.quarters.map((q) => (
@@ -1264,6 +1332,8 @@ export function ProductDetailScreen({
       <section className="ice-surface rounded-3xl">
         <button
           type="button"
+          aria-expanded={detailsExpanded}
+          aria-controls="product-details-panel"
           onClick={() => setDetailsExpanded((e) => !e)}
           className="w-full px-6 py-4 flex items-center justify-between text-left border-b border-white/75 hover:bg-white/40 rounded-t-3xl cursor-pointer"
         >
@@ -1291,7 +1361,7 @@ export function ProductDetailScreen({
         </button>
 
         {detailsExpanded && (
-          <div className="p-6 space-y-6">
+          <div id="product-details-panel" className="p-6 space-y-6">
             <div className="space-y-3">
               <h3 className="font-display text-base font-bold text-[#000000]">
                 {title}
@@ -1395,6 +1465,8 @@ export function ProductDetailScreen({
             </p>
             <button
               type="button"
+              aria-expanded={reviewFormOpen}
+              aria-controls="product-review-form"
               onClick={() => setReviewFormOpen((o) => !o)}
               className="glass-pill-frost w-full min-h-[42px] px-4 py-2 rounded-full text-xs font-bold text-[#000000] cursor-pointer"
             >
@@ -1406,6 +1478,7 @@ export function ProductDetailScreen({
         {/* Inline Review Form */}
         {reviewFormOpen && (
           <form
+            id="product-review-form"
             onSubmit={handleSubmitReview}
             className="ice-surface-subtle p-5 rounded-2xl space-y-4"
           >
@@ -1427,13 +1500,19 @@ export function ProductDetailScreen({
                     <button
                       type="button"
                       onClick={() => setReviewRating(star)}
-                      aria-label={`${star} étoiles`}
+                      aria-pressed={star <= reviewRating}
+                      aria-label={
+                        locale === 'fr'
+                          ? `${star} étoile${star > 1 ? 's' : ''}`
+                          : `${star} star${star > 1 ? 's' : ''}`
+                      }
                       className="p-1 cursor-pointer"
                     >
                       <Star
                         className="w-5 h-5"
                         fill={star <= reviewRating ? '#F4BE38' : 'none'}
                         stroke="#F4BE38"
+                        aria-hidden="true"
                       />
                     </button>
                   </ActionIconTooltip>
@@ -1447,6 +1526,7 @@ export function ProductDetailScreen({
                 required
                 value={reviewAuthor}
                 onChange={(e) => setReviewAuthor(e.target.value)}
+                aria-label={locale === 'fr' ? 'Votre nom complet' : 'Your full name'}
                 placeholder={locale === 'fr' ? 'Votre nom complet' : 'Your full name'}
                 className="glass-input-recessed min-h-[42px] px-4 rounded-full text-sm text-[#000000] focus:outline-none"
               />
@@ -1455,6 +1535,7 @@ export function ProductDetailScreen({
                 required
                 value={reviewComment}
                 onChange={(e) => setReviewComment(e.target.value)}
+                aria-label={locale === 'fr' ? 'Votre avis client' : 'Your review comment'}
                 placeholder={
                   locale === 'fr'
                     ? 'Votre retour d’expérience...'
@@ -1498,6 +1579,7 @@ export function ProductDetailScreen({
               <button
                 key={String(pill.id)}
                 type="button"
+                aria-pressed={reviewFilter === pill.id}
                 onClick={() => setReviewFilter(pill.id)}
                 className={`px-3.5 py-1 rounded-full text-xs font-bold cursor-pointer ${
                   reviewFilter === pill.id
@@ -1650,7 +1732,11 @@ export function ProductDetailScreen({
                 >
                   <button
                     type="button"
-                    aria-label="Diminuer"
+                    aria-label={
+                      locale === 'fr'
+                        ? `Diminuer la quantité de ${title}`
+                        : `Decrease quantity of ${title}`
+                    }
                     onClick={() => setQuantity((q) => Math.max(1, q - 1))}
                     className="w-8 h-8 rounded-l-full inline-flex items-center justify-center text-[#000000] hover:bg-white/60 cursor-pointer"
                   >
@@ -1666,7 +1752,11 @@ export function ProductDetailScreen({
                 >
                   <button
                     type="button"
-                    aria-label="Augmenter"
+                    aria-label={
+                      locale === 'fr'
+                        ? `Augmenter la quantité de ${title}`
+                        : `Increase quantity of ${title}`
+                    }
                     onClick={() =>
                       setQuantity((q) => Math.min(product.stockQty || 1, q + 1))
                     }

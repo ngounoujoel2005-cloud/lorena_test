@@ -32,7 +32,7 @@ export function FloatingScrollControls({
   };
 
   return (
-    <div
+    <nav
       aria-label={
         locale === 'fr' ? 'Navigation rapide haut et bas' : 'Quick scroll navigation'
       }
@@ -81,6 +81,6 @@ export function FloatingScrollControls({
           </button>
         </ActionIconTooltip>
       </div>
-    </div>
+    </nav>
   );
 }

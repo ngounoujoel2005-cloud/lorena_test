@@ -24,7 +24,7 @@ import {
   User,
   Zap,
 } from 'lucide-react';
-import { FormEvent, useEffect, useMemo, useRef, useState } from 'react';
+import { FormEvent, KeyboardEvent, useEffect, useMemo, useRef, useState } from 'react';
 import { PRODUCTS } from '../data/catalog';
 import { TRANSLATIONS } from '../i18n/translations';
 import { AppScreen, CategorySlug, Locale, Product, UserSession } from '../types/store';
@@ -77,8 +77,11 @@ export function Navbar({
   const catScrollRef = useRef<HTMLDivElement>(null);
   const searchWrapperRef = useRef<HTMLDivElement>(null);
   const accountMenuRef = useRef<HTMLDivElement>(null);
+  const accountBtnRef = useRef<HTMLButtonElement>(null);
+  const accountPanelRef = useRef<HTMLDivElement>(null);
 
   const [searchFocused, setSearchFocused] = useState(false);
+  const [highlightedIdx, setHighlightedIdx] = useState<number>(-1);
   const [accountOpen, setAccountOpen] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
   const [activePromoChip, setActivePromoChip] = useState<string | null>(null);
@@ -196,10 +199,18 @@ export function Navbar({
         variant: 'gold',
       },
       {
+        id: 'lorena-rewards',
+        labelFr: 'Lorena Rewards',
+        labelEn: 'Lorena Rewards',
+        icon: Crown,
+        screen: 'rewards' as AppScreen,
+        variant: 'gold',
+      },
+      {
         id: 'vip-luxury',
         labelFr: 'Accessoires VIP',
         labelEn: 'VIP Luxury',
-        icon: Crown,
+        icon: Sparkles,
         slug: 'fashion' as CategorySlug,
         query: '',
         variant: 'black',
@@ -256,9 +267,20 @@ export function Navbar({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
 
+  useEffect(() => {
+    setHighlightedIdx(-1);
+  }, [searchQuery, suggestions.length]);
+
+  useEffect(() => {
+    if (!accountOpen) return;
+    const firstItem = accountPanelRef.current?.querySelector<HTMLButtonElement>('[role="menuitem"]');
+    firstItem?.focus();
+  }, [accountOpen]);
+
   const handleFormSubmit = (e: FormEvent) => {
     e.preventDefault();
     setSearchFocused(false);
+    setHighlightedIdx(-1);
     onSearchSubmit();
   };
 
@@ -269,6 +291,65 @@ export function Navbar({
   };
 
   const showSuggestionsDropdown = searchFocused && searchQuery.trim().length >= 2;
+
+  const handleSearchKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Escape' && searchFocused) {
+      e.preventDefault();
+      e.stopPropagation();
+      setSearchFocused(false);
+      setHighlightedIdx(-1);
+      return;
+    }
+    if (!suggestions.length) return;
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      setSearchFocused(true);
+      setHighlightedIdx((prev) => (prev + 1) % suggestions.length);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      setSearchFocused(true);
+      setHighlightedIdx((prev) => (prev <= 0 ? suggestions.length - 1 : prev - 1));
+    } else if (
+      e.key === 'Enter' &&
+      showSuggestionsDropdown &&
+      highlightedIdx >= 0 &&
+      suggestions[highlightedIdx]
+    ) {
+      e.preventDefault();
+      const chosen = suggestions[highlightedIdx];
+      setSearchFocused(false);
+      setHighlightedIdx(-1);
+      onSelectProduct(chosen);
+    }
+  };
+
+  const handleAccountMenuKeyDown = (e: KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === 'Escape') {
+      e.preventDefault();
+      e.stopPropagation();
+      setAccountOpen(false);
+      accountBtnRef.current?.focus();
+      return;
+    }
+    const items = Array.from(
+      accountPanelRef.current?.querySelectorAll<HTMLButtonElement>('[role="menuitem"]') ?? []
+    );
+    if (items.length === 0) return;
+    const currentIndex = items.indexOf(document.activeElement as HTMLButtonElement);
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      items[(currentIndex + 1) % items.length]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      items[currentIndex <= 0 ? items.length - 1 : currentIndex - 1]?.focus();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      items[0]?.focus();
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      items[items.length - 1]?.focus();
+    }
+  };
 
   return (
     <header className="no-print sticky top-0 z-40 shadow-[0_10px_30px_-10px_rgba(45,36,12,0.22)]">
@@ -291,6 +372,13 @@ export function Navbar({
                     key={`${dupIdx}-${ad.id}`}
                     type="button"
                     tabIndex={dupIdx === 1 ? -1 : undefined}
+                    aria-label={
+                      dupIdx === 1
+                        ? undefined
+                        : `${locale === 'fr' ? ad.badgeFr : ad.badgeEn}: ${
+                            locale === 'fr' ? ad.textFr : ad.textEn
+                          }`
+                    }
                     onClick={() => {
                       setActivePromoChip(ad.id);
                       onSelectCategory(ad.slug, ad.query);
@@ -331,8 +419,12 @@ export function Navbar({
             <button
               type="button"
               onClick={() => onNavigate('home')}
-              aria-label="Lorena Market"
-              className="glass-pill-frost flex items-center shrink-0 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full cursor-pointer focus-visible:outline-2 focus-visible:outline-[#5A5AA1]"
+              aria-label={
+                locale === 'fr'
+                  ? "Lorena Market — Retour à l'accueil"
+                  : 'Lorena Market — Return to homepage'
+              }
+              className="glass-pill-frost flex items-center shrink-0 px-2.5 sm:px-3.5 py-1 sm:py-1.5 rounded-full cursor-pointer"
             >
               {!logoFailed ? (
                 <img
@@ -378,8 +470,18 @@ export function Navbar({
               </ActionIconTooltip>
               <input
                 type="search"
+                role="combobox"
+                aria-expanded={showSuggestionsDropdown}
+                aria-controls="navbar-search-suggestions"
+                aria-autocomplete="list"
+                aria-activedescendant={
+                  showSuggestionsDropdown && highlightedIdx >= 0
+                    ? `navbar-search-opt-${highlightedIdx}`
+                    : undefined
+                }
                 value={searchQuery}
                 onFocus={() => setSearchFocused(true)}
+                onKeyDown={handleSearchKeyDown}
                 onChange={(e) => {
                   onSearchChange(e.target.value);
                   setSearchFocused(true);
@@ -390,6 +492,7 @@ export function Navbar({
               />
               <button
                 type="submit"
+                aria-label={t.searchBtn}
                 className="glass-pill-cta min-h-[36px] px-4 py-1.5 rounded-full text-white text-xs sm:text-sm font-semibold whitespace-nowrap shrink-0 cursor-pointer"
               >
                 {t.searchBtn}
@@ -397,7 +500,14 @@ export function Navbar({
             </form>
 
             {showSuggestionsDropdown && (
-              <div className="ice-surface absolute left-0 right-0 top-full mt-2 text-[#000000] rounded-3xl overflow-hidden z-50">
+              <div
+                id="navbar-search-suggestions"
+                role="listbox"
+                aria-label={
+                  locale === 'fr' ? 'Suggestions de produits' : 'Product suggestions'
+                }
+                className="ice-surface absolute left-0 right-0 top-full mt-2 text-[#000000] rounded-3xl overflow-hidden z-50"
+              >
                 {/* Language Tip Banner */}
                 <div className="px-4 py-2.5 bg-[#F4BE38]/30 border-b border-white/70 flex items-start gap-2 text-[11px] text-[#000000]">
                   <Info
@@ -427,17 +537,25 @@ export function Navbar({
                   </div>
                 ) : (
                   <div className="max-h-[320px] overflow-y-auto divide-y divide-white/60">
-                    {suggestions.map((p) => {
+                    {suggestions.map((p, idx) => {
                       const name = locale === 'fr' ? p.nameFr : p.nameEn;
+                      const isHighlighted = highlightedIdx === idx;
                       return (
                         <button
                           key={p.id}
+                          id={`navbar-search-opt-${idx}`}
+                          role="option"
+                          aria-selected={isHighlighted}
                           type="button"
+                          onMouseEnter={() => setHighlightedIdx(idx)}
                           onClick={() => {
                             setSearchFocused(false);
+                            setHighlightedIdx(-1);
                             onSelectProduct(p);
                           }}
-                          className="w-full px-4 py-2.5 flex items-center gap-3 hover:bg-white/55 text-left cursor-pointer transition-colors"
+                          className={`w-full px-4 py-2.5 flex items-center gap-3 text-left cursor-pointer transition-colors ${
+                            isHighlighted ? 'bg-white/75' : 'hover:bg-white/55'
+                          }`}
                         >
                           <div className="ice-product-trap w-11 h-11 rounded-xl p-1 shrink-0">
                             <ProductImage
@@ -524,7 +642,11 @@ export function Navbar({
               <button
                 type="button"
                 onClick={onToggleLocale}
-                aria-label="Changer de langue"
+                aria-label={
+                  locale === 'fr'
+                    ? 'Changer de langue (Français actif, basculer vers Anglais)'
+                    : 'Switch language (English active, switch to French)'
+                }
                 className="glass-pill-frost min-h-[38px] px-3 py-1.5 rounded-full text-xs font-bold text-[#000000] inline-flex items-center gap-1.5 cursor-pointer whitespace-nowrap shrink-0"
               >
                 <Globe className="w-3.5 h-3.5 text-[#2563EB]" aria-hidden="true" />
@@ -544,6 +666,9 @@ export function Navbar({
               <button
                 type="button"
                 onClick={() => onNavigate('compare')}
+                aria-label={`${
+                  locale === 'fr' ? 'Comparer les produits' : 'Compare products'
+                } (${compareCount}/3)`}
                 className={`relative min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-2 text-left cursor-pointer transition-all ${
                   activeScreen === 'compare'
                     ? 'glass-pill-cta text-white'
@@ -578,6 +703,7 @@ export function Navbar({
               <button
                 type="button"
                 onClick={() => onNavigate('wishlist')}
+                aria-label={`${t.favorites} (${wishlistCount})`}
                 className={`relative min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-2 text-left cursor-pointer transition-all ${
                   activeScreen === 'wishlist'
                     ? 'glass-pill-cta text-white'
@@ -610,6 +736,7 @@ export function Navbar({
               <button
                 type="button"
                 onClick={onOpenCart}
+                aria-label={`${t.cart} (${cartCount})`}
                 className={`relative min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-2 text-left cursor-pointer transition-all ${
                   activeScreen === 'cart'
                     ? 'glass-pill-cta text-white'
@@ -640,8 +767,19 @@ export function Navbar({
                 }
               >
                 <button
+                  ref={accountBtnRef}
                   type="button"
                   onClick={() => setAccountOpen((o) => !o)}
+                  aria-expanded={accountOpen}
+                  aria-haspopup="menu"
+                  aria-controls="navbar-account-menu"
+                  aria-label={
+                    userSession
+                      ? `${locale === 'fr' ? 'Menu compte' : 'Account menu'} (${userSession.fullName})`
+                      : locale === 'fr'
+                      ? 'Menu compte et commandes'
+                      : 'Account and orders menu'
+                  }
                   className={`min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-1.5 text-left cursor-pointer transition-all ${
                     activeScreen === 'account' || accountOpen
                       ? 'glass-pill-cta text-white'
@@ -659,11 +797,19 @@ export function Navbar({
               </ActionIconTooltip>
 
               {accountOpen && (
-                <div className="ice-surface absolute right-0 top-full mt-2 w-64 max-w-[calc(100vw-1.5rem)] text-[#000000] rounded-3xl overflow-hidden z-50">
+                <div
+                  ref={accountPanelRef}
+                  id="navbar-account-menu"
+                  role="menu"
+                  aria-label={locale === 'fr' ? 'Options du compte' : 'Account options'}
+                  onKeyDown={handleAccountMenuKeyDown}
+                  className="ice-surface absolute right-0 top-full mt-2 w-64 max-w-[calc(100vw-1.5rem)] text-[#000000] rounded-3xl overflow-hidden z-50"
+                >
                   {!userSession ? (
                     <div className="p-3.5 bg-white/45 border-b border-white/70 space-y-2">
                       <button
                         type="button"
+                        role="menuitem"
                         onClick={() => {
                           setAccountOpen(false);
                           onOpenAuth('login');
@@ -674,6 +820,7 @@ export function Navbar({
                       </button>
                       <button
                         type="button"
+                        role="menuitem"
                         onClick={() => {
                           setAccountOpen(false);
                           onOpenAuth('register');
@@ -697,6 +844,7 @@ export function Navbar({
                   <div className="py-1.5 text-xs">
                     <button
                       type="button"
+                      role="menuitem"
                       onClick={() => {
                         setAccountOpen(false);
                         onNavigate('account');
@@ -708,6 +856,19 @@ export function Navbar({
                     </button>
                     <button
                       type="button"
+                      role="menuitem"
+                      onClick={() => {
+                        setAccountOpen(false);
+                        onNavigate('rewards');
+                      }}
+                      className="w-full px-4 py-2.5 flex items-center gap-2.5 hover:bg-white/50 text-left font-semibold cursor-pointer"
+                    >
+                      <Crown className="w-4 h-4 text-[#d99b16]" aria-hidden="true" />
+                      <span>Lorena Rewards</span>
+                    </button>
+                    <button
+                      type="button"
+                      role="menuitem"
                       onClick={() => {
                         setAccountOpen(false);
                         onNavigate('tracking');
@@ -719,6 +880,7 @@ export function Navbar({
                     </button>
                     <button
                       type="button"
+                      role="menuitem"
                       onClick={() => {
                         setAccountOpen(false);
                         onNavigate('invoice');
@@ -730,6 +892,7 @@ export function Navbar({
                     </button>
                     <button
                       type="button"
+                      role="menuitem"
                       onClick={() => {
                         setAccountOpen(false);
                         onNavigate('help');
@@ -742,6 +905,7 @@ export function Navbar({
                     {userSession && (
                       <button
                         type="button"
+                        role="menuitem"
                         onClick={() => {
                           setAccountOpen(false);
                           onLogout();
@@ -769,6 +933,7 @@ export function Navbar({
               <button
                 type="button"
                 onClick={() => onNavigate('help')}
+                aria-label={t.help}
                 className={`min-h-[40px] px-2.5 py-1.5 rounded-full flex items-center gap-1.5 text-left cursor-pointer transition-all ${
                   activeScreen === 'help' || activeScreen === 'tracking'
                     ? 'glass-pill-cta text-white'
@@ -799,6 +964,12 @@ export function Navbar({
             <button
               type="button"
               onClick={onOpenCategoryDrawer}
+              aria-haspopup="dialog"
+              aria-label={
+                locale === 'fr'
+                  ? 'Ouvrir le menu des catégories'
+                  : 'Open categories menu'
+              }
               className="glass-pill-gold min-h-[34px] px-3 sm:px-3.5 py-1 rounded-full text-[#000000] text-xs font-extrabold inline-flex items-center gap-1.5 whitespace-nowrap shrink-0 cursor-pointer"
             >
               <LayoutGrid className="w-3.5 h-3.5" aria-hidden="true" />
@@ -806,8 +977,13 @@ export function Navbar({
             </button>
           </ActionIconTooltip>
 
-          <div
+          <nav
             ref={catScrollRef}
+            aria-label={
+              locale === 'fr'
+                ? 'Offres et accès rapides'
+                : 'Promotional highlights and shortcuts'
+            }
             className="flex items-center gap-2 overflow-x-auto no-scrollbar flex-1 py-0.5"
           >
             {promoMenuItems.map((item) => {
@@ -827,6 +1003,7 @@ export function Navbar({
                 <button
                   key={item.id}
                   type="button"
+                  aria-pressed={isSelected}
                   onClick={() => {
                     setActivePromoChip(item.id);
                     if (item.screen) {
@@ -842,7 +1019,7 @@ export function Navbar({
                 </button>
               );
             })}
-          </div>
+          </nav>
 
           <ActionIconTooltip
             placement="left"

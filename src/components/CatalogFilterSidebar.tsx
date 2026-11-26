@@ -158,6 +158,7 @@ export function CatalogFilterSidebar({
               type="button"
               onClick={() => setMobileOpen((o) => !o)}
               aria-expanded={mobileOpen}
+              aria-controls="catalog-filter-panel"
               aria-label={locale === 'fr' ? 'Afficher les filtres' : 'Toggle filters'}
               className="glass-pill-frost w-8 h-8 rounded-full flex items-center justify-center text-[#000000] cursor-pointer"
             >
@@ -171,7 +172,7 @@ export function CatalogFilterSidebar({
         </div>
       </div>
 
-      <div className={`${mobileOpen ? 'block' : 'hidden'} lg:block space-y-6`}>
+      <div id="catalog-filter-panel" className={`${mobileOpen ? 'block' : 'hidden'} lg:block space-y-6`}>
         {/* Search Input */}
         <div className="space-y-2">
           <label
@@ -240,6 +241,7 @@ export function CatalogFilterSidebar({
                 <button
                   key={preset.id}
                   type="button"
+                  aria-pressed={isSelected}
                   onClick={() =>
                     isSelected
                       ? onSelectPricePreset(null, null)
@@ -413,6 +415,7 @@ export function CatalogFilterSidebar({
           <div className="space-y-1.5 max-h-[240px] overflow-y-auto pr-1">
             <button
               type="button"
+              aria-pressed={activeCategory === 'all'}
               onClick={() => onSelectCategory('all')}
               className={`w-full px-3 py-2 rounded-full text-left text-xs flex items-center gap-2.5 transition-all cursor-pointer ${
                 activeCategory === 'all'
@@ -442,6 +445,7 @@ export function CatalogFilterSidebar({
                 <button
                   key={cat.slug}
                   type="button"
+                  aria-pressed={isSelected}
                   onClick={() => onSelectCategory(cat.slug)}
                   className={`w-full px-3 py-2 rounded-full text-left text-xs flex items-center gap-2.5 transition-all cursor-pointer ${
                     isSelected
